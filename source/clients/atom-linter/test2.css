@@ -1,0 +1,18 @@
+p.normal {
+    border: 2px solid red;
+}
+
+p.round1 {
+    border: 2px solid red;
+    border-radius: 5px;
+}
+
+p.round2 {
+    border: 2px solid red;
+    border-radius: 8px;
+}
+
+p.round3 {
+    border: 2px solid red;
+    border-radius: 12px;
+}

@@ -1,0 +1,29 @@
+{
+  "name": "atom-lazy-linter",
+  "main": "./lib/atom-lazy-linter",
+  "version": "0.0.1",
+  "description": "A short description of your package",
+  "keywords": [
+    "lazy",
+    "linter"
+  ],
+  "repository": "https://github.com/never-code-alone/atom-lazy-linter",
+  "license": "MIT",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "dependencies": {
+    "escape-html": "^1.0.3",
+    "request": "^2.78.0"
+  },
+  "providedServices": {
+    "linter": {
+      "versions": {
+        "1.0.0": "provideLinter"
+      }
+    }
+  },
+  "package-deps": [
+    "linter"
+  ]
+}
