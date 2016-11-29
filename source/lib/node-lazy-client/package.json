@@ -1,6 +1,6 @@
 {
   "name": "@lazyass/node-lazy-client",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Node client for lazy service",
   "main": "index.js",
   "scripts": {
@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/ierceg/node-lazy-client#readme",
   "dependencies": {
+    "common-errors": "^1.0.0",
     "lodash": "^4.17.2",
     "request": "^2.79.0",
     "require-all": "^2.0.0"

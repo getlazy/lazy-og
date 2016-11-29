@@ -4,6 +4,7 @@
 const LazyClient = require('../lazy-client');
 const request = require('request');
 const os = require('os');
+const errors = require('common-errors');
 
 const VERSION = 'v20161128';
 
@@ -52,16 +53,11 @@ class LazyClientv20161128 extends LazyClient
                 }
 
                 if (response.statusCode !== 200) {
-                    let message = 'lazy service failed with ' + response.statusCode +
-                        ' status code';
-                    if (body && body.error) {
-                        message += ' (' + body.error + ')';
-                    }
-
-                    return reject(new Error(message));
+                    return reject(new errors.HttpStatusError(
+                        response.statusCode, body && body.error));
                 }
 
-                resolve(body.warnings);
+                resolve(body);
             });
         });
     }
@@ -88,13 +84,8 @@ class LazyClientv20161128 extends LazyClient
                 }
 
                 if (response.statusCode !== 200) {
-                    let message = 'lazy service failed with ' + response.statusCode +
-                        ' status code';
-                    if (body && body.error) {
-                        message += ' (' + body.error + ')';
-                    }
-
-                    return reject(new Error(message));
+                    return reject(new errors.HttpStatusError(
+                        response.statusCode, body && body.error));
                 }
 
                 resolve(body);
