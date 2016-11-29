@@ -3,12 +3,22 @@
 
 //  Initialize all global variables.
 global.logger = require('./logger');
-global.HigherDockerManager = require('@lazyass/higher-docker-manager');
 
+const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const async = require('async');
 const process = require('process');
+const selectn = require('selectn');
+
+const clients = require('./clients');
+
+//  Express application object that will be initialized once everything
+//  else has finished initializing.
+let app = null;
+
+//  Languages to engines map.
+let engines;
 
 class Main
 {
@@ -20,26 +30,20 @@ class Main
     static main() {
         logger.info('Booting lazy-engines-stack');
 
-        return require('../engines').boot()
+        return require('./engines').boot()
             .then((languagesToEnginesMap) => {
                 engines = languagesToEnginesMap;
             })
-            .then(App._initializeExpressApp);
+            .then(Main._initializeExpressApp);
     }
 
-    _initializeExpressApp() {
+    static _initializeExpressApp() {
         return new Promise((resolve) => {
             app = express();
             app.use(bodyParser.json());
 
-            app.get('/version', (req, res) => {
-                res.send({version: require('../package.json').version});
-            });
-
             app.post('/file', (req, res) => {
                 const start = new Date();
-
-                const version = selectn('body.version', req);
 
                 let grammar = selectn('body.grammar', req);
                 if (_.isEmpty(grammar)) {
@@ -63,13 +67,14 @@ class Main
                 }
 
                 try {
-                    let warnings = [];
+                    let allEnginesResults = {
+                        warnings: []
+                    };
                     let firstError = null;
 
                     //  Analyze the content in all the engines and merge all their warnings.
                     const enginesForLanguage = engines[language];
                     logger.info('Starting file analysis', {
-                        version: version,
                         language: language,
                         host: host,
                         path: path
@@ -77,8 +82,8 @@ class Main
 
                     async.each(engines[language], (engine, next) => {
                         engine.analyzeFile(content, path, language)
-                            .then((engineWarnings) => {
-                                warnings = _.union(warnings, engineWarnings);
+                            .then((engineResults) => {
+                                allEnginesResults = _.extend(allEnginesResults, engineResults);
                                 next();
                             })
                             .catch((err) => {
@@ -100,7 +105,7 @@ class Main
                             });
                         }
 
-                        if (_.isEmpty(warnings) && !_.isNull(firstError)) {
+                        if (_.isEmpty(allEnginesResults.warnings) && !_.isNull(firstError)) {
                             logger.info('File analysis failed', firstError);
                             return res.status(500).send({
                                 error: firstError && firstError.message
@@ -113,17 +118,14 @@ class Main
 
                         const end = new Date();
                         logger.info('File analysis done', {
-                            version: version,
                             language: language,
-                            warnings: warnings.length,
+                            warnings: selectn('warnings.length', allEnginesResults),
                             duration: (end - start),
                             host: host,
                             path: path
                         });
 
-                        res.send({
-                            warnings: warnings
-                        });
+                        res.send(allEnginesResults);
                     });
                 } catch (e) {
                     logger.error('Exception during file analysis', e);
@@ -131,8 +133,9 @@ class Main
                 }
             });
 
-            app.listen(process.env.PORT || 16828, () => {
-                logger.info('`lazy-stack` listening');
+            const port = process.env.PORT || 80;
+            app.listen(port, () => {
+                logger.info('`lazy-stack` listening on', port);
                 resolve();
             });
 

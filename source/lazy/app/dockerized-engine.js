@@ -6,6 +6,8 @@ const tmp = require('tmp');
 const fs = require('fs');
 const path = require('path');
 
+const HigherDockerManager = require('@lazyass/higher-docker-manager');
+
 const Engine = require('./engine');
 
 /**
@@ -77,7 +79,7 @@ class DockerizedEngine extends Engine
     _getContainerForExec() {
         const self = this;
 
-        return global.HigherDockerManager.getContainersForLabel(
+        return HigherDockerManager.getContainersForLabel(
             'com.docker.compose.service', self.name)
             .then((containers) => {
                 //  Get a random element so that we distribute the workload randomly.
@@ -124,20 +126,20 @@ class DockerizedEngine extends Engine
                         '/src/' + path.basename(temporaryFileInfo.path));
                 }
 
-                return global.HigherDockerManager.execInContainer(container, execParams);
+                return HigherDockerManager.execInContainer(container, execParams);
             })
-            .then((buffers) => {
-                //  Delegate the processing of the output to inheriting classes.
-                return _
-                    .chain(self._processEngineOutput(buffers))
-                    .map((warning) => {
-                        //  Fix the file path to use the actual client path rather than
-                        //  the temporary one we used.
-                        return _.extend(warning, {
-                            filePath: clientPath
-                        });
-                    })
-                    .value();
+            //  Delegate the processing of the output to inheriting classes.
+            .then(self._processEngineOutput)
+            .then((results) => {
+                //  Fix the file path to use the actual client path rather than
+                //  the temporary one we used.
+                results.warnings = _.map(results.warnings, (warning) => {
+                    return _.extend(warning, {
+                        filePath: clientPath
+                    });
+                });
+
+                return results;
             })
             .then((results) => {
                 //  This is the last operation before we return the results so schedule the cleanup.

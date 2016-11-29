@@ -5,6 +5,8 @@ const _ = require('lodash');
 const request = require('request');
 const url = require('url');
 
+const HigherDockerManager = require('@lazyass/higher-docker-manager');
+
 const Engine = require('./engine');
 
 /**
@@ -36,7 +38,7 @@ class DockerizedHttpEngine extends Engine
     _getEngineUrl() {
         const self = this;
 
-        return global.HigherDockerManager.getContainersForLabel(
+        return HigherDockerManager.getContainersForLabel(
             'com.docker.compose.service', self.name)
             .then((containers) => {
                 //  Get a random container so that we distribute the workload randomly.
@@ -98,15 +100,21 @@ class DockerizedHttpEngine extends Engine
                 });
             })
             .then((results) => {
-                return self._processEngineOutput(results);
+                if (_.isFunction(self._processEngineOutput)) {
+                    return self._processEngineOutput(results);
+                } else {
+                    return results;
+                }
             })
-            .then((warnings) => {
-                return _.map(warnings, (warning) => {
+            .then((results) => {
+                results.warnings = _.map(results.warnings, (warning) => {
                     //  Add the actual client file path.
                     return _.extend(warning, {
                         filePath: clientPath
                     });
                 });
+
+                return results;
             });
     }
 }

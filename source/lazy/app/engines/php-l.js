@@ -2,7 +2,7 @@
 'use strict';
 
 const _ = require('lodash');
-const DockerizedEngine = require('../lib/dockerized-engine');
+const DockerizedEngine = require('../dockerized-engine');
 
 const NAME = 'php-l';
 const LANGUAGES = ['PHP'];
@@ -42,7 +42,9 @@ class PhpLEngine extends DockerizedEngine
             match = parseRegex.exec(output);
         }
 
-        return messages;
+        return {
+            warnings: messages
+        };
     }
 }
 

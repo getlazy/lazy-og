@@ -2,8 +2,8 @@
 'use strict';
 
 const _ = require('lodash');
-const DockerizedEngine = require('../lib/dockerized-engine');
-const AdaptedAtomLinter = require('../lib/adapted-atom-linter');
+const DockerizedEngine = require('../dockerized-engine');
+const AdaptedAtomLinter = require('@lazyass/package-helpers').AdaptedAtomLinter;
 
 const NAME = 'emcc';
 const LANGUAGES = ['C++', 'C', 'Objective-C', 'Objective-C++'];
@@ -28,14 +28,16 @@ class EmccEngine extends DockerizedEngine
             ':(?<colStart>\\d+)\-(?<lineEnd>\\d+):(?<colEnd>\\d+)}.*:)? (?<type>[\\w \\-]+): ' +
             '(?<message>.*)';
 
-        return _
-            .chain(AdaptedAtomLinter.parse(output, EMCC_OUTPUT_REGEX))
-            .each(line => {
-                //  Fix "fatal error" type to error.
-                line.type = line.type === 'fatal error' ? 'error' : line.type;
-            })
-            .filter(line => { return line.type === 'warning' || line.type === 'error'; })
-            .value();
+        return {
+            warnings: _
+                .chain(AdaptedAtomLinter.parse(output, EMCC_OUTPUT_REGEX))
+                .each((line) => {
+                    //  Fix "fatal error" type to error.
+                    line.type = line.type === 'fatal error' ? 'error' : line.type;
+                })
+                .filter((line) => line.type === 'warning' || line.type === 'error')
+                .value()
+        };
     }
 }
 

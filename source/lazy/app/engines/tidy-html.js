@@ -2,7 +2,7 @@
 'use strict';
 
 const _ = require('lodash');
-const DockerizedEngine = require('../lib/dockerized-engine');
+const DockerizedEngine = require('../dockerized-engine');
 
 const LANGUAGES = ['HTML'];
 const NAME = 'tidy-html';
@@ -38,7 +38,9 @@ class TidyHtmlEngine extends DockerizedEngine
             });
         }
 
-        return warnings;
+        return {
+            warnings: warnings
+        };
     }
 }
 
