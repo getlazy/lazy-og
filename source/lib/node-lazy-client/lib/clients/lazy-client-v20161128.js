@@ -16,11 +16,12 @@ class LazyClientv20161128 extends LazyClient
         return VERSION;
     }
 
-    constructor(serviceUrl, client, host) {
+    constructor(serviceUrl, client, stackId, host) {
         super();
         this._serviceUrl = serviceUrl;
         this._client = client;
         this._host = host || os.hostname();
+        this._stackId = stackId;
     }
 
     analyzeFile(content, path, grammar) {
@@ -28,13 +29,14 @@ class LazyClientv20161128 extends LazyClient
 
         const requestParams = {
             method: 'POST',
-            url: self._serviceUrl + '/' + VERSION + '/stack/' + self._stackId + '/file',
+            url: self._serviceUrl + '/file',
             json: true,
             headers: {
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'X-LazyClient-Version': VERSION
             },
             body: {
-                version: VERSION,
+                stackId: self._stackId,
                 client: self._client,
                 host: self._host,
                 content: content,
@@ -95,7 +97,7 @@ class LazyClientv20161128 extends LazyClient
                     return reject(new Error(message));
                 }
 
-                resolve(body.version);
+                resolve(body);
             });
         });
     }
