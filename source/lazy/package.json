@@ -1,0 +1,36 @@
+{
+  "name": "lazy-engines-stack",
+  "version": "1.0.0",
+  "description": "Manager of stack of lazy engines",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ierceg/lazy-engines-stack.git"
+  },
+  "keywords": [
+    "lazy",
+    "stack",
+    "engines"
+  ],
+  "author": "Ivan Erceg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ierceg/lazy-engines-stack/issues"
+  },
+  "homepage": "https://github.com/ierceg/lazy-engines-stack#readme",
+  "dependencies": {
+    "@lazyass/higher-docker-manager": "^1.0.0",
+    "async": "^2.1.4",
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "lodash": "^4.17.2",
+    "winston": "^2.3.0",
+    "winston-logstash-udp": "^0.1.1"
+  },
+  "devDependencies": {
+    "@lazyass/node-lazy-client": "^1.0.0"
+  }
+}
