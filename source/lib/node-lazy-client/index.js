@@ -1,4 +1,4 @@
 
 'use strict';
 
-module.exports = require('lib/client-factory');
+module.exports = require('./lib/client-factory');
