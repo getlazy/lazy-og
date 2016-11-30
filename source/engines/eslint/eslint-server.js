@@ -1,7 +1,7 @@
 
 'use strict';
 
-global.logger = require('@lazyass/package-helpers').Logger.getPackageLogger();
+global.logger = require('@lazyass/engine-helpers').Logger.getEngineLogger();
 
 //  Simplest possible HTTP server that accepts requests for file analysis from lazy service.
 
@@ -97,5 +97,5 @@ app.post('/file', (req, res) => {
 
 const port = process.env.PORT || 80;
 app.listen(port, () => {
-    logger.info('`eslint-server` listening on', port);
+    logger.info('`eslint-engine` listening on', port);
 });

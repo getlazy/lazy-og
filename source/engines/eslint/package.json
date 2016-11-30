@@ -1,8 +1,8 @@
 {
-  "name": "eslint-server",
+  "name": "eslint-engine",
   "version": "1.0.3",
-  "description": "ESLint server serving requests to lint JS and related",
-  "main": "eslint-server.js",
+  "description": "ESLint engine serving requests to lint JS and related",
+  "main": "eslint-engine.js",
   "scripts": {
     "test": "test"
   },
@@ -11,21 +11,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SoftwareMarbles/lazy-eslint-server.git"
+    "url": "git+https://github.com/SoftwareMarbles/lazy-eslint-engine.git"
   },
   "keywords": [
     "lazy",
     "eslint",
-    "server"
+    "engine"
   ],
   "author": "Ivan Erceg",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SoftwareMarbles/lazy-eslint-server/issues"
+    "url": "https://github.com/SoftwareMarbles/lazy-eslint-engine/issues"
   },
-  "homepage": "https://github.com/SoftwareMarbles/lazy-eslint-server#readme",
+  "homepage": "https://github.com/SoftwareMarbles/lazy-eslint-engine#readme",
   "dependencies": {
-    "@lazyass/package-helpers": "^1.1.0",
+    "@lazyass/engine-helpers": "^1.2.0",
     "babel-eslint": "6.1.2",
     "body-parser": "^1.15.2",
     "eslint": "^3.10.2",

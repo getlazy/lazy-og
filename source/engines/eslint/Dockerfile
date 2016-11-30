@@ -4,4 +4,4 @@ ARG NPM_TOKEN
 WORKDIR /app
 COPY . /app
 RUN npm install
-ENTRYPOINT ["node", "/app/eslint-server.js"]
+ENTRYPOINT ["node", "/app/eslint-engine.js"]
