@@ -23,6 +23,8 @@ const getPackageLogger = () => {
             })
         ]
     });
+
+    return logger;
 };
 
 module.exports = {
