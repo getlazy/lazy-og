@@ -1,6 +1,6 @@
 {
   "name": "lazy-engines-stack",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Manager of stack of lazy engines",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/SoftwareMarbles/lazy-engines-stack#readme",
   "dependencies": {
-    "@lazyass/higher-docker-manager": "^1.0.0",
+    "@lazyass/higher-docker-manager": "^1.1.1",
     "@lazyass/engine-helpers": "^1.2.1",
     "async": "^2.1.4",
     "body-parser": "^1.15.2",
