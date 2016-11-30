@@ -17,15 +17,24 @@ const eslintConfigGoogle = _.extend(require('eslint-config-google'), {
     }
 });
 //  lazy config is a customization of Google config.
-const eslintLazyConfig = _.extend(_.cloneDeep(eslintConfigGoogle), {
-    rules: {
-        'max-len': [2, {
-            code: 100,
-            tabWidth: 4,
-            ignoreUrls: true
-        }],
-        'comma-dangle': [2, 'never']
-    }
+const eslintLazyConfig = _.cloneDeep(eslintConfigGoogle);
+eslintLazyConfig.rules = _.extend(eslintLazyConfig.rules, {
+    'no-console': 2,
+    'no-dupe-args': 2,
+    'no-dupe-keys': 2,
+    'no-unreachable': 2,
+    'max-len': [2, {
+        code: 100,
+        tabWidth: 4,
+        ignoreUrls: true
+    }],
+    'comma-dangle': [2, 'never'],
+    'default-case': 2,
+    'no-fallthrough': 2,
+    'no-implicit-globals': 2,
+    'no-undef': 2,
+    'no-undefined': 2,
+    'no-use-before-define': 2
 });
 
 const getConfig = (config) => {
@@ -82,6 +91,7 @@ app.post('/file', (req, res) => {
         });
 });
 
-app.listen(process.env.PORT || 16828, () => {
-    console.log('`eslint-server` listening');
+const port = process.env.PORT || 80;
+app.listen(port, () => {
+    console.log('`eslint-server` listening on', port);
 });
