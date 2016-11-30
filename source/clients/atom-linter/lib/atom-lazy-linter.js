@@ -22,7 +22,7 @@ module.exports = {
   config: {
     serviceUrl: {
       type: 'string',
-      default: 'http://lazy.ngrok.io',
+      default: 'http://localhost:16827',
       description: 'URL of lazy dev assistant service'
     }
   },
