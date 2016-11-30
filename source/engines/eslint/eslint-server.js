@@ -31,7 +31,6 @@ eslintLazyConfig.rules = _.extend(eslintLazyConfig.rules, {
     'comma-dangle': [2, 'never'],
     'default-case': 2,
     'no-fallthrough': 2,
-    'no-implicit-globals': 2,
     'no-undef': 2,
     'no-undefined': 2,
     'no-use-before-define': 2
