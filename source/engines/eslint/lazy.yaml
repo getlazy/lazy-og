@@ -1,8 +1,0 @@
-version: 1
-name: eslint
-package-version: 1.0.0
-lazy-version: 20161123
-link: http
-port: 12345
-languages:
-    - JavaScript
