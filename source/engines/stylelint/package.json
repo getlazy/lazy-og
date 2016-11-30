@@ -1,6 +1,6 @@
 {
   "name": "stylelint-server",
-  "version": "7.6.0",
+  "version": "1.0.0",
   "description": "stylelint server serving requests to lint CSS and related",
   "main": "stylelint-server.js",
   "scripts": {
@@ -16,6 +16,7 @@
   "dependencies": {
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
+    "lodash": "^4.17.2",
     "selectn": "^1.1.1",
     "stylelint": "^7.6.0",
     "stylelint-config-standard": "^15.0.0"

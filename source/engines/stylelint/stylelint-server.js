@@ -3,6 +3,7 @@
 
 //  Simplest possible HTTP server that accepts requests for file analysis from lazy service.
 
+const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const selectn = require('selectn');
@@ -31,7 +32,28 @@ app.post('/file', (req, res) => {
     const content = selectn('body.content', req);
     lint(language, content)
         .then((results) => {
-            res.send(results);
+            return _
+                .chain(selectn('results[0].warnings', results))
+                .map((warning) => {
+                    try {
+                        return {
+                            type: warning.severity,
+                            //  Remove the rule string from the final output.
+                            message: warning.text.replace(' (' + warning.rule + ')', ''),
+                            line: _.toNumber(warning.line),
+                            column: _.toNumber(warning.column)
+                        };
+                    } catch(e) {
+                        logger.error('Failed to process stylelint warning', warning);
+                    }
+                })
+                .filter()
+                .value();
+        })
+        .then((warnings) => {
+            res.send({
+                warnings: warnings
+            });
         })
         .catch((err) => {
             console.log('Linting failed', err);
@@ -41,6 +63,7 @@ app.post('/file', (req, res) => {
         });
 });
 
-app.listen(process.env.PORT || 16900, () => {
-    console.log('`stylelint-server` listening');
+const port = process.env.PORT || 80;
+app.listen(port, () => {
+    console.log('`stylelint-server` listening on', port);
 });
