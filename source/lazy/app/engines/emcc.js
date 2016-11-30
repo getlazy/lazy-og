@@ -3,7 +3,7 @@
 
 const _ = require('lodash');
 const DockerizedEngine = require('../dockerized-engine');
-const AdaptedAtomLinter = require('@lazyass/package-helpers').AdaptedAtomLinter;
+const AdaptedAtomLinter = require('@lazyass/engine-helpers').AdaptedAtomLinter;
 
 const NAME = 'emcc';
 const LANGUAGES = ['C++', 'C', 'Objective-C', 'Objective-C++'];

@@ -7,10 +7,8 @@ const NAME = 'eslint';
 const LANGUAGES = ['JavaScript'];
 
 /**
- * Runs stylelint linter through stylelint-server HTTP server.
- * This technique is much faster than executing through a container (see DockerizedContainer)
- * as stylelint takes long time to run due to slow loading but if we keep it loaded in HTTP server
- * the response times are two order of magnitude better.
+ * Runs ESLint linter through esling-engine.
+ * This technique is much faster than executing through a container (see DockerizedContainer).
  */
 class EslintEngine extends DockerizedHttpEngine
 {
