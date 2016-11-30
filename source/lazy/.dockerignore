@@ -1,0 +1,12 @@
+.git
+.gitignore
+.dockerignore
+
+test
+node_modules
+
+Dockerfile
+Makefile
+README.md
+
+envvars*
