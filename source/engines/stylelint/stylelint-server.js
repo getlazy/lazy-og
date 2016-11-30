@@ -1,6 +1,8 @@
 
 'use strict';
 
+global.logger = require('@lazyass/engine-helpers').Logger.getEngineLogger();
+
 //  Simplest possible HTTP server that accepts requests for file analysis from lazy service.
 
 const _ = require('lodash');
@@ -56,7 +58,7 @@ app.post('/file', (req, res) => {
             });
         })
         .catch((err) => {
-            console.log('Linting failed', err);
+            logger.error('Linting failed', err);
             res.status(500).send({
                 error: err.message
             });
@@ -65,5 +67,5 @@ app.post('/file', (req, res) => {
 
 const port = process.env.PORT || 80;
 app.listen(port, () => {
-    console.log('`stylelint-server` listening on', port);
+    logger.info('`stylelint-engine` listening on', port);
 });
