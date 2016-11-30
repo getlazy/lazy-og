@@ -7,7 +7,7 @@ build:
 		-t ierceg/lazy-engines-stack:$(PACKAGE_VERSION) \
 		.
 
-push-build:
+push:
 	docker push ierceg/lazy-engines-stack:$(PACKAGE_VERSION)
 
 .PHONY: *
