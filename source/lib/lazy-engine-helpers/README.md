@@ -1,9 +1,9 @@
-# lazy-package-helpers
+# lazy-engine-helpers
 
-Helper utilities for easier development of lazy packages
+Helper utilities for easier development of lazy engines
 
-## Logging in package
+## Logging in engine
 
 ```js
-global.logger = require('@lazyass/package-helpers').Logger.getPackageLogger();
+global.logger = require('@lazyass/engine-helpers').Logger.getEngineLogger();
 ```

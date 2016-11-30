@@ -6,7 +6,7 @@ const winston = require('winston');
 
 let logger;
 
-const getPackageLogger = () => {
+const getEngineLogger = () => {
     if (!_.isUndefined(logger)) {
         return logger;
     }
@@ -28,5 +28,5 @@ const getPackageLogger = () => {
 };
 
 module.exports = {
-    getPackageLogger: getPackageLogger
+    getEngineLogger: getEngineLogger
 };
