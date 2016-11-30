@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ierceg/lazy-engines-stack.git"
+    "url": "git+https://github.com/SoftwareMarbles/lazy-engines-stack.git"
   },
   "keywords": [
     "lazy",
@@ -18,9 +18,9 @@
   "author": "Ivan Erceg",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ierceg/lazy-engines-stack/issues"
+    "url": "https://github.com/SoftwareMarbles/lazy-engines-stack/issues"
   },
-  "homepage": "https://github.com/ierceg/lazy-engines-stack#readme",
+  "homepage": "https://github.com/SoftwareMarbles/lazy-engines-stack#readme",
   "dependencies": {
     "@lazyass/higher-docker-manager": "^1.0.0",
     "@lazyass/package-helpers": "^1.0.0",
