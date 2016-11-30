@@ -11,6 +11,7 @@ const selectn = require('selectn');
 const eslint = require('eslint');
 //  Extend the google config with custom options.
 const eslintConfigGoogle = _.extend(require('eslint-config-google'), {
+    envs: ['node', 'es6'],
     parser: 'babel-eslint',
     parserOptions: {
         ecmaVersion: 7

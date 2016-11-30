@@ -1,6 +1,6 @@
 {
   "name": "eslint-server",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "seslint server serving requests to lint JS and related",
   "main": "eslint-server.js",
   "scripts": {
