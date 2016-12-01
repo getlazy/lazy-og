@@ -1,0 +1,26 @@
+{
+  "name": "lazy-tidy-html-engine",
+  "version": "1.0.0",
+  "description": "TidyHtml engine serving requests to lint HTML",
+  "main": "lazy-tidy-html-engine.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SoftwareMarbles/lazy-tidy-html-engine.git"
+  },
+  "keywords": [
+    "lazy",
+    "engine",
+    "tidy",
+    "tidyhtml",
+    "html"
+  ],
+  "author": "Ivan Erceg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SoftwareMarbles/lazy-tidy-html-engine/issues"
+  },
+  "homepage": "https://github.com/SoftwareMarbles/lazy-tidy-html-engine#readme"
+}
