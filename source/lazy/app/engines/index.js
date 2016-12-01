@@ -4,8 +4,7 @@
 const _ = require('lodash');
 const async = require('async');
 
-const engines = require('require-all')(__dirname);
-delete engines.index;
+const DockerizedHttpEngine = require('../dockerized-http-engine');
 
 /**
  * Offers methods for loading and configuring engines.
@@ -16,6 +15,10 @@ class Engines {
      * @return {Object} Languages to engines map.
      */
     static boot() {
+        let engines = require('require-all')(__dirname);
+        delete engines.index;
+        engines = _.union(engines, Engines._loadHttpEngines());
+
         return new Promise((resolve, reject) => {
             const languagesToEnginesMap = new Map();
 
@@ -56,6 +59,26 @@ class Engines {
             });
         });
     };
+
+    static _loadHttpEngines() {
+        const HTTP_ENGINES_METADATA = [{
+            name: 'eslint',
+            languages: ['JavaScript'],
+            image: 'ierceg/lazy-eslint-engine:latest'
+        }, {
+            name: 'stylelint',
+            languages: ['scss', 'less', 'sugarss'],
+            image: 'ierceg/ierceg/lazy-stylelint-engine:latest'
+        }];
+
+        return _.map(HTTP_ENGINES_METADATA, (engineMetadata) => {
+            return new DockerizedHttpEngine(
+                engineMetadata.name,
+                engineMetadata.languages,
+                engineMetadata.image
+            );
+        });
+    }
 }
 
 module.exports = Engines;

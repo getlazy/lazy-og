@@ -116,8 +116,7 @@ class DockerizedHttpEngine extends Engine
                 self._engineUrl = url.format({
                     protocol: 'http',
                     //  Docker appends slash in front of the container names.
-                    hostname: _.trimStart(_.first(engineContainer.Names), '/'),
-                    port: self.port
+                    hostname: _.trimStart(_.first(engineContainer.Names), '/')
                 });
             });
     }
