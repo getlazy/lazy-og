@@ -5,6 +5,7 @@ const DockerizedHttpEngine = require('../dockerized-http-engine');
 
 const NAME = 'eslint';
 const LANGUAGES = ['JavaScript'];
+const IMAGE_NAME = 'ierceg/lazy-eslint-engine:latest';
 
 /**
  * Runs ESLint linter through esling-engine.
@@ -20,4 +21,4 @@ class EslintEngine extends DockerizedHttpEngine
     }
 }
 
-module.exports = new EslintEngine(NAME, LANGUAGES);
+module.exports = new EslintEngine(NAME, LANGUAGES, IMAGE_NAME);

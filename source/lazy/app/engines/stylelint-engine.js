@@ -5,6 +5,7 @@ const DockerizedHttpEngine = require('../dockerized-http-engine');
 
 const NAME = 'stylelint';
 const LANGUAGES = ['scss', 'less', 'sugarss'];
+const IMAGE_NAME = 'ierceg/lazy-stylelint-engine:latest';
 
 /**
  * Runs stylelint linter through stylelint-engine.
@@ -22,4 +23,4 @@ class StylelintEngine extends DockerizedHttpEngine
     }
 }
 
-module.exports = new StylelintEngine(NAME, LANGUAGES);
+module.exports = new StylelintEngine(NAME, LANGUAGES, IMAGE_NAME);

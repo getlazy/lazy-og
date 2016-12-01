@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/SoftwareMarbles/lazy-engines-stack#readme",
   "dependencies": {
-    "@lazyass/higher-docker-manager": "^1.1.1",
+    "@lazyass/higher-docker-manager": "^1.3.0",
     "@lazyass/engine-helpers": "^1.2.1",
     "async": "^2.1.4",
     "body-parser": "^1.15.2",
