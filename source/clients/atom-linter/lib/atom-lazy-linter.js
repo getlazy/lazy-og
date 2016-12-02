@@ -78,10 +78,11 @@ module.exports = {
             url: self.serviceUrl + '/file',
             json: true,
             headers: {
-              'Accept': 'application/json'
+              'Accept': 'application/json',
+              'X-LazyApi-Version': 'v20161128'
             },
             body: {
-              version: 20161123, // API version
+              stackId: '0',
               client: 'atom@' + atom.getVersion(),
               host: os.hostname(),
               path: path,
