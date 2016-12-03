@@ -19,8 +19,9 @@ const Engine = require('./engine');
  */
 class DockerizedEngine extends Engine
 {
-    constructor(name, languages) {
+    constructor(name, languages, container) {
         super(name, languages);
+        this._container = container;
     }
 
     /**
@@ -35,6 +36,9 @@ class DockerizedEngine extends Engine
     _createTempFileWithContent(content, clientPath) {
         return new Promise((resolve, reject) => {
             tmp.file({
+                //  HACK: We hard-code the stack volume mount path to /lazy which is known to all
+                //  containers.
+                dir: '/lazy',
                 prefix: 'lazy-temp-content-',
                 //  Use the real extension to allow engines to discern between different grammars.
                 postfix: path.extname(clientPath)
@@ -76,68 +80,45 @@ class DockerizedEngine extends Engine
         });
     };
 
-    _getContainerForExec() {
-        const self = this;
-
-        return HigherDockerManager.getContainersForLabel(
-            'com.docker.compose.service', self.name)
-            .then((containers) => {
-                //  Get a random element so that we distribute the workload randomly.
-                //  TODO: Figure out a better way to distribute the workload as this fixes the
-                //      container at the time of the boot.
-                const container = _.sample(containers);
-                if (!_.isObject(container)) {
-                    return Promise.reject(new Error('Failed to find container with ' +
-                        self.name + ' label'));
-                }
-                return container;
-            });
-    }
-
     analyzeFile(content, clientPath, language, config) {
         const self = this;
 
         let temporaryFileInfo;
 
         //  HACK: We create a temporary file with the correct extension in the
-        //  temporary directory of lazy container which is mounted to the temporary
-        //  directory of the host and then we run EMCC container where we map
-        //  the host's temporary directory to `/src` so that we can run the analysis
-        //  through the sibling (EMCC) container. This all depends on both knowing
-        //  temporary directory names on host and on lazy container.
-        //  Also see docker-compose.yaml for how this was enabled.
+        //  temporary directory of engine container. Volume of the engine container
+        //  is shared with helper container and can thus be read by it.
         //  TODO: unhack temporary directory thingamajig
         return self._createTempFileWithContent(content, clientPath)
             .then((fileInfo) => {
                 temporaryFileInfo = fileInfo;
 
-                return self._getContainerForExec();
-            })
-            .then((container) => {
                 //  Create exec parameters for the container.
                 const execParams = {};
                 if (_.isFunction(self._getContainerEntrypoint)) {
                     execParams.Entrypoint = self._getContainerEntrypoint();
                 }
                 if (_.isFunction(self._getContainerCmd)) {
-                    //  HACK: Add temporary file path as the last parameter. This might not
-                    //      always work at which point we will need to refactor.
+                    //  HACK: We hard-code the stack volume mount path to /lazy which is known to all
+                    //  containers.
                     execParams.Cmd = self._getContainerCmd().concat(
-                        '/src/' + path.basename(temporaryFileInfo.path));
+                        '/lazy/' + path.basename(temporaryFileInfo.path));
                 }
 
-                return HigherDockerManager.execInContainer(container, execParams);
+                return HigherDockerManager.execInContainer(self._container, execParams);
             })
             //  Delegate the processing of the output to inheriting classes.
             .then(self._processEngineOutput)
             .then((results) => {
-                //  Fix the file path to use the actual client path rather than
-                //  the temporary one we used.
-                results.warnings = _.map(results.warnings, (warning) => {
-                    return _.extend(warning, {
-                        filePath: clientPath
+                if (_.isArray(results.warnings)) {
+                    //  Fix the file path to use the actual client path rather than
+                    //  the temporary one we used.
+                    results.warnings = _.map(results.warnings, (warning) => {
+                        return _.extend(warning, {
+                            filePath: clientPath
+                        });
                     });
-                });
+                }
 
                 return results;
             })
@@ -148,7 +129,9 @@ class DockerizedEngine extends Engine
             })
             .catch((err) => {
                 //  Schedule the cleanup and pass on the error.
-                self._scheduleDelayedCleanup(temporaryFileInfo.cleanupCallback);
+                if (temporaryFileInfo) {
+                    self._scheduleDelayedCleanup(temporaryFileInfo.cleanupCallback);
+                }
                 return Promise.reject(err);
             });
     };
