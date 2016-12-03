@@ -5,10 +5,11 @@ const _ = require('lodash');
 const request = require('request');
 const url = require('url');
 const selectn = require('selectn');
+const H = require('higher');
 
 const HigherDockerManager = require('@lazyass/higher-docker-manager');
 
-const Engine = require('./engine');
+const Engine = require('@lazyass/engine-helpers').Engine;
 
 /**
  * Base class for engines running behind a dockerized HTTP server.
@@ -19,14 +20,11 @@ class DockerizedHttpEngine extends Engine
 {
     /**
      * Constructs DockerizedHttpEngine with the given name and languages.
-     * @param {string} name Name of the engine
-     * @param {Array} languages Array of language strings which this engine can process.
-     * @param {string} imageName Name of the docker image including the tag from which the
-     * engine is to be run.
+     * @param {Object} params Parameters of the engine.
      */
-    constructor(name, languages, imageName) {
-        super(name, languages);
-        this._imageName = imageName;
+    constructor(params) {
+        super(params.name, params.languages);
+        this._containerParams = params.container;
     }
 
     /**
@@ -42,17 +40,22 @@ class DockerizedHttpEngine extends Engine
         logger.info('Booting', self.name, 'engine');
         return HigherDockerManager.getOwnContainer()
             .then((container) => {
-                stackContainer = container;
-
-                let networks;
-                if (!_.isNull(stackContainer)) {
-                    networks = _.keys(selectn('NetworkSettings.Networks', stackContainer));
-                    const labels = selectn('Labels', stackContainer);
-                    stackId = (labels && labels['io.lazyass.lazy.stack.id']) || 'N/A';
+                if (_.isNull(stackContainer)) {
+                    logger.fatal('lazy-engines-stack must run in a container');
+                    process.exit(-1);
                 }
 
-                logger.info('Searching for containers in stack\'s network', networks);
-                return HigherDockerManager.getContainersInNetworks(networks);
+                stackContainer = container;
+                stackId = stackContainer.Labels &&
+                    stackContainer.Labels['io.lazyass.lazy.stack.id'];
+                if (!H.isNonEmptyString(stackId)) {
+                    logger.fatal('stack ID must be defined');
+                    process.exit(-2);
+                }
+
+                logger.info('Searching for containers in stack\'s network');
+                return HigherDockerManager.getContainersInNetworks(
+                    selectn('NetworkSettings.Networks', stackContainer));
             })
             .then((containers) => {
                 logger.info('Filtering containers for', self.name);
@@ -60,8 +63,6 @@ class DockerizedHttpEngine extends Engine
                     'io.lazyass.engine.name', self.name);
             })
             .then((containers) => {
-                logger.info('Found', containers.length, 'containers for', self.name);
-
                 if (!_.isEmpty(containers)) {
                     if (containers.length > 1) {
                         logger.error(
@@ -86,13 +87,41 @@ class DockerizedHttpEngine extends Engine
                 const createEngineParams = {
                     //  Name it after the engine name and stack.
                     name: 'lazy-stack-' + stackId + '-engine-' + self.name,
-                    Image: this._imageName,
-                    Volumes: {},
+                    Image: self._containerParams.image,
+                    Cmd: self._containerParams.command,
+                    //  Env is the union of specified env params and all the other params that
+                    //  we are passing to all containers.
+                    Env: _.union([
+                            'LAZY_STACK_ID=' + process.env.LAZY_STACK_ID,
+                            'LAZY_STACK_URL=' + url.format({
+                                protocol: 'http',
+                                hostname: process.env.LAZY_STACK_CONTAINER_NAME
+                            }),
+                            'LAZY_STACK_VOLUME_NAME=' + process.env.LAZY_STACK_VOLUME_NAME,
+                            'LAZY_STACK_NETWORK_NAME=' + process.env.LAZY_STACK_NETWORK_NAME,
+                            'LAZY_ENGINE_CONTAINER_ID=' + stackContainer.id
+                        ], self._containerParams.env),
                     HostConfig: {
                         //  When networking mode is a name of another network it's
                         //  automatically attached.
-                        NetworkMode: stackNetworkName
+                        NetworkMode: stackNetworkName,
+                        //  We only allow volumes to be bound to host.
+                        Binds: _.union(self._containerParams.volumes, [
+                            //  HACK: For now allow even engines to access Docker.
+                            //      We will solve this with the universal sibling container
+                            //      protocol (aka "docker-inception")
+                            //  Bind the docker socket so that we can access host Docker
+                            //  from the engine.
+                            '/var/run/docker.sock:/var/run/docker.sock',
+                            //  HACK: We hard-code the stack volume mount path to /lazy which is
+                            //  known to all containers.
+                            process.env.LAZY_STACK_VOLUME_NAME + ':/lazy'
+                        ]),
+                        RestartPolicy: {
+                            Name: 'unless-stopped'
+                        }
                     },
+                    WorkingDir: self._containerParams.working_dir,
                     Labels: {
                         'io.lazyass.engine.name': self.name
                     }
@@ -110,13 +139,18 @@ class DockerizedHttpEngine extends Engine
                 //  TODO: Implement internal start stack/engine protocol so that we can actually
                 //      boot engines properly (this is needed to say retrieve other docker images
                 //      which is an async operation that might take a long while)
-                return engineContainer.start();
+                return engineContainer.start()
+            })
+            .then((engineContainer) => {
+                //  Invoke status to refresh information that has changed after the start
+                //  (including Name which we need)
+                return engineContainer.status();
             })
             .then((engineContainer) => {
                 self._engineUrl = url.format({
                     protocol: 'http',
                     //  Docker appends slash in front of the container names.
-                    hostname: _.trimStart(_.first(engineContainer.Names), '/')
+                    hostname: _.trimStart(engineContainer.Name, '/')
                 });
             });
     }
@@ -136,6 +170,7 @@ class DockerizedHttpEngine extends Engine
             },
             body: {
                 language: language,
+                clientPath: clientPath,
                 content: content,
                 config: config
             }
@@ -161,19 +196,17 @@ class DockerizedHttpEngine extends Engine
             });
         })
             .then((results) => {
-                if (_.isFunction(self._processEngineOutput)) {
-                    return self._processEngineOutput(results);
-                } else {
-                    return results;
-                }
+                return results;
             })
             .then((results) => {
-                results.warnings = _.map(results.warnings, (warning) => {
-                    //  Add the actual client file path.
-                    return _.extend(warning, {
-                        filePath: clientPath
+                if (_.isArray(results.warnings)) {
+                    results.warnings = _.map(results.warnings, (warning) => {
+                        //  Add the actual client file path.
+                        return _.extend(warning, {
+                            filePath: clientPath
+                        });
                     });
-                });
+                }
 
                 return results;
             });

@@ -4,7 +4,7 @@
 const _ = require('lodash');
 const async = require('async');
 
-const DockerizedHttpEngine = require('../dockerized-http-engine');
+const DockerizedHttpEngine = require('./dockerized-http-engine');
 
 /**
  * Offers methods for loading and configuring engines.
@@ -15,9 +15,7 @@ class Engines {
      * @return {Object} Languages to engines map.
      */
     static boot() {
-        let engines = require('require-all')(__dirname);
-        delete engines.index;
-        engines = _.union(engines, Engines._loadHttpEngines());
+        const engines = Engines._loadHttpEngines();
 
         return new Promise((resolve, reject) => {
             const languagesToEnginesMap = new Map();
@@ -48,7 +46,7 @@ class Engines {
                     })
                     .catch((err) => {
                         logger.error('Failed to load engine', engineName, err);
-                        nextEngine(err);
+                        nextEngine();
                     });
             }, (err) => {
                 if (err) {
@@ -64,19 +62,30 @@ class Engines {
         const HTTP_ENGINES_METADATA = [{
             name: 'eslint',
             languages: ['JavaScript'],
-            image: 'ierceg/lazy-eslint-engine:latest'
+            container: {
+                image: 'ierceg/lazy-eslint-engine:latest'
+            }
         }, {
             name: 'stylelint',
             languages: ['scss', 'less', 'sugarss'],
-            image: 'ierceg/ierceg/lazy-stylelint-engine:latest'
+            container: {
+                image: 'ierceg/lazy-stylelint-engine:latest'
+            }
+        }, {
+            name: 'tidy-html',
+            languages: ['HTML'],
+            container: {
+                image: 'ierceg/node-dev:6.9.1',
+                command: 'nodemon -V -d 1 -L -w /app tidy-html-engine.js'.split(' '),
+                volumes: [
+                    '/Users/ierceg/repos/lazy/lazy-tidy-html-engine:/app'
+                ],
+                working_dir: '/app'
+            }
         }];
 
-        return _.map(HTTP_ENGINES_METADATA, (engineMetadata) => {
-            return new DockerizedHttpEngine(
-                engineMetadata.name,
-                engineMetadata.languages,
-                engineMetadata.image
-            );
+        return _.map(HTTP_ENGINES_METADATA, (engineParams) => {
+            return new DockerizedHttpEngine(engineParams);
         });
     }
 }
