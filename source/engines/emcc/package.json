@@ -1,0 +1,24 @@
+{
+  "name": "lazy-emcc-engine",
+  "version": "1.0.0",
+  "description": "EMCC engine serving requests to lint C, C++, ObjC and ObjC++",
+  "main": "emcc-engine.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SoftwareMarbles/lazy-emcc-engine.git"
+  },
+  "keywords": [
+    "lazy",
+    "engine",
+    "emcc"
+  ],
+  "author": "Ivan Erceg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SoftwareMarbles/lazy-emcc-engine/issues"
+  },
+  "homepage": "https://github.com/SoftwareMarbles/lazy-emcc-engine#readme"
+}
