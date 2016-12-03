@@ -13,10 +13,21 @@ const VERSION = 'v20161128';
  */
 class LazyClientv20161128 extends LazyClient
 {
+    /**
+     * Returns the lazy API version with which this client works.
+     */
     static get version() {
         return VERSION;
     }
 
+    /**
+     * Construct new LazyClient object.
+     * @param {string} serviceUrl URL to lazy service.
+     * @param {string} client Name of the client (e.g. "atom") which is instantiating this object.
+     * @param {string} stackId ID of lazy stack assined to this client by lazy service.
+     * @param {string} host Optional name of the host on which this object is running, defaults to
+     * `os.hostname()`
+     */
     constructor(serviceUrl, client, stackId, host) {
         super();
         this._serviceUrl = serviceUrl;
@@ -25,6 +36,13 @@ class LazyClientv20161128 extends LazyClient
         this._stackId = stackId;
     }
 
+    /**
+     * Analyzes the given file content for the given language.
+     * @param {string} content Content of the source file requesting lazy to analyze.
+     * @param {string} path Path of the source file requesting lazy to analyze.
+     * @param {grammar} grammar Atom grammar of the source file.
+     * @return {Promise} Promise resolving with results of the file analysis.
+     */
     analyzeFile(content, path, grammar) {
         const self = this;
 
@@ -63,7 +81,8 @@ class LazyClientv20161128 extends LazyClient
     }
 
     /**
-     * Queries the lazy service for its version (not API version).
+     * Queries the lazy service for its curent version and latest API version.
+     * @return {Promise} Promise resolving with API and lazy service versions.
      */
     version() {
         const self = this;
