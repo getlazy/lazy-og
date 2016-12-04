@@ -6,5 +6,6 @@ module.exports = {
     Logger: require('./lib/logger'),
     Engine: require('./lib/engine'),
     DockerizedEngine: require('./lib/dockerized-engine'),
-    EngineHttpServer: require('./lib/engine-http-server')
+    EngineHttpServer: require('./lib/engine-http-server'),
+    EngineHelperContainerCreator: require('./lib/engine-helper-container-creator')
 };
