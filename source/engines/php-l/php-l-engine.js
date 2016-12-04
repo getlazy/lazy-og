@@ -1,12 +1,17 @@
 
 'use strict';
 
-const _ = require('lodash');
 const EngineHelpers = require('@lazyass/engine-helpers');
+global.logger = EngineHelpers.Logger.getEngineLogger();
+
+const _ = require('lodash');
 const DockerizedEngine = EngineHelpers.DockerizedEngine;
+const EngineHttpServer = EngineHelpers.EngineHttpServer;
+const EngineHelperContainerCreator = EngineHelpers.EngineHelperContainerCreator;
 
 const NAME = 'php-l';
 const LANGUAGES = ['PHP'];
+const HELPER_CONTAINER_IMAGE_NAME = 'php:7.0.13-cli';
 
 class PhpLEngine extends DockerizedEngine
 {
@@ -49,4 +54,16 @@ class PhpLEngine extends DockerizedEngine
     }
 }
 
-module.exports = new PhpLEngine(NAME, LANGUAGES);
+class PhpLEngineHttpServer extends EngineHttpServer
+{
+    _bootEngine() {
+        return EngineHelperContainerCreator.create(HELPER_CONTAINER_IMAGE_NAME)
+            .then((container) => {
+                //  Assume that the container has started correctly.
+                return new PhpLEngine(NAME, LANGUAGES, container);
+            });
+    }
+}
+
+const server = new PhpLEngineHttpServer(NAME, process.env.PORT || 80);
+server.start();
