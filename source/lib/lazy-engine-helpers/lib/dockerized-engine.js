@@ -99,8 +99,9 @@ class DockerizedEngine extends Engine
                     execParams.Entrypoint = self._getContainerEntrypoint();
                 }
                 if (_.isFunction(self._getContainerCmd)) {
-                    //  HACK: We hard-code the stack volume mount path to /lazy which is known to all
-                    //  containers.
+                    //  HACK: We hard-code the stack volume mount path to /lazy which is known to
+                    //  all containers.
+                    //  HACK: We always add the path to file as last argument.
                     execParams.Cmd = self._getContainerCmd().concat(
                         '/lazy/' + path.basename(temporaryFileInfo.path));
                 }
