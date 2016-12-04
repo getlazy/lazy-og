@@ -15,7 +15,7 @@ const Engine = require('./engine');
  * Parameters of the container run as well processing of the results
  * are delegated to inheriting classes through a set of methods that
  * they need to implement. Those methods are: `_getContainerEntrypoint`,
- * `_getContainerCmd`, `_processEngineOutput`.
+ * `_getContainerCmd`, `_processEngineOutput`, `_getBaseContainerExecParams`.
  */
 class DockerizedEngine extends Engine
 {
@@ -95,6 +95,10 @@ class DockerizedEngine extends Engine
 
                 //  Create exec parameters for the container.
                 const execParams = {};
+                //  Delegate parts of exec param creation to inheriting classes.
+                if (_.isFunction(self._getBaseContainerExecParams)) {
+                    execParams = self._getBaseContainerExecParams();
+                }
                 if (_.isFunction(self._getContainerEntrypoint)) {
                     execParams.Entrypoint = self._getContainerEntrypoint();
                 }
