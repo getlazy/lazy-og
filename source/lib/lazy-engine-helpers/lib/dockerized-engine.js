@@ -19,6 +19,12 @@ const Engine = require('./engine');
  */
 class DockerizedEngine extends Engine
 {
+    /**
+     * Constructs a new instance of DockerizedEngine.
+     * @param {string} name Name of the engine
+     * @param {Array} languages Array of language strings which this engine can process.
+     * @param {Container} container Container on which to execute analysis.
+     */
     constructor(name, languages, container) {
         super(name, languages);
         this._container = container;
@@ -26,6 +32,7 @@ class DockerizedEngine extends Engine
 
     /**
      * Overriden from Engine class.
+     * @return {Promise} Promise that resolves when the boot process finishes.
      */
     boot() {
         //  We assign containers on which to execute at the time of the request so there is
@@ -33,6 +40,16 @@ class DockerizedEngine extends Engine
         return Promise.resolve();
     }
 
+    /**
+     * Creates temporary file in `/lazy` directory which is (HACK) is mounted to a known shared
+     * volume.
+     * @param {string} content Content of the file to analyze.
+     * @param {string} clientPath Path of the file on the client, used to extract the extension
+     * so that temporary file and original file share it. This is useful engines that analyze
+     * file extension to know which grammar to use in the analysis.
+     * @return {Promise} Promise resolving with information on the temporary file.
+     * @private
+     */
     _createTempFileWithContent(content, clientPath) {
         return new Promise((resolve, reject) => {
             tmp.file({
@@ -54,6 +71,8 @@ class DockerizedEngine extends Engine
 
                     resolve({
                         path: tempFilePath,
+                        //  Cleanup callback to delete the temporary file once it's no longer
+                        //  in use.
                         cleanupCallback: cleanupCallback
                     });
                 });
@@ -80,6 +99,14 @@ class DockerizedEngine extends Engine
         });
     };
 
+    /**
+     * Analyzes the given file content for the given language and analysis configuration.
+     * @param {string} content Content of the source file requesting lazy to analyze.
+     * @param {string} clientPath Path of the source file requesting lazy to analyze.
+     * @param {string} language Language of the source file.
+     * @param {string} config Name of the configuration to use.
+     * @return {Promise} Promise resolving with results of the file analysis.
+     */
     analyzeFile(content, clientPath, language, config) {
         const self = this;
 
