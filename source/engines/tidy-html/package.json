@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/SoftwareMarbles/lazy-tidy-html-engine#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^1.2.1",
+    "@lazyass/engine-helpers": "^1.4.0",
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
     "higher": "^1.0.5",
