@@ -16,10 +16,10 @@ global.logger = EngineHelpers.Logger.getEngineLogger();
 
 const _ = require('lodash');
 const H = require('higher');
+
 const DockerizedEngine = EngineHelpers.DockerizedEngine;
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
-const HigherDockerManager = require('@lazyass/higher-docker-manager');
-const selectn = require('selectn');
+const EngineHelperContainerCreator = EngineHelpers.EngineHelperContainerCreator;
 
 const LANGUAGES = ['HTML'];
 const NAME = 'tidy-html';
@@ -65,47 +65,7 @@ class TidyHtmlEngine extends DockerizedEngine
 class TidyHtmlEngineHttpServer extends EngineHttpServer
 {
     _bootEngine() {
-        return HigherDockerManager.pullImage(HELPER_CONTAINER_IMAGE_NAME)
-            .then(() => {
-                return HigherDockerManager.getOwnContainer();
-            })
-            .then((engineContainer) => {
-                //  Get the engine network name assuming that it's the first of all the networks that
-                //  engine container has access to. This is a safe assumption as engines should be
-                //  attached only to stack networks.
-                const engineNetworkName = _.first(_.keys(selectn(
-                    'NetworkSettings.Networks', engineContainer)));
-
-                //  Create the helper container.
-                const createHelperParams = {
-                    //  Name it after the engine name and stack.
-                    Image: HELPER_CONTAINER_IMAGE_NAME,
-                    //  We keep the helper image running so that we can execute our jobs in it without
-                    //  starting/stopping or creating/starting/stopping temporary containers.
-                    Entrypoint: 'tail',
-                    Cmd: '-f /dev/null'.split(' '),
-                    VolumesFrom: [_.trimStart(_.first(engineContainer.Names), '/')],
-                    HostConfig: {
-                        //  When networking mode is a name of another network it's
-                        //  automatically attached.
-                        NetworkMode: engineNetworkName,
-                        Binds: [
-                            //  HACK: We hard-code the stack volume mount path to /lazy which is known
-                            //  to all containers.
-                            process.env.LAZY_STACK_VOLUME_NAME + ':/lazy'
-                        ],
-                        RestartPolicy: {
-                            Name: 'unless-stopped'
-                        }
-                    },
-                    WorkingDir: '/lazy'
-                };
-
-                return HigherDockerManager.createContainer(createHelperParams);
-            })
-            .then((container) => {
-                return container.start();
-            })
+        return EngineHelperContainerCreator.create(HELPER_CONTAINER_IMAGE_NAME)
             .then((container) => {
                 //  Assume that the container has started correctly.
                 return new TidyHtmlEngine(NAME, LANGUAGES, container);
