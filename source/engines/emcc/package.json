@@ -1,7 +1,7 @@
 {
   "name": "lazy-emcc-engine",
   "version": "1.0.0",
-  "description": "EMCC engine serving requests to lint C, C++, ObjC and ObjC++",
+  "description": "lazy engine serving requests to lint C, C++, ObjC and ObjC++ with EMCC",
   "main": "emcc-engine.js",
   "scripts": {
     "test": "test"
