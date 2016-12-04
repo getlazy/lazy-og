@@ -38,11 +38,16 @@ class EmccEngine extends DockerizedEngine
         return {
             warnings: _
                 .chain(AdaptedAtomLinter.parse(output, EMCC_OUTPUT_REGEX))
-                .each((line) => {
-                    //  Fix "fatal error" type to error.
-                    line.type = line.type === 'fatal error' ? 'error' : line.type;
+                .map((warning) => {
+                    //  EMCC returns all lower case for types.
+                    warning.type = _.capitalize(warning.type);
+                    return warning;
                 })
-                .filter((line) => line.type === 'warning' || line.type === 'error')
+                .each((line) => {
+                    //  Fix "Fatal error" type to "Fatal".
+                    line.type = line.type === 'Fatal error' ? 'Error' : line.type;
+                })
+                .filter((line) => line.type === 'Warning' || line.type === 'Error')
                 .value()
         };
     }
