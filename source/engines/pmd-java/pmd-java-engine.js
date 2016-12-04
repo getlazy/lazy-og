@@ -1,21 +1,29 @@
 
 'use strict';
 
+const EngineHelpers = require('@lazyass/engine-helpers');
+global.logger = EngineHelpers.Logger.getEngineLogger();
+
 const _ = require('lodash');
 const H = require('higher');
 const selectn = require('selectn');
 
-const EngineHelpers = require('@lazyass/engine-helpers');
 const DockerizedEngine = EngineHelpers.DockerizedEngine;
+const EngineHttpServer = EngineHelpers.EngineHttpServer;
+const EngineHelperContainerCreator = EngineHelpers.EngineHelperContainerCreator;
 
 const NAME = 'pmd-java';
 const LANGUAGES = ['Java'];
+const HELPER_CONTAINER_IMAGE_NAME = 'codacy/codacy-pmdjava:1.0.114';
 
 class PmdJavaEngine extends DockerizedEngine
 {
-    _getContainerCmd() {
-        return ['/usr/local/pmd-bin/bin/run.sh', 'pmd', '-R', 'java-basic,java-typeresolution',
-            '-f', 'codeclimate', '-d'];
+    _getBaseContainerExecParams() {
+        return {
+            User: 'root',
+            Cmd: ['/usr/local/pmd-bin/bin/run.sh', 'pmd', '-R', 'java-basic,java-typeresolution',
+            '-f', 'codeclimate', '-d']
+        };
     }
 
     _processEngineOutput(buffers) {
@@ -50,7 +58,7 @@ class PmdJavaEngine extends DockerizedEngine
                         };
                     } catch (e) {
                         logger.error('Failed to parse JSON', jsonLine, e);
-                        return undefined;
+                        return;
                     }
                 })
                 .filter()
@@ -59,4 +67,16 @@ class PmdJavaEngine extends DockerizedEngine
     }
 }
 
-module.exports = new PmdJavaEngine(NAME, LANGUAGES);
+class PmdJavaEngineHttpServer extends EngineHttpServer
+{
+    _bootEngine() {
+        return EngineHelperContainerCreator.create(HELPER_CONTAINER_IMAGE_NAME)
+            .then((container) => {
+                //  Assume that the container has started correctly.
+                return new PmdJavaEngine(NAME, LANGUAGES, container);
+            });
+    }
+}
+
+const server = new PmdJavaEngineHttpServer(NAME, process.env.PORT || 80);
+server.start();
