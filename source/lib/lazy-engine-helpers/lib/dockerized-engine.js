@@ -121,7 +121,7 @@ class DockerizedEngine extends Engine
                 temporaryFileInfo = fileInfo;
 
                 //  Create exec parameters for the container.
-                const execParams = {};
+                let execParams = {};
                 //  Delegate parts of exec param creation to inheriting classes.
                 if (_.isFunction(self._getBaseContainerExecParams)) {
                     execParams = self._getBaseContainerExecParams();
@@ -130,12 +130,17 @@ class DockerizedEngine extends Engine
                     execParams.Entrypoint = self._getContainerEntrypoint();
                 }
                 if (_.isFunction(self._getContainerCmd)) {
-                    //  HACK: We hard-code the stack volume mount path to /lazy which is known to
-                    //  all containers.
-                    //  HACK: We always add the path to file as last argument.
-                    execParams.Cmd = self._getContainerCmd().concat(
-                        '/lazy/' + path.basename(temporaryFileInfo.path));
+                    execParams.Cmd = self._getContainerCmd();
                 }
+
+                //  HACK: We hard-code the stack volume mount path to /lazy which is known to
+                //  all containers.
+                //  HACK: We always add the path to file as last argument.
+                if (!_.isArray(execParams.Cmd)) {
+                    execParams.Cmd = [];
+                }
+                execParams.Cmd = execParams.Cmd
+                    .concat('/lazy/' + path.basename(temporaryFileInfo.path));
 
                 return HigherDockerManager.execInContainer(self._container, execParams);
             })
