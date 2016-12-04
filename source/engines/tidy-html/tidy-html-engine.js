@@ -5,14 +5,11 @@ const EngineHelpers = require('@lazyass/engine-helpers');
 global.logger = EngineHelpers.Logger.getEngineLogger();
 
 //  TODO:
-//      * Move launching of DockerizedEngine into engine-helpers
 //      * Add search for already existing helper engines
 //      * Add re-creation of helper engines when "protocol" version changes (like we do in
 //        StackManager)
 //      * Add cleanup of helper engines once this process is stopped for a while (this obviously
 //        outside of this process)
-
-//  Simplest possible HTTP server that accepts requests for file analysis from lazy service.
 
 const _ = require('lodash');
 const H = require('higher');
