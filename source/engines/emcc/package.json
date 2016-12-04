@@ -13,6 +13,10 @@
   "keywords": [
     "lazy",
     "engine",
+    "C",
+    "C++",
+    "Objective-C",
+    "Objective-C++",
     "emcc"
   ],
   "author": "Ivan Erceg",
