@@ -82,6 +82,39 @@ class Engines {
                 ],
                 working_dir: '/app'
             }
+        }, {
+            name: 'emcc',
+            languages: ['C', 'C++', 'Objective-C', 'Objective-C++'],
+            container: {
+                image: 'ierceg/node-dev:6.9.1',
+                command: 'nodemon -V -d 1 -L -w /app emcc-engine.js'.split(' '),
+                volumes: [
+                    '/Users/ierceg/repos/lazy/lazy-emcc-engine:/app'
+                ],
+                working_dir: '/app'
+            }
+        }, {
+            name: 'php-l',
+            languages: ['PHP'],
+            container: {
+                image: 'ierceg/node-dev:6.9.1',
+                command: 'nodemon -V -d 1 -L -w /app php-l-engine.js'.split(' '),
+                volumes: [
+                    '/Users/ierceg/repos/lazy/lazy-php-l-engine:/app'
+                ],
+                working_dir: '/app'
+            }
+        }, {
+            name: 'pmd-java',
+            languages: ['Java'],
+            container: {
+                image: 'ierceg/node-dev:6.9.1',
+                command: 'nodemon -V -d 1 -L -w /app pmd-java-engine.js'.split(' '),
+                volumes: [
+                    '/Users/ierceg/repos/lazy/lazy-pmd-java-engine:/app'
+                ],
+                working_dir: '/app'
+            }
         }];
 
         return _.map(HTTP_ENGINES_METADATA, (engineParams) => {
