@@ -1,13 +1,19 @@
 
 'use strict';
 
-const _ = require('lodash');
 const EngineHelpers = require('@lazyass/engine-helpers');
+global.logger = EngineHelpers.Logger.getEngineLogger();
+
+const _ = require('lodash');
+
 const DockerizedEngine = EngineHelpers.DockerizedEngine;
 const AdaptedAtomLinter = EngineHelpers.AdaptedAtomLinter;
+const EngineHttpServer = EngineHelpers.EngineHttpServer;
+const EngineHelperContainerCreator = EngineHelpers.EngineHelperContainerCreator;
 
 const NAME = 'emcc';
 const LANGUAGES = ['C++', 'C', 'Objective-C', 'Objective-C++'];
+const HELPER_CONTAINER_IMAGE_NAME = 'apiaryio/emcc:1.36';
 
 //  As seen in https://github.com/keplersj/linter-emscripten/blob/master/lib/main.js (MIT license)
 
@@ -42,4 +48,16 @@ class EmccEngine extends DockerizedEngine
     }
 }
 
-module.exports = new EmccEngine(NAME, LANGUAGES);
+class EmccEngineHttpServer extends EngineHttpServer
+{
+    _bootEngine() {
+        return EngineHelperContainerCreator.create(HELPER_CONTAINER_IMAGE_NAME)
+            .then((container) => {
+                //  Assume that the container has started correctly.
+                return new EmccEngine(NAME, LANGUAGES, container);
+            });
+    }
+}
+
+const server = new EmccEngineHttpServer(NAME, process.env.PORT || 80);
+server.start();
