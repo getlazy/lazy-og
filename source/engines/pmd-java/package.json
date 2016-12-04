@@ -1,0 +1,25 @@
+{
+  "name": "lazy-pmd-java-engine",
+  "version": "1.0.0",
+  "description": "lazy engine serving requests to lint Java with pmd",
+  "main": "pmd-java-engine.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SoftwareMarbles/lazy-pmd-java-engine.git"
+  },
+  "keywords": [
+    "lazy",
+    "engine",
+    "java",
+    "pmd"
+  ],
+  "author": "Ivan Erceg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SoftwareMarbles/lazy-pmd-java-engine/issues"
+  },
+  "homepage": "https://github.com/SoftwareMarbles/lazy-pmd-java-engine#readme"
+}
