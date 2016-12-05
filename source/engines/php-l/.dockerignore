@@ -1,0 +1,14 @@
+.git
+.gitignore
+.dockerignore
+.DS_Store
+.vscode
+
+test
+node_modules
+
+Dockerfile
+Makefile
+README.md
+
+envvars*
