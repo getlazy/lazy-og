@@ -75,45 +75,25 @@ class Engines {
             name: 'tidy-html',
             languages: ['HTML'],
             container: {
-                image: 'ierceg/node-dev:6.9.1',
-                command: 'nodemon -V -d 1 -L -w /app tidy-html-engine.js'.split(' '),
-                volumes: [
-                    '/Users/ierceg/repos/lazy/lazy-tidy-html-engine:/app'
-                ],
-                working_dir: '/app'
+                image: 'ierceg/lazy-tidy-html-engine:latest'
             }
         }, {
             name: 'emcc',
             languages: ['C', 'C++', 'Objective-C', 'Objective-C++'],
             container: {
-                image: 'ierceg/node-dev:6.9.1',
-                command: 'nodemon -V -d 1 -L -w /app emcc-engine.js'.split(' '),
-                volumes: [
-                    '/Users/ierceg/repos/lazy/lazy-emcc-engine:/app'
-                ],
-                working_dir: '/app'
+                image: 'ierceg/lazy-emcc-engine:latest'
             }
         }, {
             name: 'php-l',
             languages: ['PHP'],
             container: {
-                image: 'ierceg/node-dev:6.9.1',
-                command: 'nodemon -V -d 1 -L -w /app php-l-engine.js'.split(' '),
-                volumes: [
-                    '/Users/ierceg/repos/lazy/lazy-php-l-engine:/app'
-                ],
-                working_dir: '/app'
+                image: 'ierceg/lazy-php-l-engine:latest'
             }
         }, {
             name: 'pmd-java',
             languages: ['Java'],
             container: {
-                image: 'ierceg/node-dev:6.9.1',
-                command: 'nodemon -V -d 1 -L -w /app pmd-java-engine.js'.split(' '),
-                volumes: [
-                    '/Users/ierceg/repos/lazy/lazy-pmd-java-engine:/app'
-                ],
-                working_dir: '/app'
+                image: 'ierceg/lazy-pmd-java-engine:latest'
             }
         }];
 
