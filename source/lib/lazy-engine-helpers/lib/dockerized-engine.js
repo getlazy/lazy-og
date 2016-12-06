@@ -8,8 +8,6 @@ const path = require('path');
 
 const HigherDockerManager = require('@lazyass/higher-docker-manager');
 
-const Engine = require('./engine');
-
 /**
  * Base class for engines running as sibil Docker containers.
  * Parameters of the container run as well processing of the results
@@ -17,7 +15,7 @@ const Engine = require('./engine');
  * they need to implement. Those methods are: `_getContainerEntrypoint`,
  * `_getContainerCmd`, `_processEngineOutput`, `_getBaseContainerExecParams`.
  */
-class DockerizedEngine extends Engine
+class DockerizedEngine
 {
     /**
      * Constructs a new instance of DockerizedEngine.
@@ -26,10 +24,10 @@ class DockerizedEngine extends Engine
      * @param {Container} container Container on which to execute analysis.
      */
     constructor(name, languages, container) {
-        super(name, languages);
         this._container = container;
     }
 
+    // lazy next -jsdoc-no-return - TODO: Make lazy understand this and turn off the warning.
     /**
      * Overriden from Engine class.
      * @return {Promise} Promise that resolves when the boot process finishes.
@@ -40,6 +38,7 @@ class DockerizedEngine extends Engine
         return Promise.resolve();
     }
 
+    // lazy next -jsdoc-no-return - TODO: Make lazy understand this and turn off the warning.
     /**
      * Creates temporary file in `/lazy` directory which is (HACK) is mounted to a known shared
      * volume.
