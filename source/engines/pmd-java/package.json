@@ -1,6 +1,6 @@
 {
   "name": "lazy-pmd-java-engine",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "lazy engine serving requests to lint Java with pmd",
   "main": "pmd-java-engine.js",
   "scripts": {
