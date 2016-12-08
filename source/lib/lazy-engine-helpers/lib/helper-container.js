@@ -9,42 +9,84 @@ const path = require('path');
 const HigherDockerManager = require('@lazyass/higher-docker-manager');
 
 /**
- * Base class for engines running as sibil Docker containers.
+ * Base class for helper containers running as sibil Docker containers.
  * Parameters of the container run as well processing of the results
  * are delegated to inheriting classes through a set of methods that
  * they need to implement. Those methods are: `_getContainerEntrypoint`,
- * `_getContainerCmd`, `_processEngineOutput`, `_getBaseContainerExecParams`.
+ * `_getContainerCmd`, `_processContainerOutput`, `_getBaseContainerExecParams`.
  */
-class DockerizedEngine
+class HelperContainer
 {
     /**
-     * Constructs a new instance of DockerizedEngine.
-     * @param {string} name Name of the engine
-     * @param {Array} languages Array of language strings which this engine can process.
+     * Creates helper container for the given image name. This function will pull the image:tag,
+     * create the container, start it and finally return HelperContainer instances constructed
+     * with the container.
+     * @param {string} imageName Name of Docker image (including the optional tag) for which
+     * helper container should be created.
+     * @return {Promise} Promise resolving with a new instance of HelperContainer.
+     */
+    static create(imageName) {
+        return HigherDockerManager.pullImage(imageName)
+            .then(() => {
+                return HigherDockerManager.getOwnContainer();
+            })
+            .then((engineContainer) => {
+                //  Get the engine network name assuming that it's the first of all the networks
+                //  that engine container has access to. This is a safe assumption as engines should
+                //  be attached only to stack networks.
+                const engineNetworkName = _.first(_.keys(selectn(
+                    'NetworkSettings.Networks', engineContainer)));
+
+                //  Create the helper container.
+                const createHelperParams = {
+                    Image: imageName,
+                    //  HACK: We keep the helper image running so that we can execute our jobs in it
+                    //  without starting/stopping or creating/starting/stopping temporary containers
+                    Entrypoint: 'tail',
+                    Cmd: '-f /dev/null'.split(' '),
+                    VolumesFrom: [_.trimStart(_.first(engineContainer.Names), '/')],
+                    HostConfig: {
+                        //  When networking mode is a name of another network it's
+                        //  automatically attached.
+                        NetworkMode: engineNetworkName,
+                        Binds: [
+                            //  HACK: We hard-code the stack volume mount path to /lazy which is
+                            //  known to all containers.
+                            process.env.LAZY_STACK_VOLUME_NAME + ':/lazy'
+                        ],
+                        RestartPolicy: {
+                            Name: 'unless-stopped'
+                        }
+                    },
+                    //  HACK: We hard-code the stack volume mount path to /lazy which is known to
+                    //  all containers.
+                    WorkingDir: '/lazy'
+                };
+
+                return HigherDockerManager.createContainer(createHelperParams);
+            })
+            .then((container) => {
+                return container.start();
+            })
+            .then((container) => {
+                return new HelperContainer(container);
+            });
+    }
+
+    /**
+     * Constructs a new instance of HelperContainer.
      * @param {Container} container Container on which to execute analysis.
      */
-    constructor(name, languages, container) {
+    constructor(container) {
         this._container = container;
     }
 
-    // lazy next -jsdoc-no-return - TODO: Make lazy understand this and turn off the warning.
-    /**
-     * Overriden from Engine class.
-     * @return {Promise} Promise that resolves when the boot process finishes.
-     */
-    boot() {
-        //  We assign containers on which to execute at the time of the request so there is
-        //  nothing that we need to do to prepare the engine.
-        return Promise.resolve();
-    }
-
-    // lazy next -jsdoc-no-return - TODO: Make lazy understand this and turn off the warning.
     /**
      * Creates temporary file in `/lazy` directory which is (HACK) is mounted to a known shared
      * volume.
      * @param {string} content Content of the file to analyze.
      * @param {string} clientPath Path of the file on the client, used to extract the extension
-     * so that temporary file and original file share it. This is useful engines that analyze
+     * so that temporary file and original file share it. This is useful to engines that analyze
      * file extension to know which grammar to use in the analysis.
      * @return {Promise} Promise resolving with information on the temporary file.
      * @private
@@ -56,7 +98,7 @@ class DockerizedEngine
                 //  containers.
                 dir: '/lazy',
                 prefix: 'lazy-temp-content-',
-                //  Use the real extension to allow engines to discern between different grammars.
+                //  Use the real extension to allow engine to discern between different grammars.
                 postfix: path.extname(clientPath)
             }, (err, tempFilePath, fd, cleanupCallback) => {
                 if (err) {
@@ -144,7 +186,7 @@ class DockerizedEngine
                 return HigherDockerManager.execInContainer(self._container, execParams);
             })
             //  Delegate the processing of the output to inheriting classes.
-            .then(self._processEngineOutput)
+            .then(self._processContainerOutput)
             .then((results) => {
                 if (_.isArray(results.warnings)) {
                     //  Fix the file path to use the actual client path rather than
@@ -173,4 +215,4 @@ class DockerizedEngine
     };
 }
 
-module.exports = DockerizedEngine;
+module.exports = HelperContainer;
