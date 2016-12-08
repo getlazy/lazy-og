@@ -4,4 +4,5 @@ ARG NPM_TOKEN
 WORKDIR /app
 COPY . /app
 RUN npm install
+LABEL "io.lazyass.lazy.engine.languages"="CSS, SCSS, LESS, SugarCSS"
 ENTRYPOINT ["node", "/app/stylelint-engine.js"]

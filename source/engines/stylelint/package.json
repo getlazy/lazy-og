@@ -1,6 +1,6 @@
 {
   "name": "stylelint-engine",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Stylelint engine serving requests to lint CSS and related",
   "main": "stylelint-engine.js",
   "scripts": {
