@@ -4,4 +4,5 @@ ARG NPM_TOKEN
 WORKDIR /app
 COPY . /app
 RUN npm install
+LABEL "io.lazyass.lazy.engine.languages"="PHP"
 ENTRYPOINT ["node", "/app/php-l-engine.js"]
