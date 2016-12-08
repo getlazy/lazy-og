@@ -1,6 +1,6 @@
 {
   "name": "eslint-engine",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "ESLint engine serving requests to lint JS and related",
   "main": "eslint-engine.js",
   "scripts": {
