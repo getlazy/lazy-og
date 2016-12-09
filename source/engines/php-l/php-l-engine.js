@@ -5,15 +5,19 @@ const EngineHelpers = require('@lazyass/engine-helpers');
 global.logger = EngineHelpers.Logger.getEngineLogger();
 
 const _ = require('lodash');
-const DockerizedEngine = EngineHelpers.DockerizedEngine;
-const EngineHttpServer = EngineHelpers.EngineHttpServer;
-const EngineHelperContainerCreator = EngineHelpers.EngineHelperContainerCreator;
+const H = require('higher');
 
-const NAME = 'php-l';
-const LANGUAGES = ['PHP'];
+const HelperContainer = EngineHelpers.HelperContainer;
+const EngineHttpServer = EngineHelpers.EngineHttpServer;
+
+const REPOSITORY_AUTH = JSON.parse(
+    H.unless(H.isNonEmptyString, '{}', process.env.LAZY_REPOSITORY_AUTH_JSON));
+
+const LAZY_VOLUME_NAME = process.env.LAZY_VOLUME_NAME;
+
 const HELPER_CONTAINER_IMAGE_NAME = 'php:7.0.13-cli';
 
-class PhpLEngine extends DockerizedEngine
+class PhpLHelperContainer extends HelperContainer
 {
     _getContainerCmd() {
         return ['php', '--syntax-check',
@@ -22,7 +26,7 @@ class PhpLEngine extends DockerizedEngine
             '--define', 'error_reporting=E_ALL'];
     }
 
-    _processEngineOutput(buffers) {
+    _processContainerOutput(buffers) {
         //  Convert all the resulting buffers into string and join them as
         //  our parser works on a single string will all the output lines.
         const output = _.map(buffers, (buffer) => {
@@ -57,13 +61,32 @@ class PhpLEngine extends DockerizedEngine
 class PhpLEngineHttpServer extends EngineHttpServer
 {
     _bootEngine() {
-        return EngineHelperContainerCreator.create(HELPER_CONTAINER_IMAGE_NAME)
+        return HelperContainer
+            .createContainer(REPOSITORY_AUTH, HELPER_CONTAINER_IMAGE_NAME, LAZY_VOLUME_NAME)
             .then((container) => {
                 //  Assume that the container has started correctly.
-                return new PhpLEngine(NAME, LANGUAGES, container);
+                this._container = container;
+                return new PhpLHelperContainer(container);
             });
+    }
+
+    _stopEngine() {
+        return HelperContainer.deleteContainer(this._container);
     }
 }
 
-const server = new PhpLEngineHttpServer(NAME, process.env.PORT || 80);
-server.start();
+class Engine
+{
+    start() {
+        const port = process.env.PORT || 80;
+        this._server = new PhpLEngineHttpServer(port);
+        return this._server.start();
+    }
+
+    stop() {
+        this._server.stop();
+        this._server = null;
+    }
+}
+
+module.exports = Engine;

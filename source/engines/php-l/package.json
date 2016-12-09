@@ -2,12 +2,15 @@
   "name": "lazy-php-l-engine",
   "version": "1.0.1",
   "description": "lazy engine serving requests to lint PHP",
-  "main": "php-l-engine.js",
+  "main": "index.js",
   "dependencies": {
-    "@lazyass/engine-helpers": "^1.5.2",
+    "@lazyass/engine-helpers": "^1.8.0",
+    "higher": "^1.0.5",
     "lodash": "^4.17.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "request": "^2.79.0"
+  },
   "scripts": {
     "test": "test"
   },
