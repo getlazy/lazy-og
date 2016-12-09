@@ -1,22 +1,22 @@
 
 'use strict';
 
-const EngineHelpers = require('@lazyass/engine-helpers');
-global.logger = EngineHelpers.Logger.getEngineLogger();
-
 const _ = require('lodash');
 const H = require('higher');
 const selectn = require('selectn');
 
-const DockerizedEngine = EngineHelpers.DockerizedEngine;
+const EngineHelpers = require('@lazyass/engine-helpers');
+const HelperContainer = EngineHelpers.HelperContainer;
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
-const EngineHelperContainerCreator = EngineHelpers.EngineHelperContainerCreator;
 
-const NAME = 'pmd-java';
-const LANGUAGES = ['Java'];
+const REPOSITORY_AUTH = JSON.parse(
+    H.unless(H.isNonEmptyString, '{}', process.env.LAZY_REPOSITORY_AUTH_JSON));
+
+const LAZY_VOLUME_NAME = process.env.LAZY_VOLUME_NAME;
+
 const HELPER_CONTAINER_IMAGE_NAME = 'codacy/codacy-pmdjava:1.0.114';
 
-class PmdJavaEngine extends DockerizedEngine
+class PmdJavaHelperContainer extends HelperContainer
 {
     _getBaseContainerExecParams() {
         return {
@@ -26,7 +26,7 @@ class PmdJavaEngine extends DockerizedEngine
         };
     }
 
-    _processEngineOutput(buffers) {
+    _processContainerOutput(buffers) {
         //  In this engine each line is a separate JSON so we first put together all the buffers
         //  and then we split them per lines.
         const jsonLines = _
@@ -70,13 +70,34 @@ class PmdJavaEngine extends DockerizedEngine
 class PmdJavaEngineHttpServer extends EngineHttpServer
 {
     _bootEngine() {
-        return EngineHelperContainerCreator.create(HELPER_CONTAINER_IMAGE_NAME)
+        return HelperContainer
+            .createContainer(REPOSITORY_AUTH, HELPER_CONTAINER_IMAGE_NAME, LAZY_VOLUME_NAME)
             .then((container) => {
                 //  Assume that the container has started correctly.
-                return new PmdJavaEngine(NAME, LANGUAGES, container);
+                this._container = container;
+                return new PmdJavaHelperContainer(container);
+            });
+    }
+
+    _stopEngine() {
+        return HelperContainer.deleteContainer(this._container);
+    }
+}
+
+class Engine
+{
+    start() {
+        const port = process.env.PORT || 80;
+        this._server = new PmdJavaEngineHttpServer(port);
+        return this._server.start();
+    }
+
+    stop() {
+        return this._server.stop()
+            .then(() => {
+                this._server = null;
             });
     }
 }
 
-const server = new PmdJavaEngineHttpServer(NAME, process.env.PORT || 80);
-server.start();
+module.exports = Engine;
