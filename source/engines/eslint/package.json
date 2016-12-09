@@ -1,7 +1,7 @@
 {
   "name": "eslint-engine",
-  "version": "1.0.5",
-  "description": "ESLint engine serving requests to lint JS and related",
+  "version": "1.1.0",
+  "description": "lazy engine serving requests to lint JS and related using ESLint",
   "main": "eslint-engine.js",
   "scripts": {
     "test": "test"
@@ -25,13 +25,14 @@
   },
   "homepage": "https://github.com/SoftwareMarbles/lazy-eslint-engine#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^1.2.1",
+    "@lazyass/engine-helpers": "^1.8.0",
     "babel-eslint": "6.1.2",
-    "body-parser": "^1.15.2",
     "eslint": "^3.10.2",
     "eslint-config-google": "^0.7.0",
-    "express": "^4.14.0",
     "lodash": "^4.17.2",
     "selectn": "^1.1.1"
+  },
+  "devDependencies": {
+    "request": "^2.79.0"
   }
 }

@@ -1,75 +1,62 @@
 
 'use strict';
 
-global.logger = require('@lazyass/engine-helpers').Logger.getEngineLogger();
-
-//  Simplest possible HTTP server that accepts requests for file analysis from lazy service.
-
 const _ = require('lodash');
-const express = require('express');
-const bodyParser = require('body-parser');
 const selectn = require('selectn');
 
-const eslint = require('eslint');
-//  Extend the google config with custom options.
-const eslintConfigGoogle = _.extend(require('eslint-config-google'), {
-    envs: ['node', 'es6'],
-    parser: 'babel-eslint',
-    parserOptions: {
-        ecmaVersion: 7
+const EngineHelpers = require('@lazyass/engine-helpers');
+const EngineHttpServer = EngineHelpers.EngineHttpServer;
+
+class EslintEngine
+{
+    constructor() {
+        this._eslint = require('eslint');
+        //  Extend the google config with custom options.
+        this._eslintConfigGoogle = _.extend(require('eslint-config-google'), {
+            envs: ['node', 'es6'],
+            parser: 'babel-eslint',
+            parserOptions: {
+                ecmaVersion: 7
+            }
+        });
+        //  lazy config is a customization of Google config.
+        this._eslintLazyConfig = _.cloneDeep(this._eslintConfigGoogle);
+        this._eslintLazyConfig.rules = _.extend(this._eslintLazyConfig.rules, {
+            'no-console': 2,
+            'no-dupe-args': 2,
+            'no-dupe-keys': 2,
+            'no-unreachable': 2,
+            'max-len': [2, {
+                code: 100,
+                tabWidth: 4,
+                ignoreUrls: true
+            }],
+            'comma-dangle': [2, 'never'],
+            'default-case': 2,
+            'no-fallthrough': 2,
+            'no-implicit-globals': 2,
+            //  'no-undef': 2,  //  Removed for now as `config.envs` doesn't seem to work so we get too
+            //  spurious warnings on `require`, `Promise` as undeclared globals.
+            'no-undefined': 2,
+            'no-use-before-define': 2
+        });
     }
-});
-//  lazy config is a customization of Google config.
-const eslintLazyConfig = _.cloneDeep(eslintConfigGoogle);
-eslintLazyConfig.rules = _.extend(eslintLazyConfig.rules, {
-    'no-console': 2,
-    'no-dupe-args': 2,
-    'no-dupe-keys': 2,
-    'no-unreachable': 2,
-    'max-len': [2, {
-        code: 100,
-        tabWidth: 4,
-        ignoreUrls: true
-    }],
-    'comma-dangle': [2, 'never'],
-    'default-case': 2,
-    'no-fallthrough': 2,
-    'no-implicit-globals': 2,
-    //  'no-undef': 2,  //  Removed for now as `config.envs` doesn't seem to work so we get too
-    //  spurious warnings on `require`, `Promise` as undeclared globals.
-    'no-undefined': 2,
-    'no-use-before-define': 2
-});
 
-const getConfig = (config) => {
-    switch (_.toLower(config)) {
-        case 'google':
-            return eslintConfigGoogle;
-        default:
-            return eslintLazyConfig;
-    }
-};
+    /**
+     * Analyzes the given file content for the given language and analysis configuration.
+     * @param {string} content Content of the source file requesting lazy to analyze.
+     * @param {string} clientPath Path of the source file requesting lazy to analyze.
+     * @param {string} language Language of the source file.
+     * @param {string} config Name of the configuration to use.
+     * @return {Promise} Promise resolving with results of the file analysis.
+     */
+    analyzeFile(content, clientPath, language, config) {
+        const self = this;
 
-//  Use the Google config to lint the incoming content.
-const lint = (content, config) => {
-    //  We use a promise as we get any exceptions wrapped up as failures.
-    return new Promise((resolve) => {
-        resolve(eslint.linter.verify(content, getConfig(config)));
-    });
-};
+        //  We use a promise as we get any exceptions wrapped up as failures.
+        return new Promise((resolve) => {
+            const results = self._eslint.linter.verify(content, self._getConfig(config));
 
-//  Setup Express application.
-const app = express();
-app.use(bodyParser.json());
-
-//  Listen on POST /file for requests. These requests are not 100% the same as the one
-//  we are receiving in lazy service as language most notably needs to be translated from
-//  the client value into stylelint value.
-app.post('/file', (req, res) => {
-    const content = selectn('body.content', req);
-    const config = selectn('body.config', req);
-    lint(content, config)
-        .then((results) => {
             const warnings = _
                 .chain(results)
                 .map((warning) => {
@@ -83,19 +70,47 @@ app.post('/file', (req, res) => {
                 .filter()
                 .value();
 
-            res.send({
+            resolve({
                 warnings: warnings
             });
-        })
-        .catch((err) => {
-            logger.error('Linting failed', err);
-            res.status(500).send({
-                error: err.message
-            });
         });
-});
+    }
 
-const port = process.env.PORT || 80;
-app.listen(port, () => {
-    logger.info('`eslint-engine` listening on', port);
-});
+    _getConfig(config) {
+        switch (_.toLower(config)) {
+            case 'google':
+                return this._eslintConfigGoogle;
+            default:
+                return this._eslintLazyConfig;
+        }
+    };
+}
+
+class EslintEngineHttpServer extends EngineHttpServer
+{
+    _bootEngine() {
+        return Promise.resolve(new EslintEngine());
+    }
+
+    _stopEngine() {
+        return Promise.resolve();
+    }
+}
+
+class Engine
+{
+    start() {
+        const port = process.env.PORT || 80;
+        this._server = new EslintEngineHttpServer(port);
+        return this._server.start();
+    }
+
+    stop() {
+        return this._server.stop()
+            .then(() => {
+                this._server = null;
+            });
+    }
+}
+
+module.exports = Engine;
