@@ -5,4 +5,4 @@ WORKDIR /app
 COPY . /app
 RUN npm install
 LABEL "io.lazyass.lazy.engine.languages"="C, C++, Objective-C, Objective-C++"
-ENTRYPOINT ["node", "/app/emcc-engine.js"]
+ENTRYPOINT ["node", "/app/index.js"]

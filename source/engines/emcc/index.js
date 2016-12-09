@@ -1,7 +1,7 @@
 
 'use strict';
 
-const EmccEngine = require('../emcc-engine');
+const EmccEngine = require('./emcc-engine');
 const emccEngine = new EmccEngine();
 
 emccEngine.start()
