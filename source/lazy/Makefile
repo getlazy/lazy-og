@@ -17,6 +17,7 @@ test:
 	    -v "$(shell pwd):/app" \
 	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -w /app \
+	    --stop-signal SIGTERM \
 	    ierceg/node-dev:6.9.1 \
 	    mocha
 
@@ -25,6 +26,7 @@ test-cont:
 	    -v "$(shell pwd):/app" \
 	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -w /app \
+	    --stop-signal SIGTERM \
 	    ierceg/node-dev:6.9.1 \
 	    nodemon -V -d 1 -L -w /app --exec mocha
 
@@ -33,6 +35,7 @@ coverage:
 	    -v "$(shell pwd):/app" \
 	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -w /app \
+	    --stop-signal SIGTERM \
 	    ierceg/node-dev:6.9.1 \
 	    istanbul cover _mocha -- --recursive
 	docker run -it --rm \
