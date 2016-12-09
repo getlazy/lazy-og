@@ -41,6 +41,13 @@ class EngineHttpServer
             res.sendStatus(503);
         });
 
+        //  GET /status is used by lazy to determine if the engine is healthy.
+        app.get('/status', (req, res) => {
+            //  For now just return 200. The above middleware will return 503 if engine is still
+            //  not running.
+            res.sendStatus(200);
+        });
+
         //  Listen on POST /file for requests. These requests are not 100% the same as the one
         //  we are receiving in lazy service as language most notably needs to be translated from
         //  the client values into common values.

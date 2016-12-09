@@ -52,7 +52,7 @@ class HelperContainer
                         Binds: [
                             //  HACK: We hard-code the stack volume mount path to /lazy which is
                             //  known to all containers.
-                            process.env.LAZY_STACK_VOLUME_NAME + ':/lazy'
+                            process.env.LAZY_VOLUME_NAME + ':/lazy'
                         ],
                         RestartPolicy: {
                             Name: 'unless-stopped'
