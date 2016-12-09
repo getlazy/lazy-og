@@ -13,10 +13,8 @@ const ASSERT_FALSE = (data) => {
 const ANALYZE_FILE_FIXTURE = [{
     name: '200 - PHP',
     params: {
-        client: 'atom',
-        stackId: '0',
         path: '/src/test.php',
-        grammar: 'PHP',
+        language: 'PHP',
         content:
 `
 <?php
@@ -71,7 +69,8 @@ describe('PhpLEngineHttpServer', function() {
                     },
                     body: {
                         clientPath: params.path,
-                        content: params.content
+                        content: params.content,
+                        language: params.language
                     }
                 };
 
