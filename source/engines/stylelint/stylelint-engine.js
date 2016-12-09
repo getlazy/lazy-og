@@ -3,69 +3,94 @@
 
 global.logger = require('@lazyass/engine-helpers').Logger.getEngineLogger();
 
-//  Simplest possible HTTP server that accepts requests for file analysis from lazy service.
-
 const _ = require('lodash');
-const express = require('express');
-const bodyParser = require('body-parser');
 const selectn = require('selectn');
 
-const stylelint = require('stylelint');
-const stylelintConfigStandard = require('stylelint-config-standard');
+const EngineHelpers = require('@lazyass/engine-helpers');
+const EngineHttpServer = EngineHelpers.EngineHttpServer;
+
+//  TODO: Merge StylelintEngine, StylelintEngineHttpServer and Engine classes - their
+//  separation doesn't make much sense.
+
+class StylelintEngine
+{
+    constructor() {
+        this._stylelint = require('stylelint');
+        this._stylelintConfigStandard = require('stylelint-config-standard');
+    }
+
+    /**
+     * Analyzes the given file content for the given language and analysis configuration.
+     * @param {string} content Content of the source file requesting lazy to analyze.
+     * @param {string} clientPath Path of the source file requesting lazy to analyze.
+     * @param {string} language Language of the source file.
+     * @param {string} config Name of the configuration to use.
+     * @return {Promise} Promise resolving with results of the file analysis.
+     */
+    analyzeFile(content, clientPath, language, config) {
+        const self = this;
+
+        return self._stylelint.lint({
+            syntax: language,
+            code: content,
+            config: self._stylelintConfigStandard
+        })
+            .then((results) => {
+                return _
+                    .chain(selectn('results[0].warnings', results))
+                    .map((warning) => {
+                        try {
+                            return {
+                                type: warning.severity,
+                                //  Remove the rule string from the final output.
+                                message: warning.text.replace(' (' + warning.rule + ')', ''),
+                                line: _.toNumber(warning.line),
+                                column: _.toNumber(warning.column)
+                            };
+                        } catch(e) {
+                            logger.error('Failed to process stylelint warning', warning);
+                        }
+                    })
+                    .filter()
+                    .value();
+            })
+            .then((warnings) => {
+                return {
+                    warnings: warnings
+                };
+            });
+    }
+}
 
 //  Use the standard config to lint the incoming content.
 const lint = (language, content) => {
-    return stylelint.lint({
-        syntax: language,
-        code: content,
-        config: stylelintConfigStandard
-    });
 };
 
-//  Setup Express application.
-const app = express();
-app.use(bodyParser.json());
+class StylelintEngineHttpServer extends EngineHttpServer
+{
+    _bootEngine() {
+        return Promise.resolve(new StylelintEngine());
+    }
 
-//  Listen on POST /file for requests. These requests are not 100% the same as the one
-//  we are receiving in lazy service as language most notably needs to be translated from
-//  the client value into stylelint value.
-app.post('/file', (req, res) => {
-    const language = selectn('body.language', req);
-    const content = selectn('body.content', req);
-    lint(language, content)
-        .then((results) => {
-            return _
-                .chain(selectn('results[0].warnings', results))
-                .map((warning) => {
-                    try {
-                        return {
-                            type: warning.severity,
-                            //  Remove the rule string from the final output.
-                            message: warning.text.replace(' (' + warning.rule + ')', ''),
-                            line: _.toNumber(warning.line),
-                            column: _.toNumber(warning.column)
-                        };
-                    } catch(e) {
-                        logger.error('Failed to process stylelint warning', warning);
-                    }
-                })
-                .filter()
-                .value();
-        })
-        .then((warnings) => {
-            res.send({
-                warnings: warnings
-            });
-        })
-        .catch((err) => {
-            logger.error('Linting failed', err);
-            res.status(500).send({
-                error: err.message
-            });
-        });
-});
+    _stopEngine() {
+        return Promise.resolve();
+    }
+}
 
-const port = process.env.PORT || 80;
-app.listen(port, () => {
-    logger.info('`stylelint-engine` listening on', port);
-});
+class Engine
+{
+    start() {
+        const port = process.env.PORT || 80;
+        this._server = new StylelintEngineHttpServer(port);
+        return this._server.start();
+    }
+
+    stop() {
+        return this._server.stop()
+            .then(() => {
+                this._server = null;
+            });
+    }
+}
+
+module.exports = Engine;
