@@ -6,22 +6,34 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const selectn = require('selectn');
 
+/**
+ * Base class for lazy engine HTTP servers.
+ * Parameters of the engine are delegated to inheriting classes through a set of methods that
+ * they need to implement. Those methods are: `_bootEngine`, `_stopEngine`.
+ */
 class EngineHttpServer
 {
-    constructor(name, port) {
-        this._name = name;
+    constructor(port) {
         this._port = port;
     }
 
-    setEngine(engine) {
-        this._engine = engine;
+    get engine() {
+        return this._engine;
     }
 
     start() {
         const self = this;
 
-        if (!_.isUndefined(self._app)) {
-            return Promise.resolve(new Error('Engine HTTP server is already running.'));
+        return new Promise((resolve, reject) => {
+            return self._start(resolve, reject);
+        });
+    }
+
+    _start(resolve, reject) {
+        const self = this;
+
+        if (!_.isUndefined(self._engine)) {
+            return reject(new Error('Engine HTTP server is already running.'));
         }
 
         //  Setup Express application.
@@ -62,25 +74,35 @@ class EngineHttpServer
                     res.send(results);
                 })
                 .catch((err) => {
-                    logger.error('Linting failed', err);
+                    logger.info(err);
                     res.status(500).send({
                         error: err.message
                     });
                 });
         });
 
-        app.listen(self._port, () => {
+        //  Capture the HTTP server instance so that we can shut it down on `stop()`.
+        this._httpServer = app.listen(self._port, () => {
             return self._bootEngine()
                 .then((engine) => {
+                    //  Engine HTTP server is ready when engine is ready.
                     self._engine = engine;
-                    self._app = app;
-                    logger.info(self._name, 'listening on', self._port);
+                    resolve();
                 })
-                .catch((err) => {
-                    logger.error('Failed to correctly boot the engine', err);
-                    process.exit(-1);
-                });
+                .catch(reject);
         });
+    }
+
+    stop() {
+        const self = this;
+
+        //  Close the server and stop the engine.
+        self._httpServer && self._httpServer.close();
+        self._httpServer = null;
+        return self._stopEngine()
+            .then(() => {
+                self._engine = null;
+            });
     }
 }
 
