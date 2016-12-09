@@ -5,26 +5,29 @@ const EngineHelpers = require('@lazyass/engine-helpers');
 global.logger = EngineHelpers.Logger.getEngineLogger();
 
 const _ = require('lodash');
+const H = require('higher');
 
-const DockerizedEngine = EngineHelpers.DockerizedEngine;
+const HelperContainer = EngineHelpers.HelperContainer;
 const AdaptedAtomLinter = EngineHelpers.AdaptedAtomLinter;
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
-const EngineHelperContainerCreator = EngineHelpers.EngineHelperContainerCreator;
 
-const NAME = 'emcc';
-const LANGUAGES = ['C++', 'C', 'Objective-C', 'Objective-C++'];
+const REPOSITORY_AUTH = JSON.parse(
+    H.unless(H.isNonEmptyString, '{}', process.env.LAZY_REPOSITORY_AUTH_JSON));
+
+const LAZY_VOLUME_NAME = process.env.LAZY_VOLUME_NAME;
+
 const HELPER_CONTAINER_IMAGE_NAME = 'apiaryio/emcc:1.36';
 
 //  As seen in https://github.com/keplersj/linter-emscripten/blob/master/lib/main.js (MIT license)
 
-class EmccEngine extends DockerizedEngine
+class EmccHelperContainer extends HelperContainer
 {
     _getContainerCmd() {
         return ['emcc', '-fsyntax-only', '-fno-caret-diagnostics', '-fno-diagnostics-fixit-info',
             '-fdiagnostics-print-source-range-info', '-fexceptions'];
     }
 
-    _processEngineOutput(buffers) {
+    _processContainerOutput(buffers) {
         //  Convert all the resulting buffers into string and join them as
         //  our parser works on a single string will all the output lines.
         const output = _.map(buffers, (buffer) => {
@@ -56,13 +59,32 @@ class EmccEngine extends DockerizedEngine
 class EmccEngineHttpServer extends EngineHttpServer
 {
     _bootEngine() {
-        return EngineHelperContainerCreator.create(HELPER_CONTAINER_IMAGE_NAME)
+        return HelperContainer
+            .createContainer(REPOSITORY_AUTH, HELPER_CONTAINER_IMAGE_NAME, LAZY_VOLUME_NAME)
             .then((container) => {
                 //  Assume that the container has started correctly.
-                return new EmccEngine(NAME, LANGUAGES, container);
+                this._container = container;
+                return new EmccHelperContainer(container);
             });
+    }
+
+    _stopEngine() {
+        return HelperContainer.deleteContainer(this._container);
     }
 }
 
-const server = new EmccEngineHttpServer(NAME, process.env.PORT || 80);
-server.start();
+class EmccEngine
+{
+    start() {
+        const port = process.env.PORT || 80;
+        this._server = new EmccEngineHttpServer(port);
+        return this._server.start();
+    }
+
+    stop() {
+        this._server.stop();
+        this._server = null;
+    }
+}
+
+module.exports = EmccEngine;
