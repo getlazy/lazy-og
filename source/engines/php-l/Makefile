@@ -12,6 +12,16 @@ push:
 	docker push ierceg/lazy-php-l-engine:$(PACKAGE_VERSION)
 	docker push ierceg/lazy-php-l-engine:latest
 
+run:
+	docker run -it --rm \
+	    -v "$(shell pwd):/app" \
+	    -v "/var/run/docker.sock:/var/run/docker.sock" \
+	    -v "/tmp:/lazy" \
+		-e "LAZY_VOLUME_NAME=/tmp" \
+	    -w /app \
+	    ierceg/node-dev:6.9.1 \
+	    node /app/index.js
+
 test:
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \

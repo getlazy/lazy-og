@@ -1,12 +1,10 @@
 
 'use strict';
 
-const EngineHelpers = require('@lazyass/engine-helpers');
-global.logger = EngineHelpers.Logger.getEngineLogger();
-
 const _ = require('lodash');
 const H = require('higher');
 
+const EngineHelpers = require('@lazyass/engine-helpers');
 const HelperContainer = EngineHelpers.HelperContainer;
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
@@ -84,8 +82,10 @@ class Engine
     }
 
     stop() {
-        this._server.stop();
-        this._server = null;
+        return this._server.stop()
+            .then(() => {
+                this._server = null;
+            });
     }
 }
 
