@@ -11,21 +11,20 @@ const ClientGenerators = {
         //  Ignore the version for now.
         return {
             translateGrammarToLanguage: (grammar) => {
-                switch (grammar) {
-                    case 'JavaScript':
-                    case 'C++':
-                    case 'C':
-                    case 'Objective-C':
-                    case 'Objective-C++':
-                    case 'PHP':
-                    case 'HTML':
-                    case 'Java':
-                        return grammar;
-                    case 'Less':
-                    case 'SCSS':
-                        //  We use lower case for these languages.
-                        return _.toLower(grammar);
-                    case 'CSS':
+                const lowerCaseGrammar = _.toLower(grammar);
+                switch (lowerCaseGrammar) {
+                    case 'javascript':
+                    case 'c++':
+                    case 'c':
+                    case 'objective-c':
+                    case 'objective-c++':
+                    case 'php':
+                    case 'html':
+                    case 'java':
+                    case 'less':
+                    case 'scss':
+                        return lowerCaseGrammar;
+                    case 'css':
                         //  SCSS is a superset of CSS.
                         return 'scss';
                     default:
