@@ -1,6 +1,6 @@
 {
   "name": "lazy-tidy-html-engine",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "lazy engine serving requests to lint HTML with TidyHtml",
   "main": "lazy-tidy-html-engine.js",
   "scripts": {
@@ -24,11 +24,12 @@
   },
   "homepage": "https://github.com/SoftwareMarbles/lazy-tidy-html-engine#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^1.5.0",
-    "body-parser": "^1.15.2",
-    "express": "^4.14.0",
+    "@lazyass/engine-helpers": "^1.7.0",
     "higher": "^1.0.5",
     "lodash": "^4.17.2",
     "selectn": "^1.1.1"
+  },
+  "devDependencies": {
+    "request": "^2.79.0"
   }
 }

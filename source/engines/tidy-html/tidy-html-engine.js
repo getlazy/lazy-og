@@ -1,9 +1,6 @@
 
 'use strict';
 
-const EngineHelpers = require('@lazyass/engine-helpers');
-global.logger = EngineHelpers.Logger.getEngineLogger();
-
 //  TODO:
 //      * Add search for already existing helper engines
 //      * Add re-creation of helper engines when "protocol" version changes (like we do in
@@ -14,21 +11,24 @@ global.logger = EngineHelpers.Logger.getEngineLogger();
 const _ = require('lodash');
 const H = require('higher');
 
-const DockerizedEngine = EngineHelpers.DockerizedEngine;
+const EngineHelpers = require('@lazyass/engine-helpers');
+const HelperContainer = EngineHelpers.HelperContainer;
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
-const EngineHelperContainerCreator = EngineHelpers.EngineHelperContainerCreator;
 
-const LANGUAGES = ['HTML'];
-const NAME = 'tidy-html';
+const REPOSITORY_AUTH = JSON.parse(
+    H.unless(H.isNonEmptyString, '{}', process.env.LAZY_REPOSITORY_AUTH_JSON));
+
+const LAZY_VOLUME_NAME = process.env.LAZY_VOLUME_NAME;
+
 const HELPER_CONTAINER_IMAGE_NAME = 'ierceg/tidy-html:5.2.0';
 
-class TidyHtmlEngine extends DockerizedEngine
+class TidyHtmlHelperContainer extends HelperContainer
 {
     _getContainerCmd() {
         return ['tidy', '-eq'];
     }
 
-    _processEngineOutput(buffers) {
+    _processContainerOutput(buffers) {
         //  Convert all the resulting buffers into string and join them as
         //  our parser works on a single string will all the output lines.
         const output = _.map(buffers, (buffer) => {
@@ -62,13 +62,34 @@ class TidyHtmlEngine extends DockerizedEngine
 class TidyHtmlEngineHttpServer extends EngineHttpServer
 {
     _bootEngine() {
-        return EngineHelperContainerCreator.create(HELPER_CONTAINER_IMAGE_NAME)
+        return HelperContainer
+            .createContainer(REPOSITORY_AUTH, HELPER_CONTAINER_IMAGE_NAME, LAZY_VOLUME_NAME)
             .then((container) => {
                 //  Assume that the container has started correctly.
-                return new TidyHtmlEngine(NAME, LANGUAGES, container);
+                this._container = container;
+                return new TidyHtmlHelperContainer(container);
+            });
+    }
+
+    _stopEngine() {
+        return HelperContainer.deleteContainer(this._container);
+    }
+}
+
+class Engine
+{
+    start() {
+        const port = process.env.PORT || 80;
+        this._server = new TidyHtmlEngineHttpServer(port);
+        return this._server.start();
+    }
+
+    stop() {
+        return this._server.stop()
+            .then(() => {
+                this._server = null;
             });
     }
 }
 
-const server = new TidyHtmlEngineHttpServer(NAME, process.env.PORT || 80);
-server.start();
+module.exports = Engine;
