@@ -10,7 +10,7 @@ const start = () => {
     }
     alreadyStarted = true;
 
-    return Main.main()
+    return Main.main(__dirname + '/lazy-test.yaml')
         .then(() => {
             logger.info('`lazy-stack` initialized (TEST)');
         })
@@ -20,4 +20,11 @@ const start = () => {
         });
 };
 
-module.exports = start;
+const stop = () => {
+    return Main.stop();
+};
+
+module.exports = {
+    start: start,
+    stop: stop
+};
