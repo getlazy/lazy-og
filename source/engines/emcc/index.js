@@ -29,5 +29,3 @@ process.on('SIGTERM', () => {
             process.exit(-1);
         });
 });
-
-setTimeout(() => {}, 100000);
