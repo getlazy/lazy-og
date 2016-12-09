@@ -1,12 +1,10 @@
 
 'use strict';
 
-const EngineHelpers = require('@lazyass/engine-helpers');
-global.logger = EngineHelpers.Logger.getEngineLogger();
-
 const _ = require('lodash');
 const H = require('higher');
 
+const EngineHelpers = require('@lazyass/engine-helpers');
 const HelperContainer = EngineHelpers.HelperContainer;
 const AdaptedAtomLinter = EngineHelpers.AdaptedAtomLinter;
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
@@ -73,7 +71,7 @@ class EmccEngineHttpServer extends EngineHttpServer
     }
 }
 
-class EmccEngine
+class Engine
 {
     start() {
         const port = process.env.PORT || 80;
@@ -82,9 +80,11 @@ class EmccEngine
     }
 
     stop() {
-        this._server.stop();
-        this._server = null;
+        return this._server.stop()
+            .then(() => {
+                this._server = null;
+            });
     }
 }
 
-module.exports = EmccEngine;
+module.exports = Engine;

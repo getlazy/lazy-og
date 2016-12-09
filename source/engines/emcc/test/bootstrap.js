@@ -1,14 +1,17 @@
 
 'use strict';
 
-const EmccEngine = require('../emcc-engine');
-const emccEngine = new EmccEngine();
+const EngineHelpers = require('@lazyass/engine-helpers');
+global.logger = EngineHelpers.Logger.getEngineLogger();
+
+const Engine = require('../emcc-engine');
+const engine = new Engine();
 
 module.exports = {
     start: () => {
-        return emccEngine.start();
+        return engine.start();
     },
     stop: () => {
-        return emccEngine.stop();
+        return engine.stop();
     }
 };
