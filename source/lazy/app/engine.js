@@ -4,6 +4,7 @@
 const _ = require('lodash');
 const url = require('url');
 const request = require('request');
+const async = require('async');
 const HigherDockerManager = require('@lazyass/higher-docker-manager');
 
 /**
@@ -53,10 +54,45 @@ class Engine
                     protocol: 'http',
                     host: containerStatus.Config.Hostname
                 });
+            })
+            .then(() => {
+                return self._waitEngine();
             });
     }
 
-    // lazy next -jsdoc-no-return - TODO: Make lazy understand this and turn off the warning.
+    status() {
+        const self = this;
+
+        const requestParams = {
+            method: 'GET',
+            url: self._engineUrl + '/status',
+            json: true,
+            headers: {
+                'Accept': 'application/json'
+            }
+        };
+
+        return new Promise((resolve, reject) => {
+            request(requestParams, (err, response, body) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                if (response.statusCode !== 200) {
+                    let message = 'HTTP engine failed with ' + response.statusCode +
+                        ' status code';
+                    if (body && body.error) {
+                        message += ' (' + body.error + ')';
+                    }
+
+                    return reject(new Error(message));
+                }
+
+                resolve(body);
+            });
+        });
+    }
+
     /**
      * Analyzes the given file content for the given language and analysis configuration.
      * This method must be overriden by the inheriting classes.
@@ -150,6 +186,51 @@ class Engine
                     'Error while setting up streaming of logs for engine', self.name);
                 //  We don't pass the error as streaming of logs is non-critical.
             });
+    }
+
+    _waitEngine() {
+        const self = this;
+
+        //  When multiplied these two numbers give the timeout duration.
+        const ARBITRARY_MAX_NUMBER_OF_STATUS_REQUESTS = 30;
+        const ARBITRARY_DELAY_BETWEEN_REQUESTS_MS = 1000;
+
+        return new Promise((resolve, reject) => {
+            //  Request engine status until it starts working or times out.
+            let healthyStatus = false;
+            let requestCounter = 0;
+            async.doWhilst(
+                (next) => {
+                    self.status()
+                        .then(() => {
+                            //  We received an error-less status so assume everything is fine.
+                            healthyStatus = true;
+                            next();
+                        })
+                        .catch(() => {
+                            //  Increment the request counter and wait a bit until trying again.
+                            ++requestCounter;
+                            setTimeout(next, ARBITRARY_DELAY_BETWEEN_REQUESTS_MS);
+                        });
+                },
+                () => {
+                    //  Continue until we receive a healthy status or the max number of requests
+                    //  is reached.
+                    return !healthyStatus &&
+                        requestCounter < ARBITRARY_MAX_NUMBER_OF_STATUS_REQUESTS;
+                },
+                (err) => {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    if (requestCounter === ARBITRARY_MAX_NUMBER_OF_STATUS_REQUESTS) {
+                        return reject(new Error('Engine ' + self.name + ' timed out.'));
+                    }
+
+                    resolve();
+                });
+        });
     }
 }
 
