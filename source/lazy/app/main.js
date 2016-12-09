@@ -34,18 +34,40 @@ class Main
      * and then starting Express HTTP server.
      * @return {Promise} Promise which is resolved when the application has started.
      */
-    static main() {
-        logger.info('Booting lazy-engines-stack');
+    static main(lazyYamlFilePath) {
+        logger.info('Booting lazy');
 
-        return Main._recreateAllEngines()
+        return Main._recreateAllEngines(lazyYamlFilePath || (__dirname + '/../lazy.yaml'))
             .then(Main._populateLanguagesToEngines)
-            .then(Main._initializeExpressApp);
+            .then(Main._initializeExpressApp)
+            .catch((err) => {
+                logger.error('Failed to boot lazy', err);
+                return engineManager.stop()
+                    .then(() => {
+                        process.exit(-1);
+                    })
+                    .catch((err) => {
+                        logger.error('Failed to cleanup after lazy', err);
+                        process.exit(-1);
+                    });
+            });
+    }
+
+    static stop() {
+        return engineManager.stop();
     }
 
     static _initializeExpressApp() {
         return new Promise((resolve) => {
             app = express();
             app.use(bodyParser.json());
+
+            app.get('/version', (req, res) => {
+                res.send({
+                    service: require('../package.json').version,
+                    api: 'v20161128'
+                });
+            });
 
             app.get('/info', (req, res) => {
                 res.send({
@@ -201,8 +223,8 @@ class Main
         return engines;
     }
 
-    static _recreateAllEngines() {
-        return LazyYamlFile.load(__dirname + '/../lazy.yaml')
+    static _recreateAllEngines(lazyYamlFilePath) {
+        return LazyYamlFile.load(lazyYamlFilePath)
             .then((lazyConfig) => {
                 engineManager = new EngineManager(lazyConfig);
                 return engineManager.start();

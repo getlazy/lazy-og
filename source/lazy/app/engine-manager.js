@@ -26,6 +26,12 @@ class EngineManager
         this._volume = null;
     }
 
+    stop() {
+        const self = this;
+
+        return self._deleteAllEngines();
+    }
+
     start() {
         //  1.  Check if lazy's network exists (unique ID read from envvars)
         //  1a. If the network exists, delete *all* containers within it.
@@ -78,7 +84,10 @@ class EngineManager
                 const createEngineParams = {
                     Image: imageName,
                     Cmd: engineConfig.command ? engineConfig.command.split(' ') : undefined,
-                    Env: engineConfig.env,
+                    Env: _.union(engineConfig.env, [
+                        'LAZY_VOLUME_NAME=' + self._volume.Name,
+                        'LAZY_VOLUME_MOUNT=/lazy'
+                    ]),
                     HostConfig: {
                         //  When networking mode is a name of another network it's
                         //  automatically attached.
@@ -87,7 +96,10 @@ class EngineManager
                         Binds: _.union(engineConfig.volumes, [
                             //  Bind the docker socket so that we can access host Docker
                             //  from the engine and launch helper containers.
-                            '/var/run/docker.sock:/var/run/docker.sock'
+                            '/var/run/docker.sock:/var/run/docker.sock',
+                            //  HACK: We hard-code the stack volume mount path to /lazy which is
+                            //  known to all containers.
+                            self._volume.Name + ':/lazy'
                         ]),
                         RestartPolicy: {
                             Name: 'unless-stopped'
@@ -105,7 +117,11 @@ class EngineManager
                         engineImage.Config.Labels[Label.IoLazyassLazyEngineLanguages];
                 }
 
-                logger.info('Creating engine', engineName, 'on network', self._network.Name);
+                logger.info('Creating engine', {
+                    engine: engineName,
+                    network: self._network.Name,
+                    volume: self._volume.Name
+                });
                 return HigherDockerManager.createContainer(createEngineParams);
             })
             .then((engineContainer) => {
@@ -189,12 +205,12 @@ class EngineManager
         return HigherDockerManager.getContainersInNetworks([self._network.Name])
             .then((containers) => {
                 return Promise.all(_.map(containers, (container) => {
+                    logger.info('Stopping/waiting/deleting engine container',
+                        _.first(container.Names));
                     if (container.id === self._container.id) {
                         return Promise.resolve();
                     }
 
-                    logger.info('Stopping/waiting/deleting engine container',
-                        _.first(container.Names));
                     return container.stop()
                         .then(() => {
                             return container.wait();
