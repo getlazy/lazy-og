@@ -5,6 +5,7 @@ const _ = require('lodash');
 const tmp = require('tmp');
 const fs = require('fs');
 const path = require('path');
+const selectn = require('selectn');
 
 const HigherDockerManager = require('@lazyass/higher-docker-manager');
 
@@ -21,12 +22,15 @@ class HelperContainer
      * Creates helper container for the given image name. This function will pull the image:tag,
      * create the container, start it and finally return HelperContainer instances constructed
      * with the container.
+     * @param {Object} auth Authentication structure per Docker API documentation
      * @param {string} imageName Name of Docker image (including the optional tag) for which
      * helper container should be created.
+     * @param {string} lazyVolumeName Name of Docker volume (or host path when testing) on which
+     * to bind `/lazy` dir.
      * @return {Promise} Promise resolving with a new instance of HelperContainer.
      */
-    static create(imageName) {
-        return HigherDockerManager.pullImage(imageName)
+    static createContainer(auth, imageName, lazyVolumeName) {
+        return HigherDockerManager.pullImage(auth, imageName)
             .then(() => {
                 return HigherDockerManager.getOwnContainer();
             })
@@ -44,7 +48,6 @@ class HelperContainer
                     //  without starting/stopping or creating/starting/stopping temporary containers
                     Entrypoint: 'tail',
                     Cmd: '-f /dev/null'.split(' '),
-                    VolumesFrom: [_.trimStart(_.first(engineContainer.Names), '/')],
                     HostConfig: {
                         //  When networking mode is a name of another network it's
                         //  automatically attached.
@@ -52,7 +55,7 @@ class HelperContainer
                         Binds: [
                             //  HACK: We hard-code the stack volume mount path to /lazy which is
                             //  known to all containers.
-                            process.env.LAZY_VOLUME_NAME + ':/lazy'
+                            lazyVolumeName + ':/lazy'
                         ],
                         RestartPolicy: {
                             Name: 'unless-stopped'
@@ -67,9 +70,16 @@ class HelperContainer
             })
             .then((container) => {
                 return container.start();
+            });
+    }
+
+    static deleteContainer(container) {
+        return container.stop()
+            .then(() => {
+                return container.wait();
             })
-            .then((container) => {
-                return new HelperContainer(container);
+            .then(() => {
+                return container.delete();
             });
     }
 
