@@ -62,10 +62,6 @@ class StylelintEngine
     }
 }
 
-//  Use the standard config to lint the incoming content.
-const lint = (language, content) => {
-};
-
 class StylelintEngineHttpServer extends EngineHttpServer
 {
     _bootEngine() {
