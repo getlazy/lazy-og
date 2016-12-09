@@ -13,10 +13,8 @@ const ASSERT_FALSE = (data) => {
 const ANALYZE_FILE_FIXTURE = [{
     name: '200 - HTML',
     params: {
-        client: 'atom',
-        stackId: '0',
         path: '/src/test.html',
-        grammar: 'HTML',
+        language: 'HTML',
         content:
 `
 <html>
@@ -64,7 +62,8 @@ describe('TidyHtmlEngineHttpServer', function() {
                     },
                     body: {
                         clientPath: params.path,
-                        content: params.content
+                        content: params.content,
+                        language: params.language
                     }
                 };
 
