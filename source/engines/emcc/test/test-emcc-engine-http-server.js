@@ -13,10 +13,8 @@ const ASSERT_FALSE = (data) => {
 const ANALYZE_FILE_FIXTURE = [{
     name: '200 - C++',
     params: {
-        client: 'atom',
-        stackId: '0',
         path: '/src/test.cpp',
-        grammar: 'C++',
+        language: 'C++',
         content:
 `
 #include <vector>
@@ -43,10 +41,8 @@ int main() {
 }, {
     name: '200 - C',
     params: {
-        client: 'atom',
-        stackId: '0',
         path: '/src/test.c',
-        grammar: 'C',
+        language: 'C',
         content:
 `
 int main() {
@@ -96,7 +92,8 @@ describe('EmccEngineHttpServer', function() {
                     },
                     body: {
                         clientPath: params.path,
-                        content: params.content
+                        content: params.content,
+                        language: params.language
                     }
                 };
 
