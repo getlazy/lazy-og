@@ -4,10 +4,10 @@
 const Main = require('./app/main.js');
 Main.main()
     .then(() => {
-        logger.info('`lazy-stack` initialized');
+        logger.info('lazy initialized');
     })
     .catch((err) => {
-        logger.error('Failed to initialize `lazy-stack`', err);
+        logger.error('Failed to initialize lazy', err);
         process.exit(-1);
     });
 

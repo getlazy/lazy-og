@@ -173,7 +173,7 @@ class Main
 
             const port = process.env.PORT || 80;
             app.listen(port, () => {
-                logger.info('`lazy-stack` listening on', port);
+                logger.info('lazy listening on', port);
                 resolve();
             });
 

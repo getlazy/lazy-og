@@ -12,10 +12,10 @@ const start = () => {
 
     return Main.main(__dirname + '/lazy-test.yaml')
         .then(() => {
-            logger.info('`lazy-stack` initialized (TEST)');
+            logger.info('lazy initialized (TEST)');
         })
         .catch((err) => {
-            logger.error('Failed to initialize `lazy-stack` (TEST)', err);
+            logger.error('Failed to initialize lazy (TEST)', err);
             process.exit(-1);
         });
 };
