@@ -13,10 +13,8 @@ const ASSERT_FALSE = (data) => {
 const ANALYZE_FILE_FIXTURE = [{
     name: '200 - Java',
     params: {
-        client: 'atom',
-        stackId: '0',
         path: '/src/test.java',
-        grammar: 'Java',
+        language: 'Java',
         content:
 `
 import hoho.bubu;
@@ -62,7 +60,8 @@ describe('PmdJavaEngineHttpServer', function() {
                     },
                     body: {
                         clientPath: params.path,
-                        content: params.content
+                        content: params.content,
+                        language: params.language
                     }
                 };
 
