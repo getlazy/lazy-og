@@ -1,14 +1,14 @@
 {
-  "name": "lazy-engines-stack",
-  "version": "1.0.3",
-  "description": "Manager of stack of lazy engines",
+  "name": "lazy",
+  "version": "1.1.0",
+  "description": "Hackbable coding assistant",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SoftwareMarbles/lazy-engines-stack.git"
+    "url": "git+https://github.com/SoftwareMarbles/lazy.git"
   },
   "keywords": [
     "lazy",
@@ -18,17 +18,18 @@
   "author": "Ivan Erceg",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SoftwareMarbles/lazy-engines-stack/issues"
+    "url": "https://github.com/SoftwareMarbles/lazy/issues"
   },
-  "homepage": "https://github.com/SoftwareMarbles/lazy-engines-stack#readme",
+  "homepage": "https://github.com/SoftwareMarbles/lazy#readme",
   "dependencies": {
-    "@lazyass/higher-docker-manager": "^1.3.0",
     "@lazyass/engine-helpers": "^1.2.1",
+    "@lazyass/higher-docker-manager": "^1.4.0",
     "async": "^2.1.4",
     "body-parser": "^1.15.2",
     "enforce-envvars": "^1.1.0",
     "express": "^4.14.0",
     "higher": "^1.0.5",
+    "js-yaml": "^3.7.0",
     "lodash": "^4.17.2",
     "request": "^2.79.0",
     "require-all": "^2.0.0",
