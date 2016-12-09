@@ -27,5 +27,5 @@ process.on('SIGTERM', () => {
         .catch((err) => {
             logger.error('Error occurred during stopping', err);
             process.exit(-1);
-        })
+        });
 });
