@@ -5,6 +5,7 @@
 .vscode
 
 test
+coverage
 node_modules
 
 Dockerfile
@@ -12,3 +13,7 @@ Makefile
 README.md
 
 envvars*
+
+lazy
+lazyd
+lazy-dev

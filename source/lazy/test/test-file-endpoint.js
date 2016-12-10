@@ -326,7 +326,7 @@ describe('/file', function() {
             _.each(onlyFixtures, (fixture) => {
                 let params = fixture.params;
                 it(fixture.name, function(done) {
-                    let client = new LazyClient(lazyUrl, params.client, params.stackId);
+                    let client = new LazyClient(lazyUrl, params.client);
                     client.analyzeFile(params.content, params.path, params.grammar)
                         .then(fixture.then)
                         .catch(fixture.catch)
