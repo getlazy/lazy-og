@@ -14,7 +14,6 @@ class ClientFactory
 
         self._clients = {};
         _.each(clients, (client) => {
-            console.log(client.version);
             self._clients[client.version] = client;
         });
     }

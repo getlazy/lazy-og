@@ -6,7 +6,7 @@ const request = require('request');
 const os = require('os');
 const errors = require('common-errors');
 
-const VERSION = 'v20161128';
+const LAZY_API_VERSION = 'v20161128';
 
 /**
  * Client for lazy API v20161128.
@@ -17,7 +17,7 @@ class LazyClientv20161128 extends LazyClient
      * Returns the lazy API version with which this client works.
      */
     static get version() {
-        return VERSION;
+        return LAZY_API_VERSION;
     }
 
     /**
@@ -32,15 +32,15 @@ class LazyClientv20161128 extends LazyClient
         super();
         this._serviceUrl = serviceUrl;
         this._client = client;
-        this._host = host || os.hostname();
         this._stackId = stackId;
+        this._host = host || os.hostname();
     }
 
     /**
      * Analyzes the given file content for the given language.
      * @param {string} content Content of the source file requesting lazy to analyze.
      * @param {string} path Path of the source file requesting lazy to analyze.
-     * @param {grammar} grammar Atom grammar of the source file.
+     * @param {string} grammar Atom grammar of the source file.
      * @return {Promise} Promise resolving with results of the file analysis.
      */
     analyzeFile(content, path, grammar) {
@@ -52,7 +52,7 @@ class LazyClientv20161128 extends LazyClient
             json: true,
             headers: {
                 'Accept': 'application/json',
-                'X-LazyClient-Version': VERSION
+                'X-LazyClient-Version': LAZY_API_VERSION
             },
             body: {
                 stackId: self._stackId,
