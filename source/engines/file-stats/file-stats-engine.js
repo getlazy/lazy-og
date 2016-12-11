@@ -12,16 +12,17 @@ class FileStatsEngine
 {
     /**
      * Analyzes the given file content for the given language and analysis configuration.
-     * @param {string} content Content of the source file requesting lazy to analyze.
-     * @param {string} clientPath Path of the source file requesting lazy to analyze.
+     * @param {string} host Name of the host requesting file analysis.
+     * @param {string} hostPath Path of the source file requesting lazy to analyze.
      * @param {string} language Language of the source file.
+     * @param {string} content Content of the source file requesting lazy to analyze.
      * @param {string} config Name of the configuration to use.
      * @return {Promise} Promise resolving with results of the file analysis.
      */
-    analyzeFile(content, clientPath, language, config) {
+    analyzeFile(host, hostPath, language, content, config) {
         //  We use a promise as we get any exceptions wrapped up as failures.
         return new Promise((resolve) => {
-            const fileKey = 'file-' + clientPath;
+            const fileKey = 'file|' + host + '|' + hostPath;
             let fileStats = quoteUnquoteDatabase[fileKey];
             if (_.isUndefined(fileStats)) {
                 fileStats = {
@@ -32,7 +33,7 @@ class FileStatsEngine
             ++fileStats.analysisCounter;
             quoteUnquoteDatabase[fileKey] = fileStats;
 
-            const languageKey = 'language-' + language;
+            const languageKey = 'language|' + language;
             let languageStats = quoteUnquoteDatabase[languageKey];
             if (_.isUndefined(languageStats)) {
                 languageStats = {
