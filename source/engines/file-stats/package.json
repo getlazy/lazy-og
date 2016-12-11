@@ -1,0 +1,25 @@
+{
+  "name": "lazy-file-stats-engine",
+  "version": "1.0.0",
+  "description": "lazy engine tracking file editing and other statistics",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SoftwareMarbles/lazy-file-stats-engine.git"
+  },
+  "keywords": [
+    "lazy",
+    "engine",
+    "file",
+    "statistics"
+  ],
+  "author": "Ivan Erceg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SoftwareMarbles/lazy-file-stats-engine/issues"
+  },
+  "homepage": "https://github.com/SoftwareMarbles/lazy-file-stats-engine#readme"
+}
