@@ -47,7 +47,7 @@ class EngineHttpServer
             }
 
             //  Send service unavailable with an arbitrary length of Retry-After header.
-            //  This allows our running stack to gracefully handle the case.
+            //  This allows lazy service running this engine to gracefully handle the case.
             const ARBITRARY_SERVICE_UNAVAILABLE_RETRY_AFTER = 5/* seconds */;
             res.setHeader('Retry-After', ARBITRARY_SERVICE_UNAVAILABLE_RETRY_AFTER);
             res.sendStatus(503);

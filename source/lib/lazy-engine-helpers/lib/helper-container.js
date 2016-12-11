@@ -53,7 +53,7 @@ class HelperContainer
                         //  automatically attached.
                         NetworkMode: engineNetworkName,
                         Binds: [
-                            //  HACK: We hard-code the stack volume mount path to /lazy which is
+                            //  HACK: We hard-code the volume mount path to /lazy which is
                             //  known to all containers.
                             lazyVolumeName + ':/lazy'
                         ],
@@ -61,7 +61,7 @@ class HelperContainer
                             Name: 'unless-stopped'
                         }
                     },
-                    //  HACK: We hard-code the stack volume mount path to /lazy which is known to
+                    //  HACK: We hard-code the volume mount path to /lazy which is known to
                     //  all containers.
                     WorkingDir: '/lazy'
                 };
@@ -104,7 +104,7 @@ class HelperContainer
     _createTempFileWithContent(content, clientPath) {
         return new Promise((resolve, reject) => {
             tmp.file({
-                //  HACK: We hard-code the stack volume mount path to /lazy which is known to all
+                //  HACK: We hard-code the volume mount path to /lazy which is known to all
                 //  containers.
                 dir: '/lazy',
                 prefix: 'lazy-temp-content-',
@@ -184,7 +184,7 @@ class HelperContainer
                     execParams.Cmd = self._getContainerCmd();
                 }
 
-                //  HACK: We hard-code the stack volume mount path to /lazy which is known to
+                //  HACK: We hard-code the volume mount path to /lazy which is known to
                 //  all containers.
                 //  HACK: We always add the path to file as last argument.
                 if (!_.isArray(execParams.Cmd)) {
