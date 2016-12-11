@@ -1,12 +1,26 @@
 
 'use strict';
 
-const _ = require('lodash');
+const low = require('lowdb');
+const fs = require('fs');
 
 const EngineHelpers = require('@lazyass/engine-helpers');
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
-const quoteUnquoteDatabase = {};
+//  Create directory for our json database.
+if (!fs.existsSync('/lazy/file-stats-engine')) {
+    fs.mkdirSync('/lazy/file-stats-engine');
+}
+
+const db = low('/lazy/file-stats-engine/stats.json', {
+    storage: require('lowdb/lib/file-async')
+});
+
+//  Create the schema.
+db.defaults({
+    AnalyzeFileEvent: []
+})
+    .value();
 
 class FileStatsEngine
 {
@@ -22,33 +36,17 @@ class FileStatsEngine
     analyzeFile(host, hostPath, language, content, config) {
         //  We use a promise as we get any exceptions wrapped up as failures.
         return new Promise((resolve) => {
-            const fileKey = 'file|' + host + '|' + hostPath;
-            let fileStats = quoteUnquoteDatabase[fileKey];
-            if (_.isUndefined(fileStats)) {
-                fileStats = {
-                    analysisCounter: 0
-                };
-            }
+            //  We capture the events and then later extract the stats on-demand.
+            db.get('AnalyzeFileEvent')
+                .push({
+                    time: Date.now(),
+                    host: host,
+                    hostPath: hostPath,
+                    language: language
+                })
+                .value();
 
-            ++fileStats.analysisCounter;
-            quoteUnquoteDatabase[fileKey] = fileStats;
-
-            const languageKey = 'language|' + language;
-            let languageStats = quoteUnquoteDatabase[languageKey];
-            if (_.isUndefined(languageStats)) {
-                languageStats = {
-                    analysisCounter: 0
-                };
-            }
-
-            ++languageStats.analysisCounter;
-            quoteUnquoteDatabase[languageKey] = languageStats;
-
-            logger.warn('quoteUnquoteDatabase', JSON.stringify(quoteUnquoteDatabase, null, 4));
-
-            resolve({
-                stats: fileStats
-            });
+            resolve({});
         });
     }
 }
