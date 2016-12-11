@@ -81,8 +81,6 @@ class Main
             });
 
             app.post('/file', (req, res) => {
-                const start = new Date();
-
                 let grammar = selectn('body.grammar', req);
                 if (_.isEmpty(grammar)) {
                     return res.status(400).send();
@@ -115,22 +113,21 @@ class Main
                     let firstError = null;
 
                     //  Analyze the content in all the engines and merge all their warnings.
-                    const enginesForLanguage = languagesToEnginesMap[language];
-                    logger.info('Starting file analysis', {
-                        language: language,
-                        host: host,
-                        path: path
-                    });
+                    const enginesForLanguage = _.union(languagesToEnginesMap[language],
+                        allLanguagesEngines);
 
                     async.each(enginesForLanguage, (engine, next) => {
-                        engine.analyzeFile(content, path, language)
+                        engine.analyzeFile(host, path, language, content)
                             .then((engineResults) => {
                                 allEnginesResults = _.extend(allEnginesResults, engineResults);
                                 next();
                             })
                             .catch((err) => {
                                 logger.error(
-                                    'File analysis failed for', engine.name, 'engine', err);
+                                    'File analysis failed', {
+                                        engine: engine.name,
+                                        err: err
+                                    });
                                 if (_.isNull(firstError)) {
                                     //  Store the first error to report it no other engine works
                                     //  either.
@@ -141,31 +138,20 @@ class Main
                             });
                     }, (err) => {
                         if (err) {
-                            logger.err('File analysis failed', err);
                             return res.status(500).send({
                                 error: err && err.message
                             });
                         }
 
                         if (_.isEmpty(allEnginesResults.warnings) && !_.isNull(firstError)) {
-                            logger.info('File analysis failed', firstError);
                             return res.status(500).send({
                                 error: firstError && firstError.message
                             });
                         }
 
                         if (_.isEmpty(enginesForLanguage)) {
-                            logger.warn('No engines registered for', language);
+                            logger.warn('No engines registered', {language: language});
                         }
-
-                        const end = new Date();
-                        logger.info('File analysis done', {
-                            language: language,
-                            warnings: selectn('warnings.length', allEnginesResults),
-                            duration: (end - start),
-                            host: host,
-                            path: path
-                        });
 
                         res.send(allEnginesResults);
                     });
