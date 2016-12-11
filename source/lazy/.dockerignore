@@ -17,3 +17,6 @@ envvars*
 lazy
 lazyd
 lazy-dev
+
+# Ignore local lazy.yaml - we will copy the production one when building the image.
+lazy.yaml

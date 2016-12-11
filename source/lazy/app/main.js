@@ -42,18 +42,22 @@ class Main
             .then(Main._initializeExpressApp)
             .catch((err) => {
                 logger.error('Failed to boot lazy', err);
-                return engineManager.stop()
+                return Main.stop()
                     .then(() => {
                         process.exit(-1);
                     })
                     .catch((err) => {
                         logger.error('Failed to cleanup after lazy', err);
-                        process.exit(-1);
+                        process.exit(-2);
                     });
             });
     }
 
     static stop() {
+        if (!engineManager) {
+            return Promise.resolve();
+        }
+
         return engineManager.stop();
     }
 
