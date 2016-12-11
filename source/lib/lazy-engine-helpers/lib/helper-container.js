@@ -95,21 +95,21 @@ class HelperContainer
      * Creates temporary file in `/lazy` directory which is (HACK) is mounted to a known shared
      * volume.
      * @param {string} content Content of the file to analyze.
-     * @param {string} clientPath Path of the file on the client, used to extract the extension
+     * @param {string} hostPath Path of the file on the client, used to extract the extension
      * so that temporary file and original file share it. This is useful to engines that analyze
      * file extension to know which grammar to use in the analysis.
      * @return {Promise} Promise resolving with information on the temporary file.
      * @private
      */
-    _createTempFileWithContent(content, clientPath) {
+    _createTempFileWithContent(content, hostPath) {
         return new Promise((resolve, reject) => {
             tmp.file({
                 //  HACK: We hard-code the volume mount path to /lazy which is known to all
                 //  containers.
-                dir: '/lazy',
+                dir: '/lazy/tmp',
                 prefix: 'lazy-temp-content-',
                 //  Use the real extension to allow engine to discern between different grammars.
-                postfix: path.extname(clientPath)
+                postfix: path.extname(hostPath)
             }, (err, tempFilePath, fd, cleanupCallback) => {
                 if (err) {
                     return reject(err);
@@ -153,12 +153,12 @@ class HelperContainer
     /**
      * Analyzes the given file content for the given language and analysis configuration.
      * @param {string} content Content of the source file requesting lazy to analyze.
-     * @param {string} clientPath Path of the source file requesting lazy to analyze.
+     * @param {string} hostPath Path of the source file requesting lazy to analyze.
      * @param {string} language Language of the source file.
      * @param {string} config Name of the configuration to use.
      * @return {Promise} Promise resolving with results of the file analysis.
      */
-    analyzeFile(content, clientPath, language, config) {
+    analyzeFile(content, hostPath, language, config) {
         const self = this;
 
         let temporaryFileInfo;
@@ -167,7 +167,7 @@ class HelperContainer
         //  temporary directory of engine container. Volume of the engine container
         //  is shared with helper container and can thus be read by it.
         //  TODO: unhack temporary directory thingamajig
-        return self._createTempFileWithContent(content, clientPath)
+        return self._createTempFileWithContent(content, hostPath)
             .then((fileInfo) => {
                 temporaryFileInfo = fileInfo;
 
@@ -203,7 +203,7 @@ class HelperContainer
                     //  the temporary one we used.
                     results.warnings = _.map(results.warnings, (warning) => {
                         return _.extend(warning, {
-                            filePath: clientPath
+                            filePath: hostPath
                         });
                     });
                 }

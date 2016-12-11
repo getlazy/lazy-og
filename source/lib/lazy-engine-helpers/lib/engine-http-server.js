@@ -64,12 +64,13 @@ class EngineHttpServer
         //  we are receiving in lazy service as language most notably needs to be translated from
         //  the client values into common values.
         app.post('/file', (req, res) => {
-            const content = selectn('body.content', req);
-            const clientPath = selectn('body.clientPath', req);
+            const host = selectn('body.host', req);
+            const hostPath = selectn('body.hostPath', req);
             const language = selectn('body.language', req);
+            const content = selectn('body.content', req);
             const config = selectn('body.config', req);
 
-            self._engine.analyzeFile(content, clientPath, language, config)
+            self._engine.analyzeFile(host, hostPath, language, content, config)
                 .then((results) => {
                     res.send(results);
                 })
