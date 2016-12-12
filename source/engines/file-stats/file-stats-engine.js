@@ -57,6 +57,28 @@ class EslintEngineHttpServer extends EngineHttpServer
         return Promise.resolve(new FileStatsEngine());
     }
 
+    _customizeExpressApp(app) {
+        logger.warn('customizing');
+        app.get('/stats', (req, res) => {
+            const stats = db.get('AnalyzeFileEvent')
+                .reduce((stats, event) => {
+                    ++stats.requests;
+                    stats.requestsPerLanguage[event.language] =
+                        (stats.requestsPerLanguage[event.language] + 1) || 1;
+                    stats.requestsPerPath[event.hostPath] =
+                        (stats.requestsPerPath[event.hostPath] + 1) || 1;
+                    return stats;
+                }, {
+                    requests: 0,
+                    requestsPerLanguage: {},
+                    requestsPerPath: {}
+                })
+                .value();
+
+            res.send(stats);
+        });
+    }
+
     _stopEngine() {
         return Promise.resolve();
     }

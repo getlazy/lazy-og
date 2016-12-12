@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/SoftwareMarbles/lazy-file-stats-engine#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^1.9.0",
+    "@lazyass/engine-helpers": "^1.10.0",
     "lodash": "^4.17.2",
     "lowdb": "^0.14.0"
   }
