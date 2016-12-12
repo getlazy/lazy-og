@@ -7,9 +7,9 @@ const bodyParser = require('body-parser');
 const selectn = require('selectn');
 
 /**
- * Base class for lazy engine HTTP servers.
+ * Base class for lazy engine HTTP servers implemented with Express.JS.
  * Parameters of the engine are delegated to inheriting classes through a set of methods that
- * they need to implement. Those methods are: `_bootEngine`, `_stopEngine`.
+ * they need to implement. Those methods are: `_bootEngine`, `_customizeExpressApp` `_stopEngine`.
  */
 class EngineHttpServer
 {
@@ -81,6 +81,10 @@ class EngineHttpServer
                     });
                 });
         });
+
+        if (_.isFunction(self._customizeExpressApp)) {
+            self._customizeExpressApp(app);
+        }
 
         //  Capture the HTTP server instance so that we can shut it down on `stop()`.
         this._httpServer = app.listen(self._port, () => {
