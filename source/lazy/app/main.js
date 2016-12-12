@@ -10,6 +10,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const async = require('async');
 const selectn = require('selectn');
+const url = require('url');
 
 const EngineManager = require('./engine-manager');
 const LazyYamlFile = require('./lazy-yaml-file');
@@ -159,6 +160,25 @@ class Main
                     logger.error('Exception during file analysis', e);
                     res.status(500).send({error: e && e.message});
                 }
+            });
+
+            app.all('/engine/:engineName/*', (req, res) => {
+                const engineName = _.toLower(req.params.engineName);
+                const engine = namesToEnginesMap[engineName];
+
+                if (_.isUndefined(engine)) {
+                    return res.status(404).send({
+                        err: 'Engine ' + req.params.engineName + ' not found'
+                    });
+                }
+
+                //  Extract the requested engine URL path.
+                const originalUrl = url.parse(req.originalUrl);
+                const engineUrlPath = originalUrl && originalUrl.path &&
+                    originalUrl.path.slice(('/engine/' + req.params.engineName).length);
+
+                //  Pass the request to engine and pass back the response.
+                engine.passthroughRequest(req, res, engineUrlPath);
             });
 
             const port = process.env.PORT || 80;

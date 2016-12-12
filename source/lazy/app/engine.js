@@ -159,6 +159,20 @@ class Engine
             });
     }
 
+    /**
+     * Pass through the HTTP request to engine and pass back its response. This allows clients to
+     * directly communicate with engines.
+     * @param {Object} req Express request object.
+     * @param {Object} res Express response object.
+     * @param {string} engineUrlPath Path on the engine server that is being requested directly.
+     */
+    passthroughRequest(req, res, engineUrlPath) {
+        const self = this;
+
+        //  Pipe the request to engine and then pipe back the response.
+        req.pipe(request[_.toLower(req.method)](self._engineUrl + engineUrlPath)).pipe(res);
+    }
+
     _redirectContainerLogsToLogger() {
         const self = this;
 
