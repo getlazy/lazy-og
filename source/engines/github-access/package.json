@@ -1,0 +1,24 @@
+{
+  "name": "lazy-github-access-engine",
+  "version": "1.0.0",
+  "description": "lazy engine allowing lazy to access user's GitHub data",
+  "main": "index.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SoftwareMarbles/lazy-github-access-engine.git"
+  },
+  "keywords": [
+    "lazy",
+    "engine",
+    "GitHub"
+  ],
+  "author": "Ivan Erceg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SoftwareMarbles/lazy-github-access-engine/issues"
+  },
+  "homepage": "https://github.com/SoftwareMarbles/lazy-github-access-engine#readme"
+}
