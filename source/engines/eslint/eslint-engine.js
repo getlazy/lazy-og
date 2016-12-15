@@ -10,7 +10,8 @@ const EngineHttpServer = EngineHelpers.EngineHttpServer;
 class EslintEngine
 {
     constructor() {
-        this._eslint = require('eslint');
+        var CLIEngine = require("eslint").CLIEngine;
+        
         //  Extend the google config with custom options.
         this._eslintConfigGoogle = _.extend(require('eslint-config-google'), {
             envs: ['node', 'es6'],
@@ -40,6 +41,17 @@ class EslintEngine
             'no-undefined': 2,
             'no-use-before-define': 2
         });
+
+        this._cli = new CLIEngine({
+            envs: ['node', 'es6'],
+            parser: 'babel-eslint',
+            //plugins: ['lodash'],
+            rules: this._eslintLazyConfig.rules,
+            fix:false,
+            parserOptions: {
+                ecmaVersion: 7
+            }
+        });
     }
 
     /**
@@ -55,10 +67,11 @@ class EslintEngine
 
         //  We use a promise as we get any exceptions wrapped up as failures.
         return new Promise((resolve) => {
-            const results = self._eslint.linter.verify(content, self._getConfig(config));
-
+            //const results = self._cli.linter.verify(content, self._getConfig(config));
+            const results = _.head(selectn('results',self._cli.executeOnText(content, clientPath)));
+            const messages = selectn('messages',results);
             const warnings = _
-                .chain(results)
+                .chain(messages)
                 .map((warning) => {
                     return {
                         type: warning.fatal ? 'Error' : 'Warning',
@@ -75,7 +88,7 @@ class EslintEngine
             });
         });
     }
-
+/*
     _getConfig(config) {
         switch (_.toLower(config)) {
             case 'google':
@@ -84,6 +97,7 @@ class EslintEngine
                 return this._eslintLazyConfig;
         }
     };
+    */
 }
 
 class EslintEngineHttpServer extends EngineHttpServer
