@@ -51,7 +51,7 @@ class FileStatsEngine
     }
 }
 
-class EslintEngineHttpServer extends EngineHttpServer
+class FileStatsEngineHttpServer extends EngineHttpServer
 {
     _bootEngine() {
         return Promise.resolve(new FileStatsEngine());
@@ -88,7 +88,7 @@ class Engine
 {
     start() {
         const port = process.env.PORT || 80;
-        this._server = new EslintEngineHttpServer(port);
+        this._server = new FileStatsEngineHttpServer(port);
         return this._server.start();
     }
 
