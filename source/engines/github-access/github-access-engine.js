@@ -58,6 +58,7 @@ class GithubAccessEngineHttpServer extends EngineHttpServer
                     config: {
                         clientID: '160ddd4af8f51c70be8e',
                         clientSecret: '60bddd5a8ee340800f400e954d8090fc7fd15e46',
+                        scope: ['repo', 'admin:repo_hook'],
                         userAgent: 'lazyass.io'
                     },
                     callbackURLProperty: 'callbackURL',
