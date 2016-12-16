@@ -38,6 +38,13 @@ class Engine
     }
 
     /**
+     * @return {string} URL on which engine can be found.
+     */
+    get url() {
+        return this._containerUrl;
+    }
+
+    /**
      * Boots the engine.
      * @return {Promise} Promise resolved when boot operation has finished.
      */
@@ -50,7 +57,7 @@ class Engine
                 return self._container.status();
             })
             .then((containerStatus) => {
-                self._engineUrl = url.format({
+                self._containerUrl = url.format({
                     protocol: 'http',
                     host: containerStatus.Config.Hostname
                 });
@@ -65,7 +72,7 @@ class Engine
 
         const requestParams = {
             method: 'GET',
-            url: self._engineUrl + '/status',
+            url: self._containerUrl + '/status',
             json: true,
             headers: {
                 'Accept': 'application/json'
@@ -108,7 +115,7 @@ class Engine
 
         const requestParams = {
             method: 'POST',
-            url: self._engineUrl + '/file',
+            url: self._containerUrl + '/file',
             json: true,
             headers: {
                 'Accept': 'application/json'
@@ -157,20 +164,6 @@ class Engine
 
                 return results;
             });
-    }
-
-    /**
-     * Pass through the HTTP request to engine and pass back its response. This allows clients to
-     * directly communicate with engines.
-     * @param {Object} req Express request object.
-     * @param {Object} res Express response object.
-     * @param {string} engineUrlPath Path on the engine server that is being requested directly.
-     */
-    passthroughRequest(req, res, engineUrlPath) {
-        const self = this;
-
-        //  Pipe the request to engine and then pipe back the response.
-        req.pipe(request[_.toLower(req.method)](self._engineUrl + engineUrlPath)).pipe(res);
     }
 
     _redirectContainerLogsToLogger() {

@@ -28,6 +28,7 @@
     "async": "^2.1.4",
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
+    "express-http-proxy": "^0.10.1",
     "higher": "^1.0.5",
     "js-yaml": "^3.7.0",
     "lodash": "^4.17.2",

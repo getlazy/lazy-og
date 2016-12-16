@@ -11,6 +11,7 @@ const bodyParser = require('body-parser');
 const async = require('async');
 const selectn = require('selectn');
 const url = require('url');
+const proxy = require('express-http-proxy');
 
 const EngineManager = require('./engine-manager');
 const LazyYamlFile = require('./lazy-yaml-file');
@@ -162,23 +163,18 @@ class Main
                 }
             });
 
-            app.all('/engine/:engineName/*', (req, res) => {
-                const engineName = _.toLower(req.params.engineName);
-                const engine = namesToEnginesMap[engineName];
+            //  Create proxies to pass all requests that get to /engine/{engine.name}/* paths.
+            _.each(namesToEnginesMap, (engine) => {
+                app.use('/engine/' + engine.name, proxy(engine.url, {
+                    forwardPath: (req, res) => {
+                        //  Extract the requested engine URL path.
+                        const originalUrl = url.parse(req.originalUrl);
+                        const engineUrlPath = originalUrl && originalUrl.path &&
+                            originalUrl.path.slice(('/engine/' + engine.name).length);
 
-                if (_.isUndefined(engine)) {
-                    return res.status(404).send({
-                        err: 'Engine ' + req.params.engineName + ' not found'
-                    });
-                }
-
-                //  Extract the requested engine URL path.
-                const originalUrl = url.parse(req.originalUrl);
-                const engineUrlPath = originalUrl && originalUrl.path &&
-                    originalUrl.path.slice(('/engine/' + req.params.engineName).length);
-
-                //  Pass the request to engine and pass back the response.
-                engine.passthroughRequest(req, res, engineUrlPath);
+                        return engineUrlPath;
+                    }
+                }));
             });
 
             const port = process.env.PORT || 80;
