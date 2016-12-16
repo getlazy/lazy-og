@@ -3,6 +3,7 @@
 
 process.env.DEBUG = '*';
 
+const _ = require('lodash');
 const low = require('lowdb');
 const fs = require('fs');
 
@@ -67,15 +68,34 @@ class GithubAccessEngineHttpServer extends EngineHttpServer
                         failure: '/engine/github-access/auth/failure'
                     },
                     handler: function(config, token, tokenSecret, profile, done) {
-                        //  HACK: Obviously unsafe way to store tokens to access sensitive data.
-                        db.get('GitHubLogin')
-                            .push({
-                                time: Date.now(),
-                                token: token,
-                                tokenSecret: tokenSecret,
-                                profile: profile
-                            })
+                        const id = profile && profile.username;
+
+                        //  There is no "update or insert" in lowdb so we have to query and then
+                        //  decide if we should insert or update.
+                        const login = db.get('GitHubLogin')
+                            .find({id: id})
                             .value();
+
+                        //  HACK: Obviously unsafe way to store tokens to access sensitive data.
+                        if (_.isUndefined(login)) {
+                            db.get('GitHubLogin')
+                                .push({
+                                    id: id,
+                                    token: token,
+                                    profile: profile,
+                                    time: Date.now()
+                                })
+                                .value();
+                        } else {
+                            db.get('GitHubLogin')
+                                .find({id: id})
+                                .assign({
+                                    token: token,
+                                    profile: profile,
+                                    time: Date.now()
+                                })
+                                .value();
+                        }
 
                         done();
                     }
