@@ -20,5 +20,12 @@
   "bugs": {
     "url": "https://github.com/SoftwareMarbles/lazy-github-access-engine/issues"
   },
-  "homepage": "https://github.com/SoftwareMarbles/lazy-github-access-engine#readme"
+  "homepage": "https://github.com/SoftwareMarbles/lazy-github-access-engine#readme",
+  "dependencies": {
+    "@lazyass/engine-helpers": "^1.10.0",
+    "lodash": "^4.17.2",
+    "lowdb": "^0.14.0",
+    "no-boilerplate-passport": "^1.0.0",
+    "passport-github2": "^0.1.10"
+  }
 }
