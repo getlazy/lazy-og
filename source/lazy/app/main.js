@@ -15,7 +15,6 @@ const proxy = require('express-http-proxy');
 
 const EngineManager = require('./engine-manager');
 const LazyYamlFile = require('./lazy-yaml-file');
-const clients = require('./clients');
 
 //  Express application object that will be initialized once everything
 //  else has finished initializing.
@@ -83,30 +82,15 @@ class Main
             });
 
             app.post('/file', (req, res) => {
-                let grammar = selectn('body.grammar', req);
-                if (_.isEmpty(grammar)) {
+                let language = selectn('body.language', req);
+                if (_.isEmpty(language)) {
                     return res.status(400).send();
                 }
 
                 const host = selectn('body.host', req);
                 const path = selectn('body.path', req);
                 const content = selectn('body.content', req);
-                const clientName = selectn('body.client', req);
-
-                //  Transform the language if a known client is specified.
-                const client = clients.getClient(clientName);
-                let language = grammar;
-                if (client && _.isFunction(client.translateGrammarToLanguage)) {
-                    const translatedLanguage = client.translateGrammarToLanguage(grammar);
-                    if (_.isString(translatedLanguage)) {
-                        language = translatedLanguage;
-                    } else {
-                        //  Nothing to do but try with the grammar as language.
-                    }
-                } else {
-                    logger.warn('No client found for', clientName);
-                    language = _.toLower(language);
-                }
+                const client = selectn('body.client', req);
 
                 try {
                     let allEnginesResults = {
@@ -114,8 +98,11 @@ class Main
                     };
                     let firstError = null;
 
+                    //  Key is lower case because the search is case-insensitive.
+                    const languageKey = _.toLower(language);
+
                     //  Analyze the content in all the engines and merge all their warnings.
-                    const enginesForLanguage = _.union(languagesToEnginesMap[language],
+                    const enginesForLanguage = _.union(languagesToEnginesMap[languageKey],
                         allLanguagesEngines);
 
                     async.each(enginesForLanguage, (engine, next) => {
@@ -200,22 +187,23 @@ class Main
             }
 
             //  Remove all whitespaces around language names and set the languages to lower case
-            const normalizedLanguages = _.map(engine.languages, (language) => {
+            //  as the later language search is case-insensitive.
+            const languageKeys = _.map(engine.languages, (language) => {
                 return _.toLower(_.trim(language));
             });
 
             let languageAssignedToAtLeastOneLanguage = false;
-            _.each(normalizedLanguages, (language) => {
-                if (!H.isNonEmptyString(language)) {
-                    logger.warn('Bad language value', language);
+            _.each(languageKeys, (languageKey) => {
+                if (!H.isNonEmptyString(languageKey)) {
+                    logger.warn('Bad language value', languageKey);
                     return;
                 }
 
-                if (_.isUndefined(languagesToEnginesMap[language])) {
-                    languagesToEnginesMap[language] = [];
+                if (_.isUndefined(languagesToEnginesMap[languageKey])) {
+                    languagesToEnginesMap[languageKey] = [];
                 }
 
-                languagesToEnginesMap[language].push(engine);
+                languagesToEnginesMap[languageKey].push(engine);
                 languageAssignedToAtLeastOneLanguage = true;
             });
 
