@@ -30,8 +30,14 @@ class StylelintEngine
     analyzeFile(content, clientPath, language, config) {
         const self = this;
 
+        //  Convert lazy language to stylelint language.
+        const stylelintLanguage = _.toLower(language);
+        if (stylelintLanguage === 'CSS') {
+            stylelintLanguage = 'SCSS';
+        }
+
         return self._stylelint.lint({
-            syntax: language,
+            syntax: stylelintLanguage,
             code: content,
             config: self._stylelintConfigStandard
         })
