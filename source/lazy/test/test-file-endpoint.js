@@ -14,7 +14,7 @@ const FILE_FIXTURES = [{
     params: {
         client: 'atom',
         path: '/src/test.html',
-        grammar: 'HTML',
+        language: 'HTML',
         content:
 `
 <html>
@@ -37,7 +37,7 @@ const FILE_FIXTURES = [{
     params: {
         client: 'atom',
         path: '/src/test.cpp',
-        grammar: 'C++',
+        language: 'C++',
         content:
 `
 #include <vector>
@@ -66,7 +66,7 @@ int main() {
     params: {
         client: 'atom',
         path: '/src/test.c',
-        grammar: 'C',
+        language: 'C',
         content:
 `
 int main() {
@@ -91,7 +91,7 @@ class X {};
     params: {
         client: 'atom',
         path: '/src/test.php',
-        grammar: 'PHP',
+        language: 'PHP',
         content:
 `
 <?php
@@ -121,7 +121,7 @@ class a = 'XYZ';
     params: {
         client: 'atom',
         path: '/src/test.java',
-        grammar: 'Java',
+        language: 'Java',
         content:
 `
 import hoho.bubu;
@@ -142,7 +142,7 @@ import hoho.bubu2;
     params: {
         client: 'atom',
         path: '/src/test.css',
-        grammar: 'CSS',
+        language: 'CSS',
         content:
 `
 .some-title { font-weight: bold; }
@@ -182,7 +182,7 @@ a { color: pink; color: orange; }
     params: {
         client: 'atom',
         path: '/src/test.scss',
-        grammar: 'SCSS',
+        language: 'SCSS',
         content:
 `
 .some-title { font-weight: bold; }
@@ -222,7 +222,7 @@ a { color: pink; color: orange; }
     params: {
         client: 'atom',
         path: '/src/test.less',
-        grammar: 'Less',
+        language: 'Less',
         content:
 `
 @base: #f938ab;
@@ -253,7 +253,7 @@ a { color: pink; color: orange; }
     params: {
         client: 'atom',
         path: '/src/test.js',
-        grammar: 'JavaScript',
+        language: 'JavaScript',
         content:
 `
 'use strict';
@@ -275,7 +275,7 @@ var x = 0;
     params: {
         client: 'atom',
         path: '/src/test.js',
-        grammar: 'JavaScript',
+        language: 'JavaScript',
         content:
 `
 var x =
@@ -304,15 +304,15 @@ describe('/file', function() {
         return require('./bootstrap').stop();
     });
 
-    describe('supports version v20161128', function() {
-        const LazyClient = require('@lazyass/node-lazy-client').getClientClass('v20161128');
+    describe('supports version v20161217', function() {
+        const LazyClient = require('@lazyass/node-lazy-client').getClientClass('v20161217');
         const lazyUrl = 'http://0.0.0.0:' + (process.env.PORT || 80);
 
         it('version', function(done) {
             let client = new LazyClient(lazyUrl);
             client.version()
                 .then((version) => {
-                    assert.equal(version.api, 'v20161128');
+                    assert.equal(version.api, 'v20161217');
                     done();
                 })
                 .catch(done);
@@ -327,7 +327,7 @@ describe('/file', function() {
                 let params = fixture.params;
                 it(fixture.name, function(done) {
                     let client = new LazyClient(lazyUrl, params.client);
-                    client.analyzeFile(params.content, params.path, params.grammar)
+                    client.analyzeFile(params.content, params.path, params.language)
                         .then(fixture.then)
                         .catch(fixture.catch)
                         .then(done)

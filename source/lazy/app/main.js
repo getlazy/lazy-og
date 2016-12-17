@@ -70,7 +70,7 @@ class Main
             app.get('/version', (req, res) => {
                 res.send({
                     service: require('../package.json').version,
-                    api: 'v20161128'
+                    api: 'v20161217'
                 });
             });
 
