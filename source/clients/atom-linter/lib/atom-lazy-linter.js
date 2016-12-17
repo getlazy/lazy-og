@@ -79,14 +79,13 @@ module.exports = {
             json: true,
             headers: {
               'Accept': 'application/json',
-              'X-LazyApi-Version': 'v20161128'
+              'X-LazyApi-Version': 'v20161217'
             },
             body: {
-              stackId: '0',
               client: 'atom@' + atom.getVersion(),
               host: os.hostname(),
               path: path,
-              grammar: grammar,
+              language: grammar,
               content: editor.getText()
             }
           };
