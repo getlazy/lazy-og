@@ -16,4 +16,10 @@ describe('ClientFactory', function() {
         assert(LazyClient);
         assert.equal(LazyClient.version, 'v20161128');
     });
+
+    it('loads v20161217', function() {
+        const LazyClient = ClientFactory.getClientClass('v20161217');
+        assert(LazyClient);
+        assert.equal(LazyClient.version, 'v20161217');
+    });
 });
