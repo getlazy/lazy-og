@@ -97,7 +97,7 @@ class EngineManager
                             //  Bind the docker socket so that we can access host Docker
                             //  from the engine and launch helper containers.
                             '/var/run/docker.sock:/var/run/docker.sock',
-                            //  HACK: We hard-code the stack volume mount path to /lazy which is
+                            //  HACK: We hard-code the volume mount path to /lazy which is
                             //  known to all containers.
                             self._volume.Name + ':/lazy'
                         ]),
@@ -154,7 +154,7 @@ class EngineManager
         return Promise.reject(new Error('Not Implemented'));
     }
 
-    _findLazyVolumeOrCreateIt(stack) {
+    _findLazyVolumeOrCreateIt() {
         const self = this;
 
         return HigherDockerManager.getVolumesForLabel(
@@ -176,7 +176,7 @@ class EngineManager
             });
     }
 
-    _findLazyNetworkOrCreateIt(stack) {
+    _findLazyNetworkOrCreateIt() {
         const self = this;
 
         return HigherDockerManager.getNetworksForLabel(
@@ -230,7 +230,7 @@ class EngineManager
         const lazyNetworksNames =
             _.keys(selectn('NetworkSettings.Networks', self._container));
 
-        //  Check if the stack container is already attached to lazy's network
+        //  Check if the lazy container is already attached to lazy's network
         const alreadyAttachedToLazyNetwork = _.some(lazyNetworksNames,
             (networkName) => networkName === self._network.Name);
         if (alreadyAttachedToLazyNetwork) {
