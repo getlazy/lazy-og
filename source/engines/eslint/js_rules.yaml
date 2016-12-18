@@ -1,0 +1,246 @@
+# If you wish to access your private NPM repository of ESLint plugins, enter you NPM token below.
+# Otherwise, set NPM_TOKEN to 'public' and you'll be able to install only public NPM repositories
+env-vars:
+ NPM_TOKEN: 'public'
+
+# All of the rule sets should be descendents of the rule-sets: object
+rule-sets:
+
+# Anatomy of the rule set:
+- rule-set: 'Name of RS'    # Some descriptive name
+  ignore: true      # if true the complete rule-set will be ignored (like this one)                         
+  package: eslint-plugin-lodash   # Name of the NPM module that implements rules
+  package-version: 'latest'       # Specific version of the NPM module to install
+  plugin: lodash                  # Name of the plugin - if module exports a plugin
+  rules-import: configs.recommended.rules  # Some NPM modules define shortucts to pre-configured rules. Use them here if you wish.
+  rules:      # Manual list of rules to enable. Rules listed here will override definitions from rules-import above
+    rule-nr-1:   # The rule
+     - option1: val1    # Parameters/options for the rule
+       option2: val2
+    rule-nr-2: 0  # To disable a rule previously defined, add 0 after the name
+
+######################################################
+
+# Shoot youreslf in the foot!
+# All of the ESLint built in rules enabled.
+- rule-set: 'Complete ESLint'  
+  ignore: false  # Set this to true to get more reasonable settings
+  rules:
+    comma-dangle: 
+     - never
+    no-cond-assign: 
+     - always
+    no-console:
+    no-constant-condition:
+    no-control-regex:
+    no-debugger:
+    no-dupe-args:
+    no-dupe-keys:
+    no-duplicate-case:
+    no-empty-character-class:
+    no-empty:
+    no-ex-assign:
+    no-extra-boolean-cast:
+    no-extra-parens:
+     - all
+    no-extra-semi:
+    no-func-assign:
+    no-inner-declarations:
+     - both
+    no-invalid-regexp:
+    no-irregular-whitespace:
+    no-negated-in-lhs:
+    no-obj-calls:
+    no-regex-spaces:
+    no-sparse-arrays:
+    no-unreachable:
+    use-isnan:
+    valid-jsdoc:
+    valid-typeof:
+    no-unexpected-multiline:
+    accessor-pairs:
+    block-scoped-var:
+    complexity: 
+     - 5
+    consistent-return:
+    curly: 
+     - all
+    default-case:
+    dot-notation:
+     - allowKeywords: true
+    dot-location:
+     - object
+    eqeqeq:
+     - smart
+    guard-for-in:
+    no-alert:
+    no-caller:
+    no-div-regex:
+    no-else-return:
+    no-empty-label:
+    no-eq-null:
+    no-eval:
+    no-extend-native:
+    no-extra-bind:
+    no-fallthrough:
+    no-floating-decimal:
+    no-implicit-coercion:
+    no-implied-eval:
+    no-invalid-this:
+    no-iterator:
+    no-labels:
+    no-lone-blocks:
+    no-loop-func:
+    no-multi-spaces:
+    no-multi-str:
+    no-native-reassign:
+    no-new-func:
+    no-new-wrappers:
+    no-new:
+    no-octal-escape:
+    no-octal:
+    no-param-reassign:
+     - props: true
+    no-process-env:
+    no-proto:
+    no-redeclare:
+     - builtinGlobals: true
+    no-return-assign: 
+     - always
+    no-script-url:
+    no-self-compare:
+    no-sequences:
+    no-throw-literal:
+    no-unused-expressions:
+    no-useless-call:
+    no-void:
+    no-warning-comments:
+    no-with:
+    radix:
+    vars-on-top:
+    wrap-iife:
+     - any
+    yoda:
+    strict:
+     - global
+    init-declarations:
+     - always
+    no-catch-shadow:
+    no-delete-var:
+    no-label-var:
+    no-shadow-restricted-names:
+    no-shadow:
+    no-undef-init:
+    no-undef:
+    no-undefined:
+    no-unused-vars:
+    no-use-before-define:
+     - nofunc
+    callback-return:
+    handle-callback-err:
+    no-mixed-requires:
+    no-new-require:
+    no-path-concat:
+    no-process-exit:
+    no-restricted-modules:
+    no-sync:
+    array-bracket-spacing:
+    brace-style:
+    camelcase:
+    comma-spacing:
+    comma-style:
+    computed-property-spacing:
+    consistent-this:
+    eol-last:
+    func-names:
+    func-style:
+    id-length:
+    indent:
+    key-spacing:
+    lines-around-comment:
+    linebreak-style:
+    max-nested-callbacks:
+    new-cap:
+    new-parens:
+    newline-after-var:
+    no-array-constructor:
+    no-continue:
+    no-inline-comments:
+    no-lonely-if:
+    no-mixed-spaces-and-tabs:
+    no-multiple-empty-lines:
+    no-nested-ternary:
+    no-new-object:
+    no-spaced-func:
+    no-ternary:
+    no-trailing-spaces:
+    no-underscore-dangle:
+    no-unneeded-ternary:
+    object-curly-spacing:
+    one-var:
+    operator-assignment:
+    operator-linebreak:
+    padded-blocks:
+    quote-props:
+    quotes:
+    id-match:
+    semi-spacing:
+    semi:
+    sort-vars:
+    space-after-keywords:
+    space-before-blocks:
+    space-before-function-paren:
+    space-in-parens:
+    space-infix-ops:
+    space-return-throw-case:
+    space-unary-ops:
+    spaced-comment:
+    wrap-regex:
+    arrow-parens:
+    arrow-spacing:
+    constructor-super:
+    generator-star-spacing:
+    no-class-assign:
+    no-const-assign:
+    no-this-before-super:
+    no-var:
+    object-shorthand:
+    prefer-const:
+    prefer-spread:
+    prefer-reflect:
+    require-yield:
+    max-depth:
+    max-len:
+     - code: 80
+       tabWidth: 4
+       ignoreUrls: true
+    max-params:
+    max-statements:
+    no-bitwise:
+    no-plusplus:
+
+- rule-set: 'Lodash'
+#  ignore: true
+  package: eslint-plugin-lodash
+  package-version: 'latest'
+  plugin: lodash
+  rules-import: configs.recommended.rules
+
+- rule-set: 'Google'
+  package: eslint-config-google
+#  ignore: true
+  rules-import: rules
+  # We'll override some nonse in Google defaults
+  rules:
+    comma-dangle: 0  # I DON'T WANT DANGLING COMMAS!
+    max-len:
+     - code: 120  # Somebody should tell Goole to get 16:9 monitors...
+       tabWidth: 4
+       ignoreUrls: true
+
+- rule-set: 'JQuery'
+ # ignore: true
+  package: eslint-plugin-jquery
+  plugin: jquery
+  rules-import: configs.slim.rules
+
