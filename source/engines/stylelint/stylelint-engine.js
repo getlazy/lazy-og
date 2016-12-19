@@ -21,19 +21,20 @@ class StylelintEngine
 
     /**
      * Analyzes the given file content for the given language and analysis configuration.
-     * @param {string} content Content of the source file requesting lazy to analyze.
-     * @param {string} clientPath Path of the source file requesting lazy to analyze.
+     * @param {string} host Name of the host requesting file analysis.
+     * @param {string} hostPath Path of the source file requesting lazy to analyze.
      * @param {string} language Language of the source file.
+     * @param {string} content Content of the source file requesting lazy to analyze.
      * @param {string} config Name of the configuration to use.
      * @return {Promise} Promise resolving with results of the file analysis.
      */
-    analyzeFile(content, clientPath, language, config) {
+    analyzeFile(host, hostPath, language, content, config) {
         const self = this;
 
         //  Convert lazy language to stylelint language.
-        const stylelintLanguage = _.toLower(language);
-        if (stylelintLanguage === 'CSS') {
-            stylelintLanguage = 'SCSS';
+        let stylelintLanguage = _.toLower(language);
+        if (stylelintLanguage === 'css') {
+            stylelintLanguage = 'scss';
         }
 
         return self._stylelint.lint({
