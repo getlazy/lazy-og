@@ -9,6 +9,8 @@ const selectn = require('selectn');
 
 const HigherDockerManager = require('@lazyass/higher-docker-manager');
 
+const TEMPORARY_DIR_LAZY_PATH = '/lazy/tmp';
+
 /**
  * Base class for helper containers running as sibil Docker containers.
  * Parameters of the container run as well processing of the results
@@ -91,6 +93,20 @@ class HelperContainer
         this._container = container;
     }
 
+    _createTempDir() {
+        return new Promise((resolve, reject) => {
+            fs.mkdir(TEMPORARY_DIR_LAZY_PATH, (err) => {
+                if (err) {
+                    if (err.code !== 'EEXIST') {
+                        return reject(err);
+                    }
+                }
+
+                resolve();
+            });
+        });
+    }
+
     /**
      * Creates temporary file in `/lazy` directory which is (HACK) is mounted to a known shared
      * volume.
@@ -106,7 +122,7 @@ class HelperContainer
             tmp.file({
                 //  HACK: We hard-code the volume mount path to /lazy which is known to all
                 //  containers.
-                dir: '/lazy/tmp',
+                dir: TEMPORARY_DIR_LAZY_PATH,
                 prefix: 'lazy-temp-content-',
                 //  Use the real extension to allow engine to discern between different grammars.
                 postfix: path.extname(hostPath)
@@ -152,13 +168,14 @@ class HelperContainer
 
     /**
      * Analyzes the given file content for the given language and analysis configuration.
-     * @param {string} content Content of the source file requesting lazy to analyze.
+     * @param {string} host Name of the host requesting file analysis.
      * @param {string} hostPath Path of the source file requesting lazy to analyze.
      * @param {string} language Language of the source file.
+     * @param {string} content Content of the source file requesting lazy to analyze.
      * @param {string} config Name of the configuration to use.
      * @return {Promise} Promise resolving with results of the file analysis.
      */
-    analyzeFile(content, hostPath, language, config) {
+    analyzeFile(host, hostPath, language, content, config) {
         const self = this;
 
         let temporaryFileInfo;
@@ -167,7 +184,10 @@ class HelperContainer
         //  temporary directory of engine container. Volume of the engine container
         //  is shared with helper container and can thus be read by it.
         //  TODO: unhack temporary directory thingamajig
-        return self._createTempFileWithContent(content, hostPath)
+        return self._createTempDir()
+            .then(() => {
+                return self._createTempFileWithContent(content, hostPath);
+            })
             .then((fileInfo) => {
                 temporaryFileInfo = fileInfo;
 
@@ -191,7 +211,7 @@ class HelperContainer
                     execParams.Cmd = [];
                 }
                 execParams.Cmd = execParams.Cmd
-                    .concat('/lazy/' + path.basename(temporaryFileInfo.path));
+                    .concat(TEMPORARY_DIR_LAZY_PATH + '/' + path.basename(temporaryFileInfo.path));
 
                 return HigherDockerManager.execInContainer(self._container, execParams);
             })

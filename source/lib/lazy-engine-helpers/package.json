@@ -1,6 +1,6 @@
 {
   "name": "@lazyass/engine-helpers",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "description": "Helper utilities for easier development of lazy engines",
   "main": "index.js",
   "scripts": {
