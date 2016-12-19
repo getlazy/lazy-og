@@ -25,6 +25,7 @@
   "dependencies": {
     "@lazyass/engine-helpers": "^1.10.0",
     "lodash": "^4.17.2",
-    "lowdb": "^0.14.0"
+    "lowdb": "^0.14.0",
+    "mkdirp": "^0.5.1"
   }
 }

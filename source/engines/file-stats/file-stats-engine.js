@@ -3,16 +3,17 @@
 
 const low = require('lowdb');
 const fs = require('fs');
+const mkdirp = require('mkdirp');
 
 const EngineHelpers = require('@lazyass/engine-helpers');
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
-//  Create directory for our json database.
-if (!fs.existsSync('/lazy/file-stats-engine')) {
-    fs.mkdirSync('/lazy/file-stats-engine');
-}
+const LAZY_ENGINE_SANDBOX_DIR = process.env.LAZY_ENGINE_SANDBOX_DIR;
 
-const db = low('/lazy/file-stats-engine/stats.json', {
+//  Create directory for our json database.
+mkdirp.sync(LAZY_ENGINE_SANDBOX_DIR);
+
+const db = low(LAZY_ENGINE_SANDBOX_DIR + '/stats.json', {
     storage: require('lowdb/lib/file-async')
 });
 
@@ -58,7 +59,6 @@ class FileStatsEngineHttpServer extends EngineHttpServer
     }
 
     _customizeExpressApp(app) {
-        logger.warn('customizing');
         app.get('/stats', (req, res) => {
             const stats = db.get('AnalyzeFileEvent')
                 .reduce((stats, event) => {
