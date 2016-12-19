@@ -59,7 +59,7 @@ describe('PmdJavaEngineHttpServer', function() {
                         'Accept': 'application/json'
                     },
                     body: {
-                        clientPath: params.path,
+                        hostPath: params.path,
                         content: params.content,
                         language: params.language
                     }
