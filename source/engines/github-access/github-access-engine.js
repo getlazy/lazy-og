@@ -1,23 +1,24 @@
 
 'use strict';
 
-process.env.DEBUG = '*';
-
 const _ = require('lodash');
 const low = require('lowdb');
 const fs = require('fs');
+const mkdirp = require('mkdirp');
 
 const EngineHelpers = require('@lazyass/engine-helpers');
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
+const LAZY_ENGINE_NAME = process.env.LAZY_ENGINE_NAME;
+const LAZY_ENGINE_URL = process.env.LAZY_ENGINE_URL;
+const LAZY_ENGINE_SANDBOX_DIR = process.env.LAZY_ENGINE_SANDBOX_DIR;
+
 const nbPassport = require('no-boilerplate-passport');
 
 //  Create directory for our json database.
-if (!fs.existsSync('/lazy/github-access-engine')) {
-    fs.mkdirSync('/lazy/github-access-engine');
-}
+mkdirp.sync(LAZY_ENGINE_SANDBOX_DIR);
 
-const db = low('/lazy/github-access-engine/logins.json', {
+const db = low(LAZY_ENGINE_SANDBOX_DIR + '/logins.json', {
     storage: require('lowdb/lib/file-async')
 });
 
@@ -52,21 +53,28 @@ class GithubAccessEngineHttpServer extends EngineHttpServer
     _customizeExpressApp(app) {
         nbPassport(app, {
             version: '1.0.0',
-            baseURL: 'https://lazy.ngrok.io/engine/github-access',
+            baseURL: LAZY_ENGINE_URL,
             providers: {
                 github: {
                     config: {
-                        clientID: '160ddd4af8f51c70be8e',
-                        clientSecret: '60bddd5a8ee340800f400e954d8090fc7fd15e46',
+                        clientID: process.env.GITHUB_CLIENT_ID,
+                        clientSecret: process.env.GITHUB_CLIENT_SECRET,
                         scope: ['repo', 'admin:repo_hook'],
-                        userAgent: 'lazyass.io'
+                        userAgent: 'getlazy.com github-access engine'
                     },
                     callbackURLProperty: 'callbackURL',
                     paths: {
+                        //  `start` and `callback` endpoints are defined relative to engine URL
+                        //  because we no-boilerplate-passport will create and expose those through
+                        //  Passport.
                         start: '/auth/start',
                         callback: '/auth/callback',
-                        success: '/engine/github-access',
-                        failure: '/engine/github-access/auth/failure'
+                        //  `success` and `failure` endpoints are defined in absolute terms as
+                        //  those will be used by no-boilerplate-passport to redirect browser on
+                        //  success or failure (we could have defined them relative to lazy service
+                        //  rather than engine)
+                        success: LAZY_ENGINE_URL + '/auth/success',
+                        failure: LAZY_ENGINE_URL + '/auth/failure'
                     },
                     handler: function(config, token, tokenSecret, profile, done) {
                         const id = profile && profile.username;
@@ -104,7 +112,7 @@ class GithubAccessEngineHttpServer extends EngineHttpServer
             }
         });
 
-        app.get('/', (req, res) => {
+        app.get('/auth/success', (req, res) => {
             //  TODO: Implement this.
             res.sendStatus(200);
         });
