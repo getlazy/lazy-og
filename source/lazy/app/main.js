@@ -16,11 +16,15 @@ let app;
 
 const LazyYamlFile = require('./lazy-yaml-file');
 
+/**
+ * Main lazy process class.
+ */
 class Main
 {
     /**
      * Starts the stack by first initializing engines and other services
      * and then starting Express HTTP server.
+     * @param {string} lazyYamlFilePath Path to lazy YAML configuration file.
      * @return {Promise} Promise which is resolved when the application has started.
      */
     static main(lazyYamlFilePath) {
@@ -41,6 +45,11 @@ class Main
             });
     }
 
+    /**
+     * Stops the running engine manager which in turn stops and destroys all the running engines
+     * but not lazy network nor the shared volume.
+     * @return {Promise} Promise resolving when engine manager has finished stopping.
+     */
     static stop() {
         if (!engineManager) {
             return Promise.resolve();
@@ -49,6 +58,11 @@ class Main
         return engineManager.stop();
     }
 
+    /**
+     * Initialize Express app.
+     * @return {Promise} Promise which is resolved when Express app has been initialized.
+     * @private
+     */
     static _initializeExpressApp() {
         app = express();
         app.use(bodyParser.json());
@@ -71,6 +85,12 @@ class Main
             });
     }
 
+    /**
+     * Recreate all engines based on the given configuration file.
+     * @param {string} lazyYamlFilePath Path to lazy YAML configuration file.
+     * @return {Promise} Promise which is resolved when the engines have been recreated.
+     * @private
+     */
     static _recreateAllEngines(lazyYamlFilePath) {
         return LazyYamlFile.load(lazyYamlFilePath)
             .then((lazyConfig) => {
