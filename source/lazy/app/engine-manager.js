@@ -55,7 +55,14 @@ class EngineManager
             })
             .then(() => {
                 return self._installAllEngines();
+            })
+            .then((engines) => {
+                self._engines = engines;
             });
+    }
+
+    get engines() {
+        return this._engines;
     }
 
     _installAllEngines() {
