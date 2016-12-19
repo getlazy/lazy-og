@@ -92,8 +92,13 @@ class EngineManager
                     Image: imageName,
                     Cmd: engineConfig.command ? engineConfig.command.split(' ') : undefined,
                     Env: _.union(engineConfig.env, [
+                        'LAZY_ENGINE_NAME=' + engineName,
+                        'LAZY_SERVICE_URL=' + selectn('_config.service_url', self),
+                        'LAZY_ENGINE_URL=' +
+                            selectn('_config.service_url', self) + '/engine/' + engineName,
                         'LAZY_VOLUME_NAME=' + self._volume.Name,
-                        'LAZY_VOLUME_MOUNT=/lazy'
+                        'LAZY_VOLUME_MOUNT=/lazy',
+                        'LAZY_ENGINE_SANDBOX_DIR=/lazy/sandbox/' + engineName
                     ]),
                     HostConfig: {
                         //  When networking mode is a name of another network it's

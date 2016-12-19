@@ -4,7 +4,6 @@
 //  Initialize all global variables.
 global.logger = require('./logger');
 
-const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 
