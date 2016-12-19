@@ -28,36 +28,6 @@ class EslintConfigurator {
     }
 
     /**
-     * Iterate through all the rules, and turn them into errors by appending 2
-     * For example: a rule in yaml defined like
-     * some-rule:
-     * should be converted to some-rule: 2
-     * - OR -
-     * some-rule:
-     *  - param1: val1
-     *    param2: val2
-     * should be converted to
-     * some-rule: [2,{param1: val1, param2: val2 }]
-     * @param {set} rules Array of rules to process
-     * @return {set} Array of modified rules
-     */
-    static _processRules(rules) {
-        const newRules = [];
-
-        _.forIn(rules, (value, variable) => {
-            if (_.isArray(value)) {
-                value = _.concat([2], value);
-            }
-            if (_.isNil(value)) {
-                value = 2;
-            }
-            _.set(newRules, variable, value);
-        });
-
-        return newRules;
-    }
-
-    /**
      * Import a single rule set defined in the configuration
      * @param {object} configRuleSet A rule-set object.
      * @return {Promise} Promise that is resolved when the rule set is processed
@@ -98,7 +68,7 @@ class EslintConfigurator {
             };
 
             logger.info('Installing NPM package:', options.name, '@', options.version);
-            npmi(options, function(err, result) {
+            npmi(options, function (err, result) {
                 if (err) {
                     logger.warn(ruleSet.package, 'NPM error', err);
                 } else {
@@ -153,7 +123,7 @@ class EslintConfigurator {
 
                     // Function to be called after each package is successfully processed.
                     // This function should further configure packages after the installation
-                    const onSuccessF = function(ruleSet) {
+                    const onSuccessF = function (ruleSet) {
                         if (_.isNil(ruleSet)) {
                             return;
                         }
@@ -184,9 +154,7 @@ class EslintConfigurator {
 
                             // Process rules that may be configured manually
                             if (!_.isNil(ruleSet.rules)) {
-                                rules = _.extend(rules,
-                                    EslintConfigurator._processRules(ruleSet.rules)
-                                );
+                                rules = _.extend(rules, ruleSet.rules);
                             }
                         }
                     };

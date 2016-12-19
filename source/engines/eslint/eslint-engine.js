@@ -53,31 +53,31 @@ class EslintEngine {
      * @return {Promise} Promise resolving with results of the file analysis.
      */
     analyzeFile(host, hostPath, language, content, config) {
-            const self = this;
-            //  We use a promise as we get any exceptions wrapped up as failures.
-            return new Promise((resolve) => {
-                const res = self._cli.executeOnText(content, hostPath);
-                const results = _.head(selectn('results', res));
-                const messages = selectn('messages', results);
+        const self = this;
+        //  We use a promise as we get any exceptions wrapped up as failures.
+        return new Promise((resolve) => {
+            const res = self._cli.executeOnText(content, hostPath);
+            const results = _.head(selectn('results', res));
+            const messages = selectn('messages', results);
 
-                const warnings = _
-                    .chain(messages)
-                    .map((warning) => {
-                        return {
-                            type: warning.fatal ? 'Error' : 'Warning',
-                            message: warning.message,
-                            line: warning.line,
-                            column: warning.column
-                        };
-                    })
-                    .filter()
-                    .value();
+            const warnings = _
+                .chain(messages)
+                .map((warning) => {
+                    return {
+                        type: warning.fatal ? 'Error' : 'Warning',
+                        message: '['+warning.ruleId + ']: ' + warning.message,
+                        line: warning.line,
+                        column: warning.column
+                    };
+                })
+                .filter()
+                .value();
 
-                resolve({
-                    warnings: warnings
-                });
+            resolve({
+                warnings: warnings
             });
-        }
+        });
+    }
 }
 
 class EslintEngineHttpServer extends EngineHttpServer {
