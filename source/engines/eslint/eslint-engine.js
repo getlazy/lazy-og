@@ -33,7 +33,8 @@ class EslintEngine {
                             ecmaVersion: 7
                         }
                     });
-                    logger.info('Configured ESLint CLI:', this._cli);
+                    logger.info('Configured ESLint CLI.');
+                    //logger.info(this._cli);
                     resolve(this);
                 })
                 .catch((err) => {
