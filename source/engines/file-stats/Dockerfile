@@ -5,5 +5,5 @@ STOPSIGNAL SIGTERM
 WORKDIR /app
 COPY . /app
 RUN npm install
-LABEL "io.lazyass.lazy.engine.languages"="" # leaving this empty means all languages
+LABEL "io.lazyass.lazy.engine.languages"=""
 ENTRYPOINT ["node", "/app/index.js"]
