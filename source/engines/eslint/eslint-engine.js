@@ -21,7 +21,7 @@ class EslintEngine {
     configure(configFilePath) {
         return new Promise((resolve) => {
             EslintConfigurator
-                .configurFromYaml(configFilePath || (__dirname + '/js_rules.yaml'))
+                .configureFromYaml(configFilePath || (__dirname + '/js_rules.yaml'))
                 .then((configuration) => {
                     this._cli = new CLIEngine({
                         envs: ['node', 'es6'],
@@ -34,7 +34,6 @@ class EslintEngine {
                         }
                     });
                     logger.info('Configured ESLint CLI.');
-                    //logger.info(this._cli);
                     resolve(this);
                 })
                 .catch((err) => {
@@ -84,7 +83,6 @@ class EslintEngine {
 class EslintEngineHttpServer extends EngineHttpServer {
     _bootEngine() {
         return (new EslintEngine()).configure(null);
-        // return Promise.resolve(new EslintEngine());
     }
 
     _stopEngine() {

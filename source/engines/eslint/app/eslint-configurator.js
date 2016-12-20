@@ -41,7 +41,7 @@ class EslintConfigurator {
         // Convenient for quick turning on/off of some rule sets
         if (_.eq(ruleSet.ignore, true)) {
             logger.info('Ignoring ruleset:', rsName);
-            return new Promise((resolve) => resolve(null));
+            return Promise.resolve(null);
         }
         logger.info('Importing rule set:', rsName);
 
@@ -49,11 +49,11 @@ class EslintConfigurator {
         // Silently acknowledge them
         if (_.isNil(ruleSet.package)) {
             ruleSet.installed = true;
-            return new Promise((resolve) => resolve(ruleSet));
+            return Promise.resolve(ruleSet);
         }
 
         // Process rule sets that require installation of external packages (npm modules)
-        // Return the promise that will be resolved whtn the NPM module is downloaded & installed
+        // Return the promise that will be resolved when the NPM module is downloaded & installed
         return new Promise((resolve) => {
             const packageName = selectn('package', ruleSet);
             const packageVersion = selectn('package-version', ruleSet) || 'latest';
@@ -113,7 +113,7 @@ class EslintConfigurator {
      * @return {Promise} Promise that is resolved once the configuration is ready,
      *                   and all required module downloaded & installed
      */
-    static configurFromYaml(yamlFilePath) {
+    static configureFromYaml(yamlFilePath) {
         return new Promise((resolve, reject) => {
             EslintConfigurator
                 .loadYaml(yamlFilePath)
