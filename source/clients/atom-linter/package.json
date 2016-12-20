@@ -1,13 +1,13 @@
 {
   "name": "atom-lazy-linter",
   "main": "./lib/atom-lazy-linter",
-  "version": "0.0.1",
-  "description": "A short description of your package",
+  "version": "0.1.0",
+  "description": "lazy plugin for Atom Linter",
   "keywords": [
     "lazy",
     "linter"
   ],
-  "repository": "https://github.com/never-code-alone/atom-lazy-linter",
+  "repository": "https://github.com/SoftwareMarbles/atom-lazy-linter",
   "license": "MIT",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"

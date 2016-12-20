@@ -23,7 +23,7 @@ module.exports = {
     serviceUrl: {
       type: 'string',
       default: 'http://localhost:16827',
-      description: 'URL of lazy dev assistant service'
+      description: 'URL of lazy'
     }
   },
 
@@ -34,8 +34,7 @@ module.exports = {
     //    to reload the package (CTRL+ALT+CMD+L) if there is a difference between old and
     //    new scopes.
 
-    this.scopes = ['source.js', 'source.js-semantic', 'source.php', 'text.html.basic',
-      'source.css', 'source.css.less', 'source.css.scss'];
+    this.scopes = ['*'];
     this.subscriptions = new CompositeDisposable();
     this.subscriptions.add(atom.config.observe('atom-lazy-linter.serviceUrl', (serviceUrl) => {
       this.serviceUrl = serviceUrl;
