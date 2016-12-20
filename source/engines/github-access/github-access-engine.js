@@ -3,13 +3,11 @@
 
 const _ = require('lodash');
 const low = require('lowdb');
-const fs = require('fs');
 const mkdirp = require('mkdirp');
 
 const EngineHelpers = require('@lazyass/engine-helpers');
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
-const LAZY_ENGINE_NAME = process.env.LAZY_ENGINE_NAME;
 const LAZY_ENGINE_URL = process.env.LAZY_ENGINE_URL;
 const LAZY_ENGINE_SANDBOX_DIR = process.env.LAZY_ENGINE_SANDBOX_DIR;
 
