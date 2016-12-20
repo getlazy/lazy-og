@@ -2,7 +2,6 @@
 'use strict';
 
 const low = require('lowdb');
-const fs = require('fs');
 const mkdirp = require('mkdirp');
 
 const EngineHelpers = require('@lazyass/engine-helpers');
