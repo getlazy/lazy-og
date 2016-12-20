@@ -51,7 +51,7 @@ rule-sets:
         exports: never
         functions: never
 
-# Adopted from AirBnB JavaScrypt styleguide
+# Adopted from AirBnB JavaScript styleguide
 - rule-set: Best practices
   ignore: false
   rules:
@@ -185,7 +185,7 @@ rule-sets:
       - functionPrototypeMethods: false
     yoda: error
 
-# Adopted from AirBnB JavaScrypt styleguide
+# Adopted from AirBnB JavaScript styleguide
 - rule-set: Errors
   ignore: false
   rules:
@@ -231,7 +231,7 @@ rule-sets:
       - error
       - requireStringLiterals: true
 
-# Adopted from AirBnB JavaScrypt styleguide
+# Adopted from AirBnB JavaScript styleguide
 - rule-set: Node
   ignore: false
   rules:
@@ -248,7 +248,7 @@ rule-sets:
     no-restricted-modules: 'off'
     no-sync: 'off'
 
-# Adopted from AirBnB JavaScrypt styleguide
+# Adopted from AirBnB JavaScript styleguide
 - rule-set: Style
   ignore: false
   rules:
@@ -520,7 +520,7 @@ rule-sets:
       - never
     wrap-regex: 'off'
 
-# Adopted from AirBnB JavaScrypt styleguide
+# Adopted from AirBnB JavaScript styleguide
 - rule-set: Variables
   ignore: false
   rules:
@@ -540,7 +540,7 @@ rule-sets:
         args: after-used
     no-use-before-define: error
 
-# Adopted from AirBnB JavaScrypt styleguide
+# Adopted from AirBnB JavaScript styleguide
 - rule-set: ES6
   ignore: false
   rules:
@@ -616,7 +616,7 @@ rule-sets:
       - error
       - after
 
-# Adopted from AirBnB JavaScrypt styleguide
+# Adopted from AirBnB JavaScript styleguide
 - rule-set: Imports
   ignore: false
   package: eslint-plugin-import
