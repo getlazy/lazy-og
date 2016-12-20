@@ -1,6 +1,6 @@
 {
   "name": "lazy-php-l-engine",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "lazy engine serving requests to lint PHP",
   "main": "index.js",
   "dependencies": {
