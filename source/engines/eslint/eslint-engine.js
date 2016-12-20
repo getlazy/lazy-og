@@ -1,44 +1,46 @@
-
 'use strict';
 
 const _ = require('lodash');
 const selectn = require('selectn');
+const CLIEngine = require('eslint').CLIEngine;
 
 const EngineHelpers = require('@lazyass/engine-helpers');
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
-class EslintEngine
-{
-    constructor() {
-        this._eslint = require('eslint');
-        //  Extend the google config with custom options.
-        this._eslintConfigGoogle = _.extend(require('eslint-config-google'), {
-            envs: ['node', 'es6'],
-            parser: 'babel-eslint',
-            parserOptions: {
-                ecmaVersion: 7
-            }
-        });
-        //  lazy config is a customization of Google config.
-        this._eslintLazyConfig = _.cloneDeep(this._eslintConfigGoogle);
-        this._eslintLazyConfig.rules = _.extend(this._eslintLazyConfig.rules, {
-            'no-console': 2,
-            'no-dupe-args': 2,
-            'no-dupe-keys': 2,
-            'no-unreachable': 2,
-            'max-len': [2, {
-                code: 100,
-                tabWidth: 4,
-                ignoreUrls: true
-            }],
-            'comma-dangle': [2, 'never'],
-            'default-case': 2,
-            'no-fallthrough': 2,
-            'no-implicit-globals': 2,
-            //  'no-undef': 2,  //  Removed for now as `config.envs` doesn't seem to work so we get too
-            //  spurious warnings on `require`, `Promise` as undeclared globals.
-            'no-undefined': 2,
-            'no-use-before-define': 2
+const EslintConfigurator = require('./app/eslint-configurator.js');
+
+class EslintEngine {
+
+    /**
+     * Configures the ESlint engine by instatiating CLI with configuration
+     * imported from YAML file.
+     * @param {string} configFilePath YAML file path.
+     * @return {Promise} Promise which is resolved when the config is processed
+     *                   and CLI instatiated.
+     */
+    configure(configFilePath) {
+        return new Promise((resolve) => {
+            EslintConfigurator
+                .configurFromYaml(configFilePath || (__dirname + '/js_rules.yaml'))
+                .then((configuration) => {
+                    this._cli = new CLIEngine({
+                        envs: ['node', 'es6'],
+                        parser: 'babel-eslint',
+                        plugins: configuration.plugins,
+                        rules: configuration.rules,
+                        fix: false,
+                        parserOptions: {
+                            ecmaVersion: 7
+                        }
+                    });
+                    logger.info('Configured ESLint CLI.');
+                    //logger.info(this._cli);
+                    resolve(this);
+                })
+                .catch((err) => {
+                    logger.error('Failed to configure ESLint CLI.', err);
+                    process.exit(-1);
+                });
         });
     }
 
@@ -53,17 +55,18 @@ class EslintEngine
      */
     analyzeFile(host, hostPath, language, content, config) {
         const self = this;
-
         //  We use a promise as we get any exceptions wrapped up as failures.
         return new Promise((resolve) => {
-            const results = self._eslint.linter.verify(content, self._getConfig(config));
+            const res = self._cli.executeOnText(content, hostPath);
+            const results = _.head(selectn('results', res));
+            const messages = selectn('messages', results);
 
             const warnings = _
-                .chain(results)
+                .chain(messages)
                 .map((warning) => {
                     return {
                         type: warning.fatal ? 'Error' : 'Warning',
-                        message: warning.message,
+                        message: '['+warning.ruleId + ']: ' + warning.message,
                         line: warning.line,
                         column: warning.column
                     };
@@ -76,21 +79,12 @@ class EslintEngine
             });
         });
     }
-
-    _getConfig(config) {
-        switch (_.toLower(config)) {
-            case 'google':
-                return this._eslintConfigGoogle;
-            default:
-                return this._eslintLazyConfig;
-        }
-    };
 }
 
-class EslintEngineHttpServer extends EngineHttpServer
-{
+class EslintEngineHttpServer extends EngineHttpServer {
     _bootEngine() {
-        return Promise.resolve(new EslintEngine());
+        return (new EslintEngine()).configure(null);
+        // return Promise.resolve(new EslintEngine());
     }
 
     _stopEngine() {
@@ -98,8 +92,7 @@ class EslintEngineHttpServer extends EngineHttpServer
     }
 }
 
-class Engine
-{
+class Engine {
     start() {
         const port = process.env.PORT || 80;
         this._server = new EslintEngineHttpServer(port);
