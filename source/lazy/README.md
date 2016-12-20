@@ -49,7 +49,7 @@ And in the engine code we then monitor for `SIGTERM` signal and try to gracefull
 
 ### Conventions
 
-Currently lazy creates a private volume for all engines to access and this volume is mounted as `/lazy` inside of engines. At this moment this isn't configurable.
+Currently lazy creates a private volume for all engines to access and this volume is mounted as `/lazy` inside of engines. At this moment this isn't configurable. Furthermore, each engine gets is own sandbox in `/lazy/sandbox/<engine-name>` where engine name is whatever was defined in `lazy.yaml` (note that this means that names of the engines should remain stable).
 
 ### Helper containers
 
@@ -61,9 +61,9 @@ To create helper containers (which we often do in our official engines), you can
 
 On start lazy loads engine configurations and runs them. The engine configuration is, by default, set in `lazy.yaml` file found in the lazy's root directory. Here's an example:
 
-```
+```yaml
 version: 1
-# id: default # optional
+# id: default # optional lazy ID, useful when hacking
 repository_auth: # optional, only needed if your engines are in a private Docker repository
     username: <your-user-name>
     password: <your-password>
@@ -71,6 +71,7 @@ repository_auth: # optional, only needed if your engines are in a private Docker
 engines: # each of these engines can be left out and other custom or official engines may be added
     eslint:
         image: ierceg/lazy-eslint-engine:latest
+        boot_timeout: 120 # optional timeout to wait for engine to boot
     stylelint:
         image: ierceg/lazy-stylelint-engine:latest
     tidy-html:
@@ -83,9 +84,16 @@ engines: # each of these engines can be left out and other custom or official en
         image: ierceg/lazy-pmd-java-engine:latest
 ```
 
-To allow easier hacking lazy can run engines mounted from local host filesystem. For example if we wanted to hack on `lazy-eslint-engine`:
+Note:
 
-```
+* `version` must be equal to `1`
+* `id` is optional and if not provided it's set to `default`
+* `repository_auth` can also be provided with tokens
+* `boot_timeout` is optional and its default is 30 seconds
+
+To allow easier hacking lazy can run engines mounted from local host filesystem. For example if we wanted to hack on `lazy-eslint-engine` we could specify it like this:
+
+```yaml
 version: 1
 id: hacking
 engines:
@@ -99,7 +107,7 @@ engines:
             "io.lazyass.lazy.engine.languages": "JavaScript"
 ```
 
-If you furthermore run lazy with `./lazy-dev` then both lazy and the engine above will be restarted on their respective source code changes.
+If you furthermore run lazy with `./lazy-dev` then both lazy and the engine above will be run under `nodemon` and restarted on their respective source code changes.
 
 ## Tests
 

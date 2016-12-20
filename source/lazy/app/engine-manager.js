@@ -147,7 +147,7 @@ class EngineManager
                         const languages = H.isNonEmptyString(languagesLabel) ?
                             languagesLabel.split(',') : [];
 
-                        return new Engine(engineName, languages, engineContainer);
+                        return new Engine(engineName, languages, engineContainer, engineConfig);
                     });
             })
             .then((engine) => {
