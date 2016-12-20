@@ -5,7 +5,11 @@ const _ = require('lodash');
 const url = require('url');
 const request = require('request');
 const async = require('async');
+const selectn = require('selectn');
 const HigherDockerManager = require('@lazyass/higher-docker-manager');
+
+const DEFAULT_ARBITRARY_BOOT_TIMEOUT_S = 30;
+const ARBITRARY_ENGINE_BOOT_CHECK_DELAY_MS = 100;
 
 /**
  * Engine class.
@@ -17,10 +21,11 @@ class Engine
      * @param {string} name Name of the engine
      * @param {Array} languages Array of language strings which this engine can process.
      */
-    constructor(name, languages, container) {
+    constructor(name, languages, container, config) {
         this._name = name;
         this._languages = languages;
         this._container = container;
+        this._config = config;
     }
 
     /**
@@ -201,12 +206,15 @@ class Engine
     _waitEngine() {
         const self = this;
 
-        //  When multiplied these two numbers give the timeout duration.
-        const ARBITRARY_MAX_NUMBER_OF_STATUS_REQUESTS = 30;
-        const ARBITRARY_DELAY_BETWEEN_REQUESTS_MS = 1000;
+        //  Calculate the max number of status requests based on the configured timeout or
+        //  if timeout hasn't been configured, then use the default.
+        const bootTimeoutInSeconds = selectn('_config.boot_timeout', self) ||
+            DEFAULT_ARBITRARY_BOOT_TIMEOUT_S;
+        const maxNumberOfStatusRequests = 1000 * bootTimeoutInSeconds /
+            ARBITRARY_ENGINE_BOOT_CHECK_DELAY_MS;
 
+        //  Request engine status until it starts working or times out.
         return new Promise((resolve, reject) => {
-            //  Request engine status until it starts working or times out.
             let healthyStatus = false;
             let requestCounter = 0;
             async.doWhilst(
@@ -220,21 +228,21 @@ class Engine
                         .catch(() => {
                             //  Increment the request counter and wait a bit until trying again.
                             ++requestCounter;
-                            setTimeout(next, ARBITRARY_DELAY_BETWEEN_REQUESTS_MS);
+                            setTimeout(next, ARBITRARY_ENGINE_BOOT_CHECK_DELAY_MS);
                         });
                 },
                 () => {
                     //  Continue until we receive a healthy status or the max number of requests
                     //  is reached.
                     return !healthyStatus &&
-                        requestCounter < ARBITRARY_MAX_NUMBER_OF_STATUS_REQUESTS;
+                        requestCounter < maxNumberOfStatusRequests;
                 },
                 (err) => {
                     if (err) {
                         return reject(err);
                     }
 
-                    if (requestCounter === ARBITRARY_MAX_NUMBER_OF_STATUS_REQUESTS) {
+                    if (requestCounter === maxNumberOfStatusRequests) {
                         return reject(new Error('Engine ' + self.name + ' timed out.'));
                     }
 
