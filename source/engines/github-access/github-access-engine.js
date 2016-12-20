@@ -53,7 +53,7 @@ class GithubAccessEngineHttpServer extends EngineHttpServer
             version: '1.0.0',
             baseURL: LAZY_ENGINE_URL,
             providers: {
-                github: {
+                github2: {
                     config: {
                         clientID: process.env.GITHUB_CLIENT_ID,
                         clientSecret: process.env.GITHUB_CLIENT_SECRET,
