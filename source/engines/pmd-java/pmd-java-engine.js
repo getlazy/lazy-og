@@ -80,7 +80,10 @@ class PmdJavaEngineHttpServer extends EngineHttpServer
     }
 
     _stopEngine() {
-        return HelperContainer.deleteContainer(this._container);
+        //  Prevent trying to stop the same container twice.
+        const container = this._container;
+        this._container = null;
+        return HelperContainer.deleteContainer(container);
     }
 }
 
