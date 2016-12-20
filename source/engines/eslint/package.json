@@ -29,7 +29,9 @@
     "babel-eslint": "6.1.2",
     "eslint": "^3.10.2",
     "eslint-config-google": "^0.7.0",
+    "js-yaml": "^3.7.0",
     "lodash": "^4.17.2",
+    "npmi": "^2.0.1",
     "selectn": "^1.1.1"
   },
   "devDependencies": {
