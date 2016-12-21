@@ -64,7 +64,7 @@ class EslintEngine {
                 .chain(messages)
                 .map((warning) => {
                     return {
-                        type: warning.fatal ? 'Error' : 'Warning',
+                        type: _.eq(warning.severity, 2) ? 'Error' : 'Warning',
                         message: '['+warning.ruleId + ']: ' + warning.message,
                         line: warning.line,
                         column: warning.column
