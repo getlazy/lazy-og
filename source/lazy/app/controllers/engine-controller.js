@@ -75,10 +75,9 @@ const addEndpoints = (app, options) => {
                 return res.status(400).send();
             }
 
-            const host = selectn('body.host', req);
-            const path = selectn('body.path', req);
+            const hostPath = selectn('body.hostPath', req);
             const content = selectn('body.content', req);
-            const client = selectn('body.client', req);
+            const context = selectn('body.context', req);
 
             try {
                 let allEnginesResults = {
@@ -94,7 +93,7 @@ const addEndpoints = (app, options) => {
                     allLanguagesEngines);
 
                 async.each(enginesForLanguage, (engine, next) => {
-                    engine.analyzeFile(host, path, language, content)
+                    engine.analyzeFile(hostPath, language, content, context)
                         .then((engineResults) => {
                             allEnginesResults = _.extend(allEnginesResults, engineResults);
                             next();

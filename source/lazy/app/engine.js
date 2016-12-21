@@ -108,14 +108,13 @@ class Engine
     /**
      * Analyzes the given file content for the given language and analysis configuration.
      * This method must be overriden by the inheriting classes.
-     * @param {string} host Name of the host requesting file analysis.
      * @param {string} hostPath Path of the source file on the host.
      * @param {string} language Language of the source file.
      * @param {string} content Content of the source file requesting lazy to analyze.
-     * @param {string} config Name of the configuration to use.
+     * @param {string} context Context information included with the request.
      * @return {Promise} Promise resolving with results of the file analysis.
      */
-    analyzeFile(host, hostPath, language, content, config) {
+    analyzeFile(hostPath, language, content, context) {
         const self = this;
 
         const requestParams = {
@@ -126,12 +125,10 @@ class Engine
                 'Accept': 'application/json'
             },
             body: {
-                host: host,
                 hostPath: hostPath,
-                clientPath: hostPath,
                 language: language,
                 content: content,
-                config: config
+                context: context
             }
         };
 
