@@ -1,6 +1,7 @@
 
 'use strict';
 
+const _ = require('lodash');
 const low = require('lowdb');
 const mkdirp = require('mkdirp');
 
@@ -40,14 +41,21 @@ class FileStatsEngine
             db.get('AnalyzeFileEvent')
                 .push({
                     time: Date.now(),
-                    host: selectn('host', context),
+                    host: context && context.host,
                     hostPath: hostPath,
                     language: language,
-                    client: selectn('client', context)
+                    client: context && context.client,
+                    originRepository: _
+                        .chain(context)
+                        .get('repositoryInformation.remotes')
+                        .find((remote) => {
+                            return remote && _.eq(remote.name, 'origin');
+                        })
+                        .get('refs.fetch')
+                        .value(),
+                    branch: _.get(context, 'repositoryInformation.status.current')
                 })
                 .value();
-
-            logger.warn('XYZ', context, '123');
 
             resolve({});
         });
