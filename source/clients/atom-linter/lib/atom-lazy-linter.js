@@ -28,12 +28,11 @@ module.exports = {
   },
 
   activate() {
+    const self = this;
+
     require('atom-package-deps').install('atom-lazy-linter');
 
-    //  TODO: Dyamically retrieve supported scopes from the service and then ask the user
-    //    to reload the package (CTRL+ALT+CMD+L) if there is a difference between old and
-    //    new scopes.
-
+    //  We are interested in *all* scopes as lazy may be doing more than just say linting.
     this.scopes = ['*'];
     this.subscriptions = new CompositeDisposable();
     this.subscriptions.add(atom.config.observe('atom-lazy-linter.serviceUrl', (serviceUrl) => {
