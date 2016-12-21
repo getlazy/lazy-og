@@ -215,12 +215,14 @@ module.exports = {
           'X-LazyApi-Version': 'v20161217'
         },
         body: {
-          client: 'atom@' + atom.getVersion(),
-          host: os.hostname(),
-          path: path,
+          hostPath: path,
           language: grammar,
           content: fileContents,
-          repositoryInformation: repoInfo
+          context: {
+            host: os.hostname(),
+            client: 'atom@' + atom.getVersion(),
+            repositoryInformation: repoInfo
+          }
         }
       };
 
