@@ -30,21 +30,24 @@ class FileStatsEngine
      * @param {string} hostPath Path of the source file requesting lazy to analyze.
      * @param {string} language Language of the source file.
      * @param {string} content Content of the source file requesting lazy to analyze.
-     * @param {string} config Name of the configuration to use.
+     * @param {string} context Context information included with the request.
      * @return {Promise} Promise resolving with results of the file analysis.
      */
-    analyzeFile(host, hostPath, language, content, config) {
+    analyzeFile(hostPath, language, content, context) {
         //  We use a promise as we get any exceptions wrapped up as failures.
         return new Promise((resolve) => {
             //  We capture the events and then later extract the stats on-demand.
             db.get('AnalyzeFileEvent')
                 .push({
                     time: Date.now(),
-                    host: host,
+                    host: selectn('host', context),
                     hostPath: hostPath,
-                    language: language
+                    language: language,
+                    client: selectn('client', context)
                 })
                 .value();
+
+            logger.warn('XYZ', context, '123');
 
             resolve({});
         });
