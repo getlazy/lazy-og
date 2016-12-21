@@ -1,10 +1,11 @@
+
 'use strict';
 
 const _ = require('lodash');
 const selectn = require('selectn');
 const CLIEngine = require('eslint').CLIEngine;
-
 const EngineHelpers = require('@lazyass/engine-helpers');
+
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
 const EslintConfigurator = require('./app/eslint-configurator.js');
@@ -45,14 +46,13 @@ class EslintEngine {
 
     /**
      * Analyzes the given file content for the given language and analysis configuration.
-     * @param {string} host Name of the host requesting file analysis.
      * @param {string} hostPath Path of the source file requesting lazy to analyze.
      * @param {string} language Language of the source file.
      * @param {string} content Content of the source file requesting lazy to analyze.
-     * @param {string} config Name of the configuration to use.
+     * @param {string} context Context information included with the request.
      * @return {Promise} Promise resolving with results of the file analysis.
      */
-    analyzeFile(host, hostPath, language, content, config) {
+    analyzeFile(hostPath, language, content, context) {
         const self = this;
         //  We use a promise as we get any exceptions wrapped up as failures.
         return new Promise((resolve) => {
