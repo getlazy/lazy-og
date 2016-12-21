@@ -7,6 +7,7 @@ import request from 'request';
 import escape from 'escape-html';
 import os from 'os';
 import crypto from 'crypto';
+import simpleGit from 'simple-git';
 
 type Linter$Provider = Object
 
@@ -36,7 +37,7 @@ module.exports = {
     this.scopes = ['*'];
     this.subscriptions = new CompositeDisposable();
     this.subscriptions.add(atom.config.observe('atom-lazy-linter.serviceUrl', (serviceUrl) => {
-      this.serviceUrl = serviceUrl;
+      self.serviceUrl = serviceUrl;
     }));
   },
 
@@ -70,32 +71,22 @@ module.exports = {
         }
 
         //  Create the promise and then add it to the map of running requests.
-        const promise = new Promise(function(resolve, reject) {
-          const requestParams = {
-            method: 'POST',
-            url: self.serviceUrl + '/file',
-            json: true,
-            headers: {
-              'Accept': 'application/json',
-              'X-LazyApi-Version': 'v20161217'
-            },
-            body: {
-              client: 'atom@' + atom.getVersion(),
-              host: os.hostname(),
-              path: path,
-              language: grammar,
-              content: editor.getText()
-            }
-          };
+        const promise = self.getRepoInfoForPath(path)
+          .then((repoInfo) => {
+            //  TODO: Cache the results for at least a little while to avoid unnecessary slowdowns.
+            return self.makeRequest(path, grammar, fileContents, repoInfo);
+          })
+          .then((requestResults) => {
+            const {err, response, body} = requestResults;
 
-          request(requestParams, (err, response, body) => {
             if (err) {
-              return resolve([{
+              return Promise.resolve([{
                 type: 'Error',
                 text: err.message,
                 filePath: editor.getPath()
               }]);
             }
+
             if (editor.getText() !== fileContents) {
               // File has changed since the analysis was triggered so rerun it.
               return linter.lint(editor);
@@ -106,7 +97,7 @@ module.exports = {
               if (body && body.error) {
                 message += ' (' + body.error + ')';
               }
-              return resolve([{
+              return Promise.resolve([{
                 type: 'Error',
                 text: message,
                 filePath: editor.getPath()
@@ -150,9 +141,8 @@ module.exports = {
               })
               .value();
 
-            resolve(results);
-          });
-        })
+            return Promise.resolve(results);
+          })
           .then((result) => {
             //  Delete the request from the map of running requests.
             runningRequests.delete(requestHash);
@@ -171,5 +161,71 @@ module.exports = {
     };
 
     return linter;
+  },
+
+  getRepoInfoForPath(path) {
+    const directory = _.find(atom.project.getDirectories(), (directory) => {
+      return directory.contains(path);
+    });
+
+    if (_.isNil(directory)) {
+      return null;
+    }
+
+    return atom.project.repositoryForDirectory(directory)
+      .then((repository) => {
+        if (_.isNil(repository)) {
+          return null;
+        }
+
+        return new Promise((resolve) => {
+          const git = simpleGit(repository.getWorkingDirectory());
+          git.getRemotes(true, (err, remotes) => {
+            if (err) {
+              console.log('Error getting repo remotes', err);
+              //  Don't fail the operation, we will return what we can.
+            }
+
+            git.status((err, status) => {
+              if (err) {
+                console.log('Error getting repo status', err);
+                //  Don't fail the operation, we will return what we can.
+              }
+
+              return resolve({
+                remotes: remotes,
+                status: status
+              });
+            });
+          });
+        });
+      });
+  },
+  makeRequest(path, grammar, fileContents, repoInfo) {
+    const self = this;
+
+    return new Promise((resolve) => {
+      const requestParams = {
+        method: 'POST',
+        url: self.serviceUrl + '/file',
+        json: true,
+        headers: {
+          'Accept': 'application/json',
+          'X-LazyApi-Version': 'v20161217'
+        },
+        body: {
+          client: 'atom@' + atom.getVersion(),
+          host: os.hostname(),
+          path: path,
+          language: grammar,
+          content: fileContents,
+          repositoryInformation: repoInfo
+        }
+      };
+
+      request(requestParams, (err, response, body) => {
+        resolve({err, response, body});
+      });
+    });
   }
 };
