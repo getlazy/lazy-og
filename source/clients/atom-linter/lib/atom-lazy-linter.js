@@ -1,5 +1,7 @@
 'use babel'; // this must be the absolutely first line in the file otherwise Atom gets confused
 
+/* global atom */
+
 import _ from 'lodash';
 
 import {CompositeDisposable} from 'atom';
@@ -8,6 +10,7 @@ import escape from 'escape-html';
 import os from 'os';
 import crypto from 'crypto';
 import simpleGit from 'simple-git';
+import async from 'async';
 
 type Linter$Provider = Object
 
@@ -181,24 +184,32 @@ module.exports = {
 
         return new Promise((resolve) => {
           const git = simpleGit(repository.getWorkingDirectory());
-          git.getRemotes(true, (err, remotes) => {
-            if (err) {
-              console.log('Error getting repo remotes', err);
-              //  Don't fail the operation, we will return what we can.
-            }
-
-            git.status((err, status) => {
+          async.parallel(async.reflectAll(
+            [git.getRemotes.bind(git), git.status.bind(git), git.branch.bind(git)]),
+            (err, reflectedResults) => {
               if (err) {
-                console.log('Error getting repo status', err);
-                //  Don't fail the operation, we will return what we can.
+                console.log('Error getting complete repository info', err);
               }
 
-              return resolve({
-                remotes: remotes,
-                status: status
+              //  Log all the errors if any but return anything you have collected.
+              _.each(reflectedResults, (result) => {
+                if (result.err) {
+                  console.log('Error getting repository info', err);
+                }
               });
-            });
-          });
+
+              const [reflectedRemotes, reflectedStatus, reflectedBranches] = reflectedResults;
+
+              const repoInfo = {
+                type: repository.getType(),
+                remotes: reflectedRemotes.value,
+                status: reflectedStatus.value,
+                branches: _.get(reflectedBranches.value, 'branches')
+              };
+
+              return resolve(repoInfo);
+            }
+          );
         });
       });
   },
