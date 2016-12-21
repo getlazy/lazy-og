@@ -109,6 +109,61 @@ engines:
 
 If you furthermore run lazy with `./lazy-dev` then both lazy and the engine above will be run under `nodemon` and restarted on their respective source code changes.
 
+## API
+
+### POST `/file`
+
+Analyzes the given file content for the given language and analysis context.
+
+#### Headers
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `X-LazyClient-Version` | string | yes | lazy API version that client is using. |
+
+#### Request
+
+lazy expects the following body for request:
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `hostPath` | string | yes | Path of the source file on the host. |
+| `language` | string | yes | Language of the source file. |
+| `instanceUrl` | string | yes | Content of the source file requesting lazy to analyze. |
+| `context` | object | yes | Context information included with the request. |
+
+Context information may consists of anything that client deems relevant. At the moment, our engines use the following:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `host` | string | Name of the host making the request. |
+| `client` | string | Name and version of the client making the request. |
+| `repositoryInformation` | object | Remotes and status of the repository to which the file belongs, if any. |
+
+Repository information may further contain:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `remotes` | array | Array of objects describing the remotes registered with the repository. |
+| `status` | object | Object containing properties and values of the repository's current status. |
+
+#### Response
+
+lazy responds with the following body:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `warnings` | array | Array of warnings objects that are the result of the analysis. |
+
+Each warning object consists may contain:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `type` | string | `Error`, `Warning` or `Info` value describing the level of the warning. |
+| `message` | string | The message of the warning. |
+| `line` | number | The line with which the message is associated. |
+| `column` | number | The column with which the message is associated. |
+
 ## Tests
 
 At this moment most of our tests are of integration variety - we run a full lazy service and then send requests to it. You can run them with `make test`. Coverage is not great, to say the least so please feel free to jump in.
