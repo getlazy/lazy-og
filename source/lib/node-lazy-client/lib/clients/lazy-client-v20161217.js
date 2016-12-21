@@ -57,12 +57,13 @@ class LazyClientv20161217 extends LazyClient
                 'X-LazyClient-Version': LAZY_API_VERSION
             },
             body: {
-                stackId: self._stackId,
-                client: self._client,
-                host: self._host,
+                hostPath: path,
+                language: language,
                 content: content,
-                path: path,
-                language: language
+                context: {
+                    host: self._host,
+                    client: self._client
+                }
             }
         };
 

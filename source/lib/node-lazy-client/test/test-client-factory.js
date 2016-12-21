@@ -11,12 +11,6 @@ describe('ClientFactory', function() {
         assert(_.isNull(LazyClient));
     });
 
-    it('loads v20161128', function() {
-        const LazyClient = ClientFactory.getClientClass('v20161128');
-        assert(LazyClient);
-        assert.equal(LazyClient.version, 'v20161128');
-    });
-
     it('loads v20161217', function() {
         const LazyClient = ClientFactory.getClientClass('v20161217');
         assert(LazyClient);
