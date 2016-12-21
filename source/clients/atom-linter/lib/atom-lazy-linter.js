@@ -51,6 +51,7 @@ module.exports = {
       grammarScopes: this.scopes,
       scope: 'file',
       lintOnFly: true,
+      lintOnFlyInterval: 250, /* Don't trigger lazy too often when typing */
       lint: async (editor) => {
         const self = this;
 
