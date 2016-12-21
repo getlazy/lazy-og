@@ -34,10 +34,10 @@ class GithubAccessEngine
      * @param {string} hostPath Path of the source file requesting lazy to analyze.
      * @param {string} language Language of the source file.
      * @param {string} content Content of the source file requesting lazy to analyze.
-     * @param {string} config Name of the configuration to use.
+     * @param {string} context Context information included with the request.
      * @return {Promise} Promise resolving with results of the file analysis.
      */
-    analyzeFile(host, hostPath, language, content, config) {
+    analyzeFile(hostPath, language, content, context) {
         return Promise.resolve({});
     }
 }
