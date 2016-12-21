@@ -77,11 +77,22 @@ class FileStatsEngineHttpServer extends EngineHttpServer
                         (stats.requestsPerLanguage[event.language] + 1) || 1;
                     stats.requestsPerPath[event.hostPath] =
                         (stats.requestsPerPath[event.hostPath] + 1) || 1;
+                    if (event.client) {
+                        stats.requestsPerClient[event.client] =
+                            (stats.requestsPerClient[event.client] + 1) || 1;
+                    }
+                    if (event.originRepository && event.branch) {
+                        const key = event.originRepository + ':' + event.branch;
+                        stats.requestsPerOriginRepositoryBranch[key] =
+                            (stats.requestsPerOriginRepositoryBranch[key] + 1) || 1;
+                    }
                     return stats;
                 }, {
                     requests: 0,
                     requestsPerLanguage: {},
-                    requestsPerPath: {}
+                    requestsPerPath: {},
+                    requestsPerClient: {},
+                    requestsPerOriginRepositoryBranch: {}
                 })
                 .value();
 
