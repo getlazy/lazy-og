@@ -1,7 +1,7 @@
 {
   "name": "atom-lazy-linter",
   "main": "./lib/atom-lazy-linter",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "lazy plugin for Atom Linter",
   "keywords": [
     "lazy",
@@ -16,7 +16,8 @@
     "atom-package-deps": "^4.3.1",
     "escape-html": "^1.0.3",
     "lodash": "^4.17.2",
-    "request": "^2.78.0"
+    "request": "^2.78.0",
+    "simple-git": "^1.65.0"
   },
   "providedServices": {
     "linter": {
