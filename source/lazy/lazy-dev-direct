@@ -1,0 +1,9 @@
+#/bin/bash
+docker run -it --rm \
+    -v "$(pwd):/app" \
+    -v "/var/run/docker.sock:/var/run/docker.sock" \
+    -p "16827:80" \
+    --stop-signal SIGTERM \
+    -w /app \
+    ierceg/node-dev:6.9.1 \
+    node index.js
