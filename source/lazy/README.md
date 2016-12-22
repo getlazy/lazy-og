@@ -146,6 +146,7 @@ Repository information may further contain:
 |----------|------|-------------|
 | `remotes` | array | Array of objects describing the remotes registered with the repository. |
 | `status` | object | Object containing properties and values of the repository's current status. |
+| `branches` | object | Object containing names of all branches and their respective information. |
 
 #### Response
 
