@@ -50,7 +50,7 @@ class LazyClientv20161217 extends LazyClient
 
         const requestParams = {
             method: 'POST',
-            url: self._serviceUrl + '/file',
+            url: `${self._serviceUrl}/file`,
             json: true,
             headers: {
                 Accept: 'application/json',
@@ -84,44 +84,24 @@ class LazyClientv20161217 extends LazyClient
     }
 
     getEngines() {
-        const self = this;
-
-        const requestParams = {
-            method: 'GET',
-            url: `${self._serviceUrl}/engines`,
-            json: true,
-            headers: {
-                Accept: 'application/json',
-                'X-LazyClient-Version': LAZY_API_VERSION
-            }
-        };
-
-        return new Promise((resolve, reject) => {
-            request(requestParams, (err, response, body) => {
-                if (err) {
-                    return reject(err);
-                }
-
-                if (response.statusCode !== 200) {
-                    return reject(new errors.HttpStatusError(
-                        response.statusCode, body && body.error));
-                }
-
-                return resolve(body);
-            });
-        });
+        return this._get('engines');
     }
 
     /**
      * Queries the lazy service for its curent version and latest API version.
      * @return {Promise} Promise resolving with API and lazy service versions.
      */
-    version() {
+    getVersion() {
+        return this._get('version');
+    }
+
+    _get(path, qs) {
         const self = this;
 
         const requestParams = {
             method: 'GET',
-            url: self._serviceUrl + '/version',
+            url: `${self._serviceUrl}/${path}`,
+            qs,
             json: true,
             headers: {
                 Accept: 'application/json'
