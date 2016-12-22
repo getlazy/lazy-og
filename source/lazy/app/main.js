@@ -1,12 +1,14 @@
 
 'use strict';
 
+/* global logger */
+
 //  Initialize all global variables.
 global.logger = require('./logger');
 
 const express = require('express');
 const bodyParser = require('body-parser');
-
+const controllers = require('./controllers');
 const EngineManager = require('./engine-manager');
 
 //  Engine manager object managing all the engine containers.
@@ -30,7 +32,7 @@ class Main
     static main(lazyYamlFilePath) {
         logger.info('Booting lazy');
 
-        return Main._recreateAllEngines(lazyYamlFilePath || (__dirname + '/../lazy.yaml'))
+        return Main._recreateAllEngines(lazyYamlFilePath || (`${__dirname}/../lazy.yaml`))
             .then(Main._initializeExpressApp)
             .catch((err) => {
                 logger.error('Failed to boot lazy', err);
@@ -38,8 +40,8 @@ class Main
                     .then(() => {
                         process.exit(-1);
                     })
-                    .catch((err) => {
-                        logger.error('Failed to cleanup after lazy', err);
+                    .catch((stopErr) => {
+                        logger.error('Failed to cleanup after lazy', stopErr);
                         process.exit(-2);
                     });
             });
@@ -67,22 +69,18 @@ class Main
         app = express();
         app.use(bodyParser.json());
 
-        return require('./controllers').initialize(app, {
-            engineManager: engineManager
-        })
-            .then(() => {
-                return new Promise((resolve) => {
-                    const port = process.env.PORT || 80;
-                    app.listen(port, () => {
-                        logger.info('lazy listening on', port);
-                        resolve();
-                    });
-
-                    app.on('error', (err) => {
-                        logger.error('Express error', err);
-                    });
+        return controllers.initialize(app, { engineManager })
+            .then(() => new Promise((resolve) => {
+                const port = process.env.PORT || 80;
+                app.listen(port, () => {
+                    logger.info('lazy listening on', port);
+                    resolve();
                 });
-            });
+
+                app.on('error', (err) => {
+                    logger.error('Express error', err);
+                });
+            }));
     }
 
     /**
