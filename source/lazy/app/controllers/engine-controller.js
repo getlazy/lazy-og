@@ -62,11 +62,14 @@ const addEndpoints = (app, options) => {
         });
     });
 
-    app.get('/info', (req, res) => {
-        res.send({
-            engines: _.keys(namesToEnginesMap),
-            languages: _.keys(languagesToEnginesMap)
-        });
+    app.get('/engines', (req, res) => {
+        res.send(_.reduce(namesToEnginesMap, (engines, engine, name) => {
+            /* eslint no-param-reassign off */
+            engines[name] = {
+                url: engine.url
+            };
+            return engines;
+        }, {}));
     });
 
     app.post('/file', (req, res) => {
