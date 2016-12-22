@@ -22,6 +22,8 @@ class Engine
      * Constructs a new instance of Engine with the given name and languages.
      * @param {string} name Name of the engine
      * @param {Array} languages Array of language strings which this engine can process.
+     * @param {Container} container Container in which this engine is running.
+     * @param {Object} config Defined configuration of this engine.
      */
     constructor(name, languages, container, config) {
         this._name = name;
