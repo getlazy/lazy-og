@@ -12,7 +12,6 @@ const ASSERT_FALSE = (data) => {
 const FILE_FIXTURES = [{
     name: '200 - HTML',
     params: {
-        client: 'atom',
         path: '/src/test.html',
         language: 'HTML',
         content:
@@ -35,7 +34,6 @@ const FILE_FIXTURES = [{
 }, {
     name: '200 - C++',
     params: {
-        client: 'atom',
         path: '/src/test.cpp',
         language: 'C++',
         content:
@@ -64,7 +62,6 @@ int main() {
 }, {
     name: '200 - C',
     params: {
-        client: 'atom',
         path: '/src/test.c',
         language: 'C',
         content:
@@ -89,7 +86,6 @@ class X {};
 }, {
     name: '200 - PHP',
     params: {
-        client: 'atom',
         path: '/src/test.php',
         language: 'PHP',
         content:
@@ -119,7 +115,6 @@ class a = 'XYZ';
 }, {
     name: '200 - Java',
     params: {
-        client: 'atom',
         path: '/src/test.java',
         language: 'Java',
         content:
@@ -140,7 +135,6 @@ import hoho.bubu2;
 }, {
     name: '200 - CSS',
     params: {
-        client: 'atom',
         path: '/src/test.css',
         language: 'CSS',
         content:
@@ -180,7 +174,6 @@ a { color: pink; color: orange; }
 }, {
     name: '200 - SCSS',
     params: {
-        client: 'atom',
         path: '/src/test.scss',
         language: 'SCSS',
         content:
@@ -220,7 +213,6 @@ a { color: pink; color: orange; }
 }, {
     name: '200 - LESS',
     params: {
-        client: 'atom',
         path: '/src/test.less',
         language: 'Less',
         content:
@@ -251,7 +243,6 @@ a { color: pink; color: orange; }
 }, {
     name: '200 - JavaScript',
     params: {
-        client: 'atom',
         path: '/src/test.js',
         language: 'JavaScript',
         content:
@@ -273,7 +264,6 @@ var x = 0;
 }, {
     name: '200 - JavaScript (error)',
     params: {
-        client: 'atom',
         path: '/src/test.js',
         language: 'JavaScript',
         content:
