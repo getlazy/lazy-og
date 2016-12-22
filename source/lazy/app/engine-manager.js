@@ -1,6 +1,8 @@
 
 'use strict';
 
+/* global logger */
+
 const _ = require('lodash');
 const H = require('higher');
 const selectn = require('selectn');
@@ -50,12 +52,8 @@ class EngineManager
                 [self._container, self._network, self._volume] = results;
                 return self._deleteAllEngines();
             })
-            .then(() => {
-                return self._joinContainerToNetwork();
-            })
-            .then(() => {
-                return self._installAllEngines();
-            })
+            .then(() => self._joinContainerToNetwork())
+            .then(() => self._installAllEngines())
             .then((engines) => {
                 self._engines = engines;
             });
@@ -68,10 +66,9 @@ class EngineManager
     _installAllEngines() {
         const self = this;
 
-        return Promise.all(
-            _.map(self._config.engines, (engineConfig, engineName) => {
-                return self._installEngine(engineName, engineConfig);
-            }));
+        return Promise.all(_.map(
+            self._config.engines,
+            (engineConfig, engineName) => self._installEngine(engineName, engineConfig)));
     }
 
     _installEngine(engineName, engineConfig) {
@@ -92,13 +89,12 @@ class EngineManager
                     Image: imageName,
                     Cmd: engineConfig.command ? engineConfig.command.split(' ') : undefined,
                     Env: _.union(engineConfig.env, [
-                        'LAZY_ENGINE_NAME=' + engineName,
-                        'LAZY_SERVICE_URL=' + selectn('_config.service_url', self),
-                        'LAZY_ENGINE_URL=' +
-                            selectn('_config.service_url', self) + '/engine/' + engineName,
-                        'LAZY_VOLUME_NAME=' + self._volume.Name,
+                        `LAZY_ENGINE_NAME=${engineName}`,
+                        `LAZY_SERVICE_URL=${selectn('_config.service_url', self)}`,
+                        `LAZY_ENGINE_URL=${selectn('_config.service_url', self)}/engine/${engineName}`,
+                        `LAZY_VOLUME_NAME=${self._volume.Name}`,
                         'LAZY_VOLUME_MOUNT=/lazy',
-                        'LAZY_ENGINE_SANDBOX_DIR=/lazy/sandbox/' + engineName
+                        `LAZY_ENGINE_SANDBOX_DIR=/lazy/sandbox/${engineName}`
                     ]),
                     HostConfig: {
                         //  When networking mode is a name of another network it's
@@ -111,7 +107,7 @@ class EngineManager
                             '/var/run/docker.sock:/var/run/docker.sock',
                             //  HACK: We hard-code the volume mount path to /lazy which is
                             //  known to all containers.
-                            self._volume.Name + ':/lazy'
+                            `${self._volume.Name}:/lazy`
                         ]),
                         RestartPolicy: {
                             Name: 'unless-stopped'
@@ -136,34 +132,19 @@ class EngineManager
                 });
                 return HigherDockerManager.createContainer(createEngineParams);
             })
-            .then((engineContainer) => {
-                return engineContainer.start()
-                    .then(() => {
-                        return engineContainer.status();
-                    })
+            .then(engineContainer =>
+                engineContainer.start()
+                    .then(() => engineContainer.status())
                     .then((engineContainerStatus) => {
-                        const languagesLabel = engineContainerStatus.Config.Labels
-                            [Label.IoLazyassLazyEngineLanguages];
+                        const languagesLabel =
+                            engineContainerStatus.Config.Labels[Label.IoLazyassLazyEngineLanguages];
                         const languages = H.isNonEmptyString(languagesLabel) ?
                             languagesLabel.split(',') : [];
 
                         return new Engine(engineName, languages, engineContainer, engineConfig);
-                    });
-            })
-            .then((engine) => {
-                return engine.boot()
-                    .then(() => {
-                        return engine;
-                    });
-            });
-    }
-
-    getEngineHelp(engineName) {
-        return Promise.reject(new Error('Not Implemented'));
-    }
-
-    getEngineInfo(engineName) {
-        return Promise.reject(new Error('Not Implemented'));
+                    })
+            )
+            .then(engine => engine.boot().then(() => engine));
     }
 
     _findLazyVolumeOrCreateIt() {
@@ -173,12 +154,12 @@ class EngineManager
                 Label.IoLazyassLazyEngineManagerOwned, self._id)
             .then((volumes) => {
                 if (!_.isEmpty(volumes)) {
-                    return _.first(volumes);
+                    return _.head(volumes);
                 }
 
                 const volumeCreateParams = {
                     //  Name it after the unique ID.
-                    name: 'lazy-volume-' + self._id,
+                    name: `lazy-volume-${self._id}`,
                     Labels: {}
                 };
                 //  Add the label to later use it to find this container.
@@ -195,12 +176,12 @@ class EngineManager
                 Label.IoLazyassLazyEngineManagerOwned, self._id)
             .then((networks) => {
                 if (!_.isEmpty(networks)) {
-                    return _.first(networks);
+                    return _.head(networks);
                 }
 
                 const networkCreateParams = {
                     //  Name it after the unique ID.
-                    name: 'lazy-network-' + self._id,
+                    name: `lazy-network-${self._id}`,
                     Labels: {}
                 };
                 //  Add the label to later use it to find this container.
@@ -215,23 +196,19 @@ class EngineManager
 
         //  Stop/wait/delete all containers in the lazy network except our own container.
         return HigherDockerManager.getContainersInNetworks([self._network.Name])
-            .then((containers) => {
-                return Promise.all(_.map(containers, (container) => {
+            .then(containers =>
+                Promise.all(_.map(containers, (container) => {
                     logger.info('Stopping/waiting/deleting engine container',
-                        _.first(container.Names));
+                        _.head(container.Names));
                     if (container.id === self._container.id) {
                         return Promise.resolve();
                     }
 
                     return container.stop()
-                        .then(() => {
-                            return container.wait();
-                        })
-                        .then(() => {
-                            return container.delete();
-                        });
-                }));
-            });
+                        .then(() => container.wait())
+                        .then(() => container.delete());
+                }))
+            );
     }
 
     _joinContainerToNetwork() {
@@ -244,9 +221,9 @@ class EngineManager
 
         //  Check if the lazy container is already attached to lazy's network
         const alreadyAttachedToLazyNetwork = _.some(lazyNetworksNames,
-            (networkName) => networkName === self._network.Name);
+            networkName => networkName === self._network.Name);
         if (alreadyAttachedToLazyNetwork) {
-            return;
+            return Promise.resolve();
         }
 
         //  Connect the lazy container to the lazy network.
