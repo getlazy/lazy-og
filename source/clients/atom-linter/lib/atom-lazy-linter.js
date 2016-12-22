@@ -185,7 +185,7 @@ module.exports = {
         return new Promise((resolve) => {
           const git = simpleGit(repository.getWorkingDirectory());
           async.parallel(async.reflectAll(
-            [git.getRemotes.bind(git), git.status.bind(git), git.branch.bind(git)]),
+            [_.bind(git.getRemotes, git, true), git.status.bind(git), git.branch.bind(git)]),
             (err, reflectedResults) => {
               if (err) {
                 console.log('Error getting complete repository info', err);
