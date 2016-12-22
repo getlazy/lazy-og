@@ -48,7 +48,7 @@ class StylelintEngine
                     .map((warning) => {
                         try {
                             return {
-                                type: warning.severity,
+                                type: _.capitalize(warning.severity),
                                 //  Remove the rule string from the final output.
                                 message: warning.text.replace(' (' + warning.rule + ')', ''),
                                 line: _.toNumber(warning.line),
