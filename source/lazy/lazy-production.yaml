@@ -1,4 +1,6 @@
 version: 1
+dashboard:
+    image: ierceg/lazy-dashboard:latest
 engines:
     eslint:
         image: ierceg/lazy-eslint-engine:latest
