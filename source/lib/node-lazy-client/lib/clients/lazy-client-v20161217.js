@@ -53,13 +53,13 @@ class LazyClientv20161217 extends LazyClient
             url: self._serviceUrl + '/file',
             json: true,
             headers: {
-                'Accept': 'application/json',
+                Accept: 'application/json',
                 'X-LazyClient-Version': LAZY_API_VERSION
             },
             body: {
                 hostPath: path,
-                language: language,
-                content: content,
+                language,
+                content,
                 context: {
                     host: self._host,
                     client: self._client
@@ -78,7 +78,7 @@ class LazyClientv20161217 extends LazyClient
                         response.statusCode, body && body.error));
                 }
 
-                resolve(body);
+                return resolve(body);
             });
         });
     }
@@ -95,7 +95,7 @@ class LazyClientv20161217 extends LazyClient
             url: self._serviceUrl + '/version',
             json: true,
             headers: {
-                'Accept': 'application/json'
+                Accept: 'application/json'
             }
         };
 
@@ -110,7 +110,7 @@ class LazyClientv20161217 extends LazyClient
                         response.statusCode, body && body.error));
                 }
 
-                resolve(body);
+                return resolve(body);
             });
         });
     }
