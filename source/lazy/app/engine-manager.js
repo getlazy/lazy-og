@@ -56,6 +56,17 @@ class EngineManager
             .then(() => self._installAllEngines())
             .then((engines) => {
                 self._engines = engines;
+            })
+            .then(() => {
+                //  Install dashboard if one is specified.
+                if (_.isObject(self._config.dashboard)) {
+                    return self._installEngine('dashboard', self._config.dashboard)
+                        .then((dashboard) => {
+                            self._dashboard = dashboard;
+                        });
+                }
+
+                return Promise.resolve();
             });
     }
 
@@ -63,11 +74,14 @@ class EngineManager
         return this._engines;
     }
 
+    get dashboard() {
+        return this._dashboard;
+    }
+
     _installAllEngines() {
         const self = this;
 
-        return Promise.all(_.map(
-            self._config.engines,
+        return Promise.all(_.map(self._config.engines,
             (engineConfig, engineName) => self._installEngine(engineName, engineConfig)));
     }
 

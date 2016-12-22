@@ -150,6 +150,12 @@ const addEndpoints = (app, options) => {
                 }
             }));
         });
+
+        //  Proxy GET /dashboard if one has been configured.
+        const dashboard = _.get(options, 'engineManager.dashboard');
+        if (dashboard) {
+            app.get('/dashboard', proxy(dashboard.url));
+        }
     });
 };
 
