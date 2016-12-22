@@ -1,8 +1,12 @@
 
 'use strict';
 
+/* global logger, describe, it, before, after */
+
 const _ = require('lodash');
 const assert = require('assert');
+const NodeLazyClient = require('@lazyass/node-lazy-client');
+const bootstrap = require('./bootstrap');
 
 const ASSERT_FALSE = (data) => {
     logger.error(data);
@@ -25,10 +29,10 @@ const FILE_FIXTURES = [{
     then: (results) => {
         const warnings = results.warnings;
         assert.equal(warnings.length, 10);
-        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
-        assert.equal(warningsPerType['Error'].length, 1);
-        assert.equal(warningsPerType['Warning'].length, 8);
-        assert.equal(warningsPerType['Info'].length, 1);
+        const warningsPerType = _.groupBy(warnings, 'type');
+        assert.equal(warningsPerType.Error.length, 1);
+        assert.equal(warningsPerType.Warning.length, 8);
+        assert.equal(warningsPerType.Info.length, 1);
     },
     catch: ASSERT_FALSE
 }, {
@@ -54,9 +58,9 @@ int main() {
     then: (results) => {
         const warnings = results.warnings;
         assert.equal(warnings.length, 4);
-        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
-        assert.equal(warningsPerType['Error'].length, 3);
-        assert.equal(warningsPerType['Warning'].length, 1);
+        const warningsPerType = _.groupBy(warnings, 'type');
+        assert.equal(warningsPerType.Error.length, 3);
+        assert.equal(warningsPerType.Warning.length, 1);
     },
     catch: ASSERT_FALSE
 }, {
@@ -78,9 +82,9 @@ class X {};
     then: (results) => {
         const warnings = results.warnings;
         assert.equal(warnings.length, 6);
-        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
-        assert.equal(warningsPerType['Error'].length, 5);
-        assert.equal(warningsPerType['Warning'].length, 1);
+        const warningsPerType = _.groupBy(warnings, 'type');
+        assert.equal(warningsPerType.Error.length, 5);
+        assert.equal(warningsPerType.Warning.length, 1);
     },
     catch: ASSERT_FALSE
 }, {
@@ -108,8 +112,8 @@ class a = 'XYZ';
     then: (results) => {
         const warnings = results.warnings;
         assert.equal(warnings.length, 1);
-        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
-        assert.equal(warningsPerType['Error'].length, 1);
+        const warningsPerType = _.groupBy(warnings, 'type');
+        assert.equal(warningsPerType.Error.length, 1);
     },
     catch: ASSERT_FALSE
 }, {
@@ -126,8 +130,8 @@ import hoho.bubu2;
     then: (results) => {
         const warnings = results.warnings;
         assert.equal(warnings.length, 2);
-        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
-        assert.equal(warningsPerType['Warning'].length, 2);
+        const warningsPerType = _.groupBy(warnings, 'type');
+        assert.equal(warningsPerType.Warning.length, 2);
         assert.equal(warnings[0].message, 'Avoid unused imports such as \'hoho.bubu\'');
         assert.equal(warnings[1].message, 'Avoid unused imports such as \'hoho.bubu2\'');
     },
@@ -167,8 +171,8 @@ a { color: pink; color: orange; }
     then: (results) => {
         const warnings = results.warnings;
         assert.equal(warnings.length, 10);
-        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
-        assert.equal(warningsPerType['error'].length, 10);
+        const warningsPerType = _.groupBy(warnings, 'type');
+        assert.equal(warningsPerType.Error.length, 10);
     },
     catch: ASSERT_FALSE
 }, {
@@ -206,8 +210,8 @@ a { color: pink; color: orange; }
     then: (results) => {
         const warnings = results.warnings;
         assert.equal(warnings.length, 10);
-        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
-        assert.equal(warningsPerType['error'].length, 10);
+        const warningsPerType = _.groupBy(warnings, 'type');
+        assert.equal(warningsPerType.Error.length, 10);
     },
     catch: ASSERT_FALSE
 }, {
@@ -236,8 +240,8 @@ a { color: pink; color: orange; }
     then: (results) => {
         const warnings = results.warnings;
         assert.equal(warnings.length, 2);
-        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
-        assert.equal(warningsPerType['error'].length, 2);
+        const warningsPerType = _.groupBy(warnings, 'type');
+        assert.equal(warningsPerType.Error.length, 2);
     },
     catch: ASSERT_FALSE
 }, {
@@ -245,8 +249,7 @@ a { color: pink; color: orange; }
     params: {
         path: '/src/test.js',
         language: 'JavaScript',
-        content:
-`
+        content: `
 'use strict';
 
 var x = 0;
@@ -255,10 +258,12 @@ var x = 0;
     then: (results) => {
         const warnings = results.warnings;
         assert.equal(warnings.length, 2);
-        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
-        assert.equal(warningsPerType['Warning'].length, 2);
-        assert.equal(warnings[0].message, 'Unexpected var, use let or const instead.');
-        assert.equal(warnings[1].message, '\'x\' is assigned a value but never used.');
+        const warningsPerType = _.groupBy(warnings, 'type');
+
+        // We should get two errors: [no-var] and [no-unused-vars]
+        assert.equal(warningsPerType.Error.length, 2);
+        assert(_.endsWith(warnings[0].message, 'Unexpected var, use let or const instead.'));
+        assert(_.endsWith(warnings[1].message, '\'x\' is assigned a value but never used.'));
     },
     catch: ASSERT_FALSE
 }, {
@@ -266,40 +271,40 @@ var x = 0;
     params: {
         path: '/src/test.js',
         language: 'JavaScript',
-        content:
-`
+        content: `
 var x =
 `
     },
     then: (results) => {
         const warnings = results.warnings;
         assert.equal(warnings.length, 1);
-        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
-        assert.equal(warningsPerType['Error'].length, 1);
-        assert.equal(warnings[0].message, 'Parsing error: Unexpected token');
+        const warningsPerType = _.groupBy(warnings, 'type');
+        assert.equal(warningsPerType.Error.length, 1);
+        assert(_.endsWith(warnings[0].message, 'Parsing error: Unexpected token'));
     },
     catch: ASSERT_FALSE
 }];
 
-describe('/file', function() {
+describe('/file', function postFileEndpointTest() {
     this.timeout(15000);
 
-    before(function() {
+    before(function beforeTests() {
         this.timeout(150000);
-        return require('./bootstrap').start();
+        return bootstrap.start();
     });
 
-    after(function() {
+    after(function afterTests() {
         this.timeout(150000);
-        return require('./bootstrap').stop();
+        return bootstrap.stop();
     });
 
-    describe('supports version v20161217', function() {
-        const LazyClient = require('@lazyass/node-lazy-client').getClientClass('v20161217');
-        const lazyUrl = 'http://0.0.0.0:' + (process.env.PORT || 80);
+    describe('supports version v20161217', () => {
+        const LazyClient = NodeLazyClient.getClientClass('v20161217');
+        const port = process.env.PORT || 80;
+        const lazyUrl = `http://0.0.0.0:${port}`;
 
-        it('version', function(done) {
-            let client = new LazyClient(lazyUrl);
+        it('version', (done) => {
+            const client = new LazyClient(lazyUrl);
             client.version()
                 .then((version) => {
                     assert.equal(version.api, 'v20161217');
@@ -308,15 +313,16 @@ describe('/file', function() {
                 .catch(done);
         });
 
-        describe('analyzeFile', function() {
-            let onlyFixtures = _.filter(FILE_FIXTURES, (fixture) => fixture.only);
+        describe('analyzeFile', () => {
+            let onlyFixtures = _.filter(FILE_FIXTURES, 'only');
             if (_.isEmpty(onlyFixtures)) {
                 onlyFixtures = FILE_FIXTURES;
             }
-            _.each(onlyFixtures, (fixture) => {
-                let params = fixture.params;
-                it(fixture.name, function(done) {
-                    let client = new LazyClient(lazyUrl, params.client);
+
+            _.forEach(onlyFixtures, (fixture) => {
+                const params = fixture.params;
+                it(fixture.name, (done) => {
+                    const client = new LazyClient(lazyUrl, params.client);
                     client.analyzeFile(params.content, params.path, params.language)
                         .then(fixture.then)
                         .catch(fixture.catch)

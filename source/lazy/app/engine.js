@@ -1,6 +1,8 @@
 
 'use strict';
 
+/* global logger */
+
 const _ = require('lodash');
 const url = require('url');
 const request = require('request');
@@ -58,18 +60,14 @@ class Engine
 
         logger.info('Booting', self.name, 'engine');
         return self._redirectContainerLogsToLogger()
-            .then(() => {
-                return self._container.status();
-            })
+            .then(() => self._container.status())
             .then((containerStatus) => {
                 self._containerUrl = url.format({
                     protocol: 'http',
                     host: containerStatus.Config.Hostname
                 });
             })
-            .then(() => {
-                return self._waitEngine();
-            });
+            .then(() => self._waitEngine());
     }
 
     status() {
@@ -77,10 +75,10 @@ class Engine
 
         const requestParams = {
             method: 'GET',
-            url: self._containerUrl + '/status',
+            url: `${self._containerUrl}/status`,
             json: true,
             headers: {
-                'Accept': 'application/json'
+                Accept: 'application/json'
             }
         };
 
@@ -91,27 +89,26 @@ class Engine
                 }
 
                 if (response.statusCode !== 200) {
-                    let message = 'HTTP engine failed with ' + response.statusCode +
-                        ' status code';
+                    let message = `HTTP engine failed with ${response.statusCode} status code`;
                     if (body && body.error) {
-                        message += ' (' + body.error + ')';
+                        message += ` (${body.error})`;
                     }
 
                     return reject(new Error(message));
                 }
 
-                resolve(body);
+                return resolve(body);
             });
         });
     }
 
     /**
-     * Analyzes the given file content for the given language and analysis configuration.
+     * Analyzes the given file content for the given language and analysis context.
      * This method must be overriden by the inheriting classes.
      * @param {string} hostPath Path of the source file on the host.
      * @param {string} language Language of the source file.
      * @param {string} content Content of the source file requesting lazy to analyze.
-     * @param {string} context Context information included with the request.
+     * @param {Object} context Context information included with the request.
      * @return {Promise} Promise resolving with results of the file analysis.
      */
     analyzeFile(hostPath, language, content, context) {
@@ -119,16 +116,16 @@ class Engine
 
         const requestParams = {
             method: 'POST',
-            url: self._containerUrl + '/file',
+            url: `${self._containerUrl}/file`,
             json: true,
             headers: {
-                'Accept': 'application/json'
+                Accept: 'application/json'
             },
             body: {
-                hostPath: hostPath,
-                language: language,
-                content: content,
-                context: context
+                hostPath,
+                language,
+                content,
+                context
             }
         };
 
@@ -139,32 +136,30 @@ class Engine
                 }
 
                 if (response.statusCode !== 200) {
-                    let message = 'HTTP engine failed with ' + response.statusCode +
-                        ' status code';
+                    let message = `HTTP engine failed with ${response.statusCode} status code`;
                     if (body && body.error) {
-                        message += ' (' + body.error + ')';
+                        message += ` (${body.error})`;
                     }
 
                     return reject(new Error(message));
                 }
 
-                resolve(body);
+                return resolve(body);
             });
         })
             .then((results) => {
-                return results;
-            })
-            .then((results) => {
+                const processedWarnings = {};
                 if (_.isArray(results.warnings)) {
-                    results.warnings = _.map(results.warnings, (warning) => {
+                    /* eslint arrow-body-style: off */
+                    processedWarnings.warnings = _.map(results.warnings, (warning) => {
                         //  Add the actual client file path.
-                        return _.extend(warning, {
+                        return _.assignIn(warning, {
                             filePath: hostPath
                         });
                     });
                 }
 
-                return results;
+                return processedWarnings;
             });
     }
 
@@ -173,7 +168,7 @@ class Engine
 
         const redirectLogStreamIntoLogger = (stream) => {
             stream.on('data', (buffer) => {
-                logger.info('[' + self.name + ']',
+                logger.info(`[${self.name}]`,
                     HigherDockerManager.containerOutputBuffersToString([buffer]));
             });
             stream.on('end', () => {
@@ -181,7 +176,7 @@ class Engine
                     'Stopped streaming logs for engine', self.name);
             });
             stream.on('error', (err) => {
-                logger.error('Error while streaming logs for engine', self.name);
+                logger.error('Error while streaming logs for engine', self.name, err);
             });
         };
 
@@ -195,7 +190,7 @@ class Engine
             .then(redirectLogStreamIntoLogger)
             .catch((err) => {
                 logger.error(
-                    'Error while setting up streaming of logs for engine', self.name);
+                    'Error while setting up streaming of logs for engine', self.name, err);
                 //  We don't pass the error as streaming of logs is non-critical.
             });
     }
@@ -205,10 +200,9 @@ class Engine
 
         //  Calculate the max number of status requests based on the configured timeout or
         //  if timeout hasn't been configured, then use the default.
-        const bootTimeoutInSeconds = selectn('_config.boot_timeout', self) ||
-            DEFAULT_ARBITRARY_BOOT_TIMEOUT_S;
-        const maxNumberOfStatusRequests = 1000 * bootTimeoutInSeconds /
-            ARBITRARY_ENGINE_BOOT_CHECK_DELAY_MS;
+        const bootTimeoutInMs = 1000 * (selectn('_config.boot_timeout', self) ||
+            DEFAULT_ARBITRARY_BOOT_TIMEOUT_S);
+        const maxNumberOfStatusRequests = bootTimeoutInMs / ARBITRARY_ENGINE_BOOT_CHECK_DELAY_MS;
 
         //  Request engine status until it starts working or times out.
         return new Promise((resolve, reject) => {
@@ -224,26 +218,23 @@ class Engine
                         })
                         .catch(() => {
                             //  Increment the request counter and wait a bit until trying again.
-                            ++requestCounter;
+                            requestCounter += 1;
                             setTimeout(next, ARBITRARY_ENGINE_BOOT_CHECK_DELAY_MS);
                         });
                 },
-                () => {
-                    //  Continue until we receive a healthy status or the max number of requests
-                    //  is reached.
-                    return !healthyStatus &&
-                        requestCounter < maxNumberOfStatusRequests;
-                },
+                //  Continue until we receive a healthy status or the max number of requests
+                //  is reached.
+                () => !healthyStatus && requestCounter < maxNumberOfStatusRequests,
                 (err) => {
                     if (err) {
                         return reject(err);
                     }
 
                     if (requestCounter === maxNumberOfStatusRequests) {
-                        return reject(new Error('Engine ' + self.name + ' timed out.'));
+                        return reject(new Error(`Engine ${self.name} timed out.`));
                     }
 
-                    resolve();
+                    return resolve();
                 });
         });
     }

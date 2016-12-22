@@ -38,6 +38,6 @@
     "winston-logstash-udp": "^0.1.1"
   },
   "devDependencies": {
-    "@lazyass/node-lazy-client": "^1.2.0"
+    "@lazyass/node-lazy-client": "^1.2.1"
   }
 }
