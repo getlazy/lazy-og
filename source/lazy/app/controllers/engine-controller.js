@@ -144,17 +144,7 @@ const addEndpoints = (app, options) => {
 
     //  Create proxies to pass all requests that get to /engine/{engine.name}/* paths.
     _.forEach(namesToEnginesMap, (engine) => {
-        const enginePath = `/engine/${engine.name}`;
-        app.use(enginePath, proxy(engine.url, {
-            forwardPath: (req) => {
-                //  Extract the requested engine URL path.
-                const originalUrl = url.parse(req.originalUrl);
-                const engineUrlPath = originalUrl && originalUrl.path &&
-                    originalUrl.path.slice(enginePath.length);
-
-                return engineUrlPath;
-            }
-        }));
+        app.use(`/engine/${engine.name}`, proxy(engine.url));
     });
 
     //  Proxy /dashboard to dashboard engine if one has been configured.
