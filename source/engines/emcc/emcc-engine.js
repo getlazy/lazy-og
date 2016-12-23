@@ -5,6 +5,7 @@ const _ = require('lodash');
 const H = require('higher');
 
 const EngineHelpers = require('@lazyass/engine-helpers');
+
 const HelperContainer = EngineHelpers.HelperContainer;
 const AdaptedAtomLinter = EngineHelpers.AdaptedAtomLinter;
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
@@ -25,13 +26,15 @@ class EmccHelperContainer extends HelperContainer
             '-fdiagnostics-print-source-range-info', '-fexceptions'];
     }
 
+    /* eslint class-methods-use-this: off */
     _processContainerOutput(buffers) {
         //  Convert all the resulting buffers into string and join them as
         //  our parser works on a single string will all the output lines.
-        const output = _.map(buffers, (buffer) => {
-            return buffer && buffer.payload && buffer.payload.toString();
-        }).join('');
+        const output = _.map(buffers,
+            buffer => buffer && buffer.payload && buffer.payload.toString()
+        ).join('');
 
+        /* eslint no-useless-escape: off */
         const EMCC_OUTPUT_REGEX = '(?<file>.+):(?<line>\\d+):(?<col>\\d+):(\{(?<lineStart>\\d+)' +
             ':(?<colStart>\\d+)\-(?<lineEnd>\\d+):(?<colEnd>\\d+)}.*:)? (?<type>[\\w \\-]+): ' +
             '(?<message>.*)';
@@ -42,13 +45,11 @@ class EmccHelperContainer extends HelperContainer
                 .map((warning) => {
                     //  EMCC returns all lower case for types.
                     warning.type = _.capitalize(warning.type);
+                    //  Fix "Fatal error" type to "Fatal".
+                    warning.type = warning.type === 'Fatal error' ? 'Error' : warning.type;
                     return warning;
                 })
-                .each((line) => {
-                    //  Fix "Fatal error" type to "Fatal".
-                    line.type = line.type === 'Fatal error' ? 'Error' : line.type;
-                })
-                .filter((line) => line.type === 'Warning' || line.type === 'Error')
+                .filter(line => line.type === 'Warning' || line.type === 'Error')
                 .value()
         };
     }
@@ -56,23 +57,36 @@ class EmccHelperContainer extends HelperContainer
 
 class EmccEngineHttpServer extends EngineHttpServer
 {
-    _bootEngine() {
+    beforeListening() {
         return HelperContainer
             .createContainer(REPOSITORY_AUTH, HELPER_CONTAINER_IMAGE_NAME, LAZY_VOLUME_NAME)
             .then((container) => {
                 //  Assume that the container has started correctly.
                 this._container = container;
-                return new EmccHelperContainer(container);
+                this._engine = new EmccHelperContainer(container);
             });
     }
 
-    _stopEngine() {
+    getMeta() {
+        return {
+            languages: ['C', 'C++', 'Objective-C', 'Objective-C++']
+        };
+    }
+
+    analyzeFile() {
+        //  Pass forward the arguments to the engine.
+        return this._engine.analyzeFile.apply(this._engine, arguments);
+    }
+
+    afterListening() {
         if (this._container) {
             //  Prevent trying to stop the same container twice.
             const container = this._container;
             this._container = null;
             return HelperContainer.deleteContainer(container);
         }
+
+        return Promise.resolve();
     }
 }
 
