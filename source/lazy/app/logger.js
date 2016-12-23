@@ -5,7 +5,7 @@ const winston = require('winston');
 
 const STACK_VERSION = require('../package.json').version;
 
-const logger = new(winston.Logger)({
+const logger = new winston.Logger({
     transports: [
         new (winston.transports.Console)({
             formatter: (options) => {

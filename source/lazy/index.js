@@ -1,7 +1,10 @@
 
 'use strict';
 
+/* global logger */
+
 const Main = require('./app/main.js');
+
 Main.main()
     .then(() => {
         logger.info('lazy initialized');
