@@ -1,6 +1,8 @@
 
 'use strict';
 
+/* global logger */
+
 const _ = require('lodash');
 const tmp = require('tmp');
 const fs = require('fs');
@@ -33,14 +35,12 @@ class HelperContainer
      */
     static createContainer(auth, imageName, lazyVolumeName) {
         return HigherDockerManager.pullImage(auth, imageName)
-            .then(() => {
-                return HigherDockerManager.getOwnContainer();
-            })
+            .then(() => HigherDockerManager.getOwnContainer())
             .then((engineContainer) => {
                 //  Get the engine network name assuming that it's the first of all the networks
                 //  that engine container has access to. This is a safe assumption as engines should
                 //  be attached only to stack networks.
-                const engineNetworkName = _.first(_.keys(selectn(
+                const engineNetworkName = _.head(_.keys(selectn(
                     'NetworkSettings.Networks', engineContainer)));
 
                 //  Create the helper container.
@@ -57,7 +57,7 @@ class HelperContainer
                         Binds: [
                             //  HACK: We hard-code the volume mount path to /lazy which is
                             //  known to all containers.
-                            lazyVolumeName + ':/lazy'
+                            `${lazyVolumeName}:/lazy`
                         ],
                         RestartPolicy: {
                             Name: 'unless-stopped'
@@ -70,19 +70,13 @@ class HelperContainer
 
                 return HigherDockerManager.createContainer(createHelperParams);
             })
-            .then((container) => {
-                return container.start();
-            });
+            .then(container => container.start());
     }
 
     static deleteContainer(container) {
         return container.stop()
-            .then(() => {
-                return container.wait();
-            })
-            .then(() => {
-                return container.delete();
-            });
+            .then(() => container.wait())
+            .then(() => container.delete());
     }
 
     /**
@@ -93,7 +87,7 @@ class HelperContainer
         this._container = container;
     }
 
-    _createTempDir() {
+    static _createTempDir() {
         return new Promise((resolve, reject) => {
             fs.mkdir(TEMPORARY_DIR_LAZY_PATH, (err) => {
                 if (err) {
@@ -102,7 +96,7 @@ class HelperContainer
                     }
                 }
 
-                resolve();
+                return resolve();
             });
         });
     }
@@ -117,7 +111,7 @@ class HelperContainer
      * @return {Promise} Promise resolving with information on the temporary file.
      * @private
      */
-    _createTempFileWithContent(content, hostPath) {
+    static _createTempFileWithContent(content, hostPath) {
         return new Promise((resolve, reject) => {
             tmp.file({
                 //  HACK: We hard-code the volume mount path to /lazy which is known to all
@@ -131,21 +125,21 @@ class HelperContainer
                     return reject(err);
                 }
 
-                fs.writeFile(tempFilePath, content, (err) => {
-                    if (err) {
-                        return reject(err);
+                return fs.writeFile(tempFilePath, content, (writeFileErr) => {
+                    if (writeFileErr) {
+                        return reject(writeFileErr);
                     }
 
-                    resolve({
+                    return resolve({
                         path: tempFilePath,
                         //  Cleanup callback to delete the temporary file once it's no longer
                         //  in use.
-                        cleanupCallback: cleanupCallback
+                        cleanupCallback
                     });
                 });
             });
         });
-    };
+    }
 
     /**
      * Schedules and performs the cleanup after the analysis. This operation doesn't
@@ -154,27 +148,29 @@ class HelperContainer
      * to return the results as soon as possible.
      * @param {function} temporaryFileCleanupCallback callback to be used to cleanup temporary file
      * when it is no longer needed
+     * @private
      */
-    _scheduleDelayedCleanup(temporaryFileCleanupCallback) {
+    static _scheduleDelayedCleanup(temporaryFileCleanupCallback) {
         setImmediate(() => {
             try {
-                temporaryFileCleanupCallback && temporaryFileCleanupCallback();
-            } catch(e) {
+                if (_.isFunction(temporaryFileCleanupCallback)) {
+                    temporaryFileCleanupCallback();
+                }
+            } catch (e) {
                 logger.error('Failed to cleanup temporary file', e);
                 //  Don't pass on this error - there is nothing we can do about it.
             }
         });
-    };
+    }
 
     /**
      * Analyzes the given file content for the given language and analysis configuration.
      * @param {string} hostPath Path of the source file requesting lazy to analyze.
      * @param {string} language Language of the source file.
      * @param {string} content Content of the source file requesting lazy to analyze.
-     * @param {string} context Context information included with the request.
      * @return {Promise} Promise resolving with results of the file analysis.
      */
-    analyzeFile(hostPath, language, content, context) {
+    analyzeFile(hostPath, language, content) {
         const self = this;
 
         let temporaryFileInfo;
@@ -183,10 +179,8 @@ class HelperContainer
         //  temporary directory of engine container. Volume of the engine container
         //  is shared with helper container and can thus be read by it.
         //  TODO: unhack temporary directory thingamajig
-        return self._createTempDir()
-            .then(() => {
-                return self._createTempFileWithContent(content, hostPath);
-            })
+        return HelperContainer._createTempDir()
+            .then(() => HelperContainer._createTempFileWithContent(content, hostPath))
             .then((fileInfo) => {
                 temporaryFileInfo = fileInfo;
 
@@ -210,38 +204,39 @@ class HelperContainer
                     execParams.Cmd = [];
                 }
                 execParams.Cmd = execParams.Cmd
-                    .concat(TEMPORARY_DIR_LAZY_PATH + '/' + path.basename(temporaryFileInfo.path));
+                    .concat(`${TEMPORARY_DIR_LAZY_PATH}/${path.basename(temporaryFileInfo.path)}`);
 
                 return HigherDockerManager.execInContainer(self._container, execParams);
             })
             //  Delegate the processing of the output to inheriting classes.
             .then(self._processContainerOutput)
             .then((results) => {
-                if (_.isArray(results.warnings)) {
+                const processedResults = _.cloneDeep(results);
+                if (_.isArray(processedResults.warnings)) {
                     //  Fix the file path to use the actual client path rather than
                     //  the temporary one we used.
-                    results.warnings = _.map(results.warnings, (warning) => {
-                        return _.extend(warning, {
+                    processedResults.warnings = _.map(processedResults.warnings, warning =>
+                        _.assignIn(warning, {
                             filePath: hostPath
-                        });
-                    });
+                        })
+                    );
                 }
 
-                return results;
+                return processedResults;
             })
             .then((results) => {
                 //  This is the last operation before we return the results so schedule the cleanup.
-                self._scheduleDelayedCleanup(temporaryFileInfo.cleanupCallback);
+                HelperContainer._scheduleDelayedCleanup(temporaryFileInfo.cleanupCallback);
                 return results;
             })
             .catch((err) => {
                 //  Schedule the cleanup and pass on the error.
                 if (temporaryFileInfo) {
-                    self._scheduleDelayedCleanup(temporaryFileInfo.cleanupCallback);
+                    HelperContainer._scheduleDelayedCleanup(temporaryFileInfo.cleanupCallback);
                 }
                 return Promise.reject(err);
             });
-    };
+    }
 }
 
 module.exports = HelperContainer;

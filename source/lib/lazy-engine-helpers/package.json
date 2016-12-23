@@ -4,7 +4,8 @@
   "description": "Helper utilities for easier development of lazy engines",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "make test",
+    "coverage": "make coverage"
   },
   "repository": {
     "type": "git",
@@ -30,5 +31,8 @@
     "selectn": "^1.1.1",
     "tmp": "0.0.31",
     "winston": "^2.3.0"
+  },
+  "devDependencies": {
+    "node-docker-api": "^1.1.3"
   }
 }
