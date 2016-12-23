@@ -17,7 +17,8 @@ const docker = new Docker({
     socketPath: '/var/run/docker.sock'
 });
 
-const TEST_IMAGE = 'hello-world';
+//  Use old node-dev image for testing.
+const TEST_IMAGE = 'ierceg/node-dev:1.0.0';
 
 describe('HelperContainer', function _HelperContainerTest() {
     describe('createContainer', function _createContainerTest() {
@@ -37,7 +38,7 @@ describe('HelperContainer', function _HelperContainerTest() {
                 });
         });
 
-        it.only('pulls image that is not available', function () {
+        it('pulls image that is not available', function () {
             //  First make sure the test image doesn't exist.
             return docker.image.status(TEST_IMAGE)
                 .then((image) => {
@@ -52,10 +53,7 @@ describe('HelperContainer', function _HelperContainerTest() {
                     assert.equal(err.statusCode, 404);
                     assert(_.startsWith(err.message, '(HTTP code 404) no such image'));
                 })
-                .then(() => {
-                    return HelperContainer
-                        .createContainer({}, TEST_IMAGE);
-                });
+                .then(() => HelperContainer.createContainer({}, TEST_IMAGE));
         });
     });
 });
