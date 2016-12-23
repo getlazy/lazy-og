@@ -1,7 +1,8 @@
 
 'use strict';
 
-const _ = require('lodash');
+/* global logger */
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const selectn = require('selectn');
@@ -9,30 +10,64 @@ const selectn = require('selectn');
 /**
  * Base class for lazy engine HTTP servers implemented with Express.JS.
  * Parameters of the engine are delegated to inheriting classes through a set of methods that
- * they need to implement. Those methods are: `_bootEngine`, `_customizeExpressApp` `_stopEngine`.
+ * they need to implement. Those methods are: `beforeListening`, `customizeExpressApp`,
+ * `afterListening`, `getMeta`.
  */
 class EngineHttpServer
 {
     constructor(port) {
         this._port = port;
+        this._isReady = false;
     }
 
-    get engine() {
-        return this._engine;
+    get isReady() {
+        return this._isReady;
     }
 
     start() {
-        const self = this;
-
-        return new Promise((resolve, reject) => {
-            return self._start(resolve, reject);
-        });
+        return new Promise(this._initializeExpressApp.bind(this));
     }
 
-    _start(resolve, reject) {
+    stop() {
+        //  Immediately mark the server as not ready to prevent any stray requests being served.
+        this._isReady = false;
+
+        //  Close the server and stop the engine.
+        if (this._httpServer) {
+            this._httpServer.close();
+        }
+        this._httpServer = null;
+        return this.afterListening();
+    }
+
+    //  Methods to be overriden by inheriting classes.
+
+    /**
+     * Finishes start of the engine. It is invoked immediately before HTTP server starts
+     * listening.
+     */
+    beforeListening() {
+        //  Nothing to do.
+        return Promise.resolve();
+    }
+
+    afterListening() {
+        //  Nothing to do.
+        return Promise.resolve();
+    }
+
+    customizeExpressApp() {
+        //  Nothing to do.
+    }
+
+    getMeta() {
+        return {};
+    }
+
+    _initializeExpressApp(resolve, reject) {
         const self = this;
 
-        if (!_.isUndefined(self._engine)) {
+        if (self._isReady) {
             return reject(new Error('Engine HTTP server is already running.'));
         }
 
@@ -42,7 +77,7 @@ class EngineHttpServer
 
         //  Middleware that returns 503 if the engine isn't ready to accept requests yet.
         app.use((req, res, next) => {
-            if (!_.isUndefined(self._engine)) {
+            if (self._isReady) {
                 return next();
             }
 
@@ -50,14 +85,17 @@ class EngineHttpServer
             //  This allows lazy service running this engine to gracefully handle the case.
             const ARBITRARY_SERVICE_UNAVAILABLE_RETRY_AFTER = 5/* seconds */;
             res.setHeader('Retry-After', ARBITRARY_SERVICE_UNAVAILABLE_RETRY_AFTER);
-            res.sendStatus(503);
+            return res.sendStatus(503);
         });
 
         //  GET /status is used by lazy to determine if the engine is healthy.
         app.get('/status', (req, res) => {
-            //  For now just return 200. The above middleware will return 503 if engine is still
-            //  not running.
+            //  Return 200. The above middleware will return 503 if engine is still not ready.
             res.sendStatus(200);
+        });
+
+        app.get('/meta', (req, res) => {
+            res.send(self.getMeta());
         });
 
         //  Listen on POST /file for requests. These requests are not 100% the same as the one
@@ -69,7 +107,7 @@ class EngineHttpServer
             const content = selectn('body.content', req);
             const context = selectn('body.context', req);
 
-            self._engine.analyzeFile(hostPath, language, content, context)
+            self.analyzeFile(hostPath, language, content, context)
                 .then((results) => {
                     res.send(results);
                 })
@@ -81,32 +119,36 @@ class EngineHttpServer
                 });
         });
 
-        if (_.isFunction(self._customizeExpressApp)) {
-            self._customizeExpressApp(app);
-        }
+        self.customizeExpressApp(app);
 
-        //  Capture the HTTP server instance so that we can shut it down on `stop()`.
-        this._httpServer = app.listen(self._port, () => {
-            return self._bootEngine()
-                .then((engine) => {
-                    //  Engine HTTP server is ready when engine is ready.
-                    self._engine = engine;
-                    resolve();
-                })
-                .catch(reject);
-        });
-    }
-
-    stop() {
-        const self = this;
-
-        //  Close the server and stop the engine.
-        self._httpServer && self._httpServer.close();
-        self._httpServer = null;
-        return self._stopEngine()
+        //  Finish initialization before we start listening on the port.
+        self.beforeListening()
             .then(() => {
-                self._engine = null;
+                //  Capture the HTTP server instance so that we can shut it down on `stop()`.
+                self._httpServer = app.listen(self._port, (err) => {
+                    if (err) {
+                        logger.warn(`Failed to listen on port ${self._port}`, err);
+                        //  We have to cleanup as we have already invoked `beforeListening`.
+                        return self.afterListening()
+                            .then(() => {
+                                //  Reject the entire promise with the original error.
+                                reject(err);
+                            })
+                            .catch((afterListeningErr) => {
+                                //  Log the error and reject with the original error as
+                                //  there is nothing we can do about this.
+                                logger.error('After listening failed', afterListeningErr);
+                                reject(err);
+                            });
+                    }
+
+                    //  HTTP server has booted and engine is now ready to accept requests.
+                    self._isReady = true;
+                    return resolve();
+                });
             });
+
+        return this._httpServer;
     }
 }
 
