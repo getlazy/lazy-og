@@ -2,10 +2,13 @@
 'use strict';
 
 const _ = require('lodash');
+//  lowdb uses lodash internally but eslint cannot know that.
+/* eslint lodash/prefer-lodash-method: off */
 const low = require('lowdb');
+const LowdbLibFileAsync = require('lowdb/lib/file-async');
 const mkdirp = require('mkdirp');
-
 const EngineHelpers = require('@lazyass/engine-helpers');
+
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
 const LAZY_ENGINE_URL = process.env.LAZY_ENGINE_URL;
@@ -13,42 +16,27 @@ const LAZY_ENGINE_SANDBOX_DIR = process.env.LAZY_ENGINE_SANDBOX_DIR;
 
 const nbPassport = require('no-boilerplate-passport');
 
-//  Create directory for our json database.
-mkdirp.sync(LAZY_ENGINE_SANDBOX_DIR);
-
-const db = low(LAZY_ENGINE_SANDBOX_DIR + '/logins.json', {
-    storage: require('lowdb/lib/file-async')
-});
-
-//  Create the schema.
-db.defaults({
-    GitHubLogin: []
-})
-    .value();
-
-class GithubAccessEngine
-{
-    /**
-     * Analyzes the given file content for the given language and analysis configuration.
-     * @param {string} host Name of the host requesting file analysis.
-     * @param {string} hostPath Path of the source file requesting lazy to analyze.
-     * @param {string} language Language of the source file.
-     * @param {string} content Content of the source file requesting lazy to analyze.
-     * @param {string} context Context information included with the request.
-     * @return {Promise} Promise resolving with results of the file analysis.
-     */
-    analyzeFile(hostPath, language, content, context) {
-        return Promise.resolve({});
-    }
-}
-
+/* eslint class-methods-use-this: off */
 class GithubAccessEngineHttpServer extends EngineHttpServer
 {
-    _bootEngine() {
-        return Promise.resolve(new GithubAccessEngine());
+    beforeListening() {
+        //  Create directory for our json database.
+        mkdirp.sync(LAZY_ENGINE_SANDBOX_DIR);
+
+        this._db = low(`${LAZY_ENGINE_SANDBOX_DIR}/logins.json`, {
+            storage: LowdbLibFileAsync
+        });
+
+        //  Create the schema.
+        this._db.defaults({
+            GitHubLogin: []
+        })
+            .value();
     }
 
-    _customizeExpressApp(app) {
+    customizeExpressApp(app) {
+        const self = this;
+
         nbPassport(app, {
             version: '1.0.0',
             baseURL: LAZY_ENGINE_URL,
@@ -71,34 +59,34 @@ class GithubAccessEngineHttpServer extends EngineHttpServer
                         //  those will be used by no-boilerplate-passport to redirect browser on
                         //  success or failure (we could have defined them relative to lazy service
                         //  rather than engine)
-                        success: LAZY_ENGINE_URL + '/auth/success',
-                        failure: LAZY_ENGINE_URL + '/auth/failure'
+                        success: `${LAZY_ENGINE_URL}/auth/success`,
+                        failure: `${LAZY_ENGINE_URL}/auth/failure`
                     },
-                    handler: function(config, token, tokenSecret, profile, done) {
+                    handler: (config, token, tokenSecret, profile, done) => {
                         const id = profile && profile.username;
 
                         //  There is no "update or insert" in lowdb so we have to query and then
                         //  decide if we should insert or update.
-                        const login = db.get('GitHubLogin')
-                            .find({id: id})
+                        const login = self._db.get('GitHubLogin')
+                            .find({ id })
                             .value();
 
                         //  HACK: Obviously unsafe way to store tokens to access sensitive data.
                         if (_.isUndefined(login)) {
-                            db.get('GitHubLogin')
+                            self._db.get('GitHubLogin')
                                 .push({
-                                    id: id,
-                                    token: token,
-                                    profile: profile,
+                                    id,
+                                    token,
+                                    profile,
                                     time: Date.now()
                                 })
                                 .value();
                         } else {
-                            db.get('GitHubLogin')
-                                .find({id: id})
+                            self._db.get('GitHubLogin')
+                                .find({ id })
                                 .assign({
-                                    token: token,
-                                    profile: profile,
+                                    token,
+                                    profile,
                                     time: Date.now()
                                 })
                                 .value();
@@ -121,8 +109,10 @@ class GithubAccessEngineHttpServer extends EngineHttpServer
         });
     }
 
-    _stopEngine() {
-        return Promise.resolve();
+    getMeta() {
+        return {
+            languages: []
+        };
     }
 }
 
