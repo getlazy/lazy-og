@@ -22,6 +22,8 @@ const LAZY_VOLUME_NAME = process.env.LAZY_VOLUME_NAME;
 
 const HELPER_CONTAINER_IMAGE_NAME = 'ierceg/tidy-html:5.2.0';
 
+//  We are implicitly using `this` in overriden methods but eslint keep telling us not to.
+/* eslint class-methods-use-this: off */
 class TidyHtmlHelperContainer extends HelperContainer
 {
     _getContainerCmd() {
@@ -31,9 +33,9 @@ class TidyHtmlHelperContainer extends HelperContainer
     _processContainerOutput(buffers) {
         //  Convert all the resulting buffers into string and join them as
         //  our parser works on a single string will all the output lines.
-        const output = _.map(buffers, (buffer) => {
-            return buffer && buffer.payload && buffer.payload.toString();
-        }).join('');
+        const output = _.map(buffers,
+            buffer => buffer && buffer.payload && buffer.payload.toString()
+        ).join('');
 
         const OUTPUT_LINE_REGEX =
             /line (\d+) column (\d+) - (Info|Warning|Error): (.+)/g;
@@ -54,24 +56,35 @@ class TidyHtmlHelperContainer extends HelperContainer
         }
 
         return {
-            warnings: warnings
+            warnings
         };
     }
 }
 
 class TidyHtmlEngineHttpServer extends EngineHttpServer
 {
-    _bootEngine() {
+    beforeListening() {
         return HelperContainer
             .createContainer(REPOSITORY_AUTH, HELPER_CONTAINER_IMAGE_NAME, LAZY_VOLUME_NAME)
             .then((container) => {
                 //  Assume that the container has started correctly.
                 this._container = container;
-                return new TidyHtmlHelperContainer(container);
+                this._engine = new TidyHtmlHelperContainer(container);
             });
     }
 
-    _stopEngine() {
+    getMeta() {
+        return {
+            languages: ['HTML']
+        };
+    }
+
+    analyzeFile() {
+        //  Pass forward the arguments to the engine.
+        return this._engine.analyzeFile.apply(this._engine, arguments);
+    }
+
+    afterListening() {
         //  Prevent trying to stop the same container twice.
         const container = this._container;
         this._container = null;
