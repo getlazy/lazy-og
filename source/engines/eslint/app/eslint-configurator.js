@@ -1,7 +1,9 @@
+
 'use strict';
 
+/* global logger */
+
 const _ = require('lodash');
-const selectn = require('selectn');
 const fs = require('fs');
 const yaml = require('js-yaml');
 const npmi = require('npmi');
@@ -22,7 +24,8 @@ class EslintConfigurator {
                 if (err) {
                     return reject(err);
                 }
-                resolve(yaml.safeLoad(content));
+
+                return resolve(yaml.safeLoad(content));
             });
         });
     }
@@ -35,7 +38,7 @@ class EslintConfigurator {
      */
     static _importRuleSet(configRuleSet) {
         const ruleSet = _.cloneDeep(configRuleSet);
-        const rsName = selectn('rule-set', ruleSet);
+        const rsName = _.get(ruleSet, 'rule-set');
 
         // If there is ignore:true in configuration then just skip the whole rule-set
         // Convenient for quick turning on/off of some rule sets
@@ -55,8 +58,8 @@ class EslintConfigurator {
         // Process rule sets that require installation of external packages (npm modules)
         // Return the promise that will be resolved when the NPM module is downloaded & installed
         return new Promise((resolve) => {
-            const packageName = selectn('package', ruleSet);
-            const packageVersion = selectn('package-version', ruleSet) || 'latest';
+            const packageName = _.get(ruleSet, 'package');
+            const packageVersion = _.get(ruleSet, 'package-version') || 'latest';
             const options = {
                 name: packageName,
                 version: packageVersion,
@@ -88,12 +91,15 @@ class EslintConfigurator {
      * @return {Promise} Promise that is resolved when the last rules-set is processed.
      */
     static _installAllRuleSets(ruleSets, onSuccess) {
-        return _.reduce(ruleSets, (prom, oneRuleSet) => {
-            return prom.then((rSet) => {
+        //  Builds a chain of promises importing rule sets. Last rule is resolved and accepted
+        //  by the caller.
+        return _.reduce(ruleSets, (prom, oneRuleSet) =>
+            prom.then((rSet) => {
                 onSuccess(rSet);
                 return EslintConfigurator._importRuleSet(oneRuleSet);
-            });
-        }, Promise.resolve());
+            }),
+            //  Start reducing from a promise resolving to empty.
+            Promise.resolve());
     }
 
     /**
@@ -123,7 +129,7 @@ class EslintConfigurator {
 
                     // Function to be called after each package is successfully processed.
                     // This function should further configure packages after the installation
-                    const onSuccessF = function (ruleSet) {
+                    const onSuccessF = function _onSuccessF(ruleSet) {
                         if (_.isNil(ruleSet)) {
                             return;
                         }
@@ -140,12 +146,14 @@ class EslintConfigurator {
                             // either as a recommendation or as a full list.
                             // In such cases, we can use this instead of manually listing every rule
                             // defined in a package.
-                            const rulesImportStatement = selectn('rules-import', ruleSet);
+                            const rulesImportStatement = _.get(ruleSet, 'rules-import');
 
                             try {
                                 if (_.isString(rulesImportStatement)) {
-                                    rules = _.extend(rules,
-                                        selectn(rulesImportStatement, require(ruleSet.package))
+                                    rules = _.assignIn(rules,
+                                        /* eslint import/no-dynamic-require: off */
+                                        /* eslint global-require: off */
+                                        _.get(require(ruleSet.package), rulesImportStatement)
                                     );
                                 }
                             } catch (err) {
@@ -154,28 +162,28 @@ class EslintConfigurator {
 
                             // Process rules that may be configured manually
                             if (!_.isNil(ruleSet.rules)) {
-                                rules = _.extend(rules, ruleSet.rules);
+                                rules = _.assignIn(rules, ruleSet.rules);
                             }
                         }
                     };
 
                     // Set env vars defined in yaml configuration
                     // In future, add other configuration options, if needed.
-                    const envs = selectn('env-vars', eslintConfiguration);
+                    const envs = _.get(eslintConfiguration, 'env-vars');
 
                     EslintConfigurator._setEnvVars(envs);
 
                     // Process all declared rule sets. A rule set may involve installing
                     // remote NPM packages
-                    const packs = selectn('rule-sets', eslintConfiguration);
+                    const packs = _.get(eslintConfiguration, 'rule-sets');
 
                     EslintConfigurator._installAllRuleSets(packs, onSuccessF)
                         .then((lastRuleSet) => {
                             onSuccessF(lastRuleSet);
                             logger.info('Finished installation of packages.');
                             resolve({
-                                'rules': rules,
-                                'plugins': plugins
+                                rules,
+                                plugins
                             });
                         });
                 })
