@@ -12,13 +12,13 @@ class LazyYamlFile {
                     return reject(err);
                 }
 
-                resolve(yaml.safeLoad(content));
+                return resolve(yaml.safeLoad(content));
             });
         });
     }
 
     static save(filePath, data) {
-        return new Primise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             const content = yaml.safeDump(data, {
                 indent: 4
             });
@@ -27,8 +27,8 @@ class LazyYamlFile {
                     return reject(err);
                 }
 
-                resolve();
-            })
+                return resolve();
+            });
         });
     }
 }
