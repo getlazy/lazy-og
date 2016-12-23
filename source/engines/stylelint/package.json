@@ -22,9 +22,8 @@
   },
   "homepage": "https://github.com/SoftwareMarbles/lazy-stylelint-engine#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^1.11.0",
+    "@lazyass/engine-helpers": "^2.0.0",
     "lodash": "^4.17.2",
-    "selectn": "^1.1.1",
     "stylelint": "^7.6.0",
     "stylelint-config-standard": "^15.0.0"
   },
