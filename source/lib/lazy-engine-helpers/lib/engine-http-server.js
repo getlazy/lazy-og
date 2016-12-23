@@ -7,6 +7,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const selectn = require('selectn');
 
+//  We are implicitly using `this` in overriden methods but eslint keep telling us not to.
+/* eslint class-methods-use-this: off */
+
 /**
  * Base class for lazy engine HTTP servers implemented with Express.JS.
  * Parameters of the engine are delegated to inheriting classes through a set of methods that
