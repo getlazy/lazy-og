@@ -65,7 +65,8 @@ const addEndpoints = (app, options) => {
         res.send(_.reduce(namesToEnginesMap, (engines, engine, name) => {
             /* eslint no-param-reassign: off */
             engines[name] = {
-                url: engine.url
+                url: engine.url,
+                meta: engine.meta
             };
             return engines;
         }, {}));

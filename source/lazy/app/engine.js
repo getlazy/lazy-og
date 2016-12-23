@@ -30,6 +30,7 @@ class Engine
         this._languages = languages;
         this._container = container;
         this._config = config;
+        this._meta = {};
     }
 
     /**
@@ -53,6 +54,10 @@ class Engine
         return this._containerUrl;
     }
 
+    get meta() {
+        return this._meta;
+    }
+
     /**
      * Boots the engine.
      * @return {Promise} Promise resolved when boot operation has finished.
@@ -69,7 +74,11 @@ class Engine
                     host: containerStatus.Config.Hostname
                 });
             })
-            .then(() => self._waitEngine());
+            .then(() => self._waitEngine())
+            .then(() => self._getMeta())
+            .then((meta) => {
+                self._meta = meta;
+            });
     }
 
     status() {
@@ -238,6 +247,39 @@ class Engine
 
                     return resolve();
                 });
+        });
+    }
+
+    _getMeta() {
+        const self = this;
+
+        const requestParams = {
+            method: 'GET',
+            url: `${self._containerUrl}/meta`,
+            json: true,
+            headers: {
+                Accept: 'application/json'
+            }
+        };
+
+        return new Promise((resolve, reject) => {
+            request(requestParams, (err, response, body) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                if (response.statusCode !== 200) {
+                    let message =
+                        `Engine ${self.name} failed with ${response.statusCode} status code`;
+                    if (body && body.error) {
+                        message += ` (${body.error})`;
+                    }
+
+                    return reject(new Error(message));
+                }
+
+                return resolve(body);
+            });
         });
     }
 }
