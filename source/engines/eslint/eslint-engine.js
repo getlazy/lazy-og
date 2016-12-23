@@ -1,8 +1,9 @@
 
 'use strict';
 
+/* global logger */
+
 const _ = require('lodash');
-const selectn = require('selectn');
 const CLIEngine = require('eslint').CLIEngine;
 const EngineHelpers = require('@lazyass/engine-helpers');
 
@@ -10,7 +11,10 @@ const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
 const EslintConfigurator = require('./app/eslint-configurator.js');
 
-class EslintEngine {
+class EslintEngineHttpServer extends EngineHttpServer {
+    beforeListening() {
+        return this.configure(null);
+    }
 
     /**
      * Configures the ESlint engine by instatiating CLI with configuration
@@ -20,11 +24,13 @@ class EslintEngine {
      *                   and CLI instatiated.
      */
     configure(configFilePath) {
+        const self = this;
+
         return new Promise((resolve) => {
             EslintConfigurator
                 .configureFromYaml(configFilePath || (__dirname + '/js_rules.yaml'))
                 .then((configuration) => {
-                    this._cli = new CLIEngine({
+                    self._cli = new CLIEngine({
                         envs: ['node', 'es6'],
                         parser: 'babel-eslint',
                         plugins: configuration.plugins,
@@ -52,20 +58,21 @@ class EslintEngine {
      * @param {string} context Context information included with the request.
      * @return {Promise} Promise resolving with results of the file analysis.
      */
-    analyzeFile(hostPath, language, content, context) {
+    analyzeFile(hostPath, language, content/*, context*/) {
         const self = this;
+
         //  We use a promise as we get any exceptions wrapped up as failures.
         return new Promise((resolve) => {
             const res = self._cli.executeOnText(content, hostPath);
-            const results = _.head(selectn('results', res));
-            const messages = selectn('messages', results);
+            const results = _.head(_.get(res, 'results'));
+            const messages = _.get(results, 'messages');
 
             const warnings = _
                 .chain(messages)
                 .map((warning) => {
                     return {
                         type: _.eq(warning.severity, 2) ? 'Error' : 'Warning',
-                        message: '['+warning.ruleId + ']: ' + warning.message,
+                        message: `[${warning.ruleId}]: ${warning.message}`,
                         line: warning.line,
                         column: warning.column
                     };
@@ -74,19 +81,16 @@ class EslintEngine {
                 .value();
 
             resolve({
-                warnings: warnings
+                warnings
             });
         });
     }
-}
 
-class EslintEngineHttpServer extends EngineHttpServer {
-    _bootEngine() {
-        return (new EslintEngine()).configure(null);
-    }
-
-    _stopEngine() {
-        return Promise.resolve();
+    /* eslint class-methods-use-this: off */
+    getMeta() {
+        return {
+            languages: ['JavaScript']
+        };
     }
 }
 
