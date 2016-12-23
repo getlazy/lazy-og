@@ -166,8 +166,18 @@ module.exports = {
 
     return linter;
   },
+  
+  getLocalFileInfo(fullPath) {
+    const pathInfo = atom.project.relativizePath(fullPath);
+    return {
+      baseDir: pathInfo[0],
+      relativePath: pathInfo[1]
+    }
+  },
 
   getRepoInfoForPath(path) {
+    const self = this;
+
     const directory = _.find(atom.project.getDirectories(), (directory) => {
       return directory.contains(path);
     });
@@ -204,7 +214,8 @@ module.exports = {
                 type: repository.getType(),
                 remotes: reflectedRemotes.value,
                 status: reflectedStatus.value,
-                branches: _.get(reflectedBranches.value, 'branches')
+                branches: _.get(reflectedBranches.value, 'branches'),
+                fileInfo: self.getLocalFileInfo(path)
               };
 
               return resolve(repoInfo);
