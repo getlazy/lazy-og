@@ -6,7 +6,6 @@
 const _ = require('lodash');
 const H = require('higher');
 const selectn = require('selectn');
-const url = require('url');
 const async = require('async');
 const proxy = require('express-http-proxy');
 const PACKAGE_VERSION = require('../../package.json').version;
@@ -64,7 +63,7 @@ const addEndpoints = (app, options) => {
 
     app.get('/engines', (req, res) => {
         res.send(_.reduce(namesToEnginesMap, (engines, engine, name) => {
-            /* eslint no-param-reassign off */
+            /* eslint no-param-reassign: off */
             engines[name] = {
                 url: engine.url
             };
