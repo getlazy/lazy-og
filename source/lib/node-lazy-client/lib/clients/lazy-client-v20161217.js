@@ -84,7 +84,7 @@ class LazyClientv20161217 extends LazyClient
     }
 
     getEngines() {
-        return this._get('engines');
+        return this._getService('engines');
     }
 
     /**
@@ -92,15 +92,26 @@ class LazyClientv20161217 extends LazyClient
      * @return {Promise} Promise resolving with API and lazy service versions.
      */
     getVersion() {
-        return this._get('version');
+        return this._getService('version');
     }
 
-    _get(path, qs) {
-        const self = this;
+    getEngineMeta(engineUrl) {
+        return this._getEngine(engineUrl, 'meta');
+    }
 
+    _getService(path, qs) {
+        return this._get(`${this._serviceUrl}/${path}`, qs);
+    }
+
+    _getEngine(engineUrl, path, qs) {
+        return this._get(`${engineUrl}/${path}`, qs);
+    }
+
+    /* eslint class-methods-use-this: off */
+    _get(url, qs) {
         const requestParams = {
             method: 'GET',
-            url: `${self._serviceUrl}/${path}`,
+            url,
             qs,
             json: true,
             headers: {
