@@ -1,6 +1,6 @@
 {
   "name": "eslint-engine",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "lazy engine serving requests to lint JS and related using ESLint",
   "main": "eslint-engine.js",
   "scripts": {
