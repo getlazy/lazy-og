@@ -46,25 +46,48 @@ class EngineHttpServer
     //  Methods to be overriden by inheriting classes.
 
     /**
-     * Finishes start of the engine. It is invoked immediately before HTTP server starts
-     * listening.
+     * This function is invoked immediately before HTTP server starts listening.
+     * @return {Promise}
      */
     beforeListening() {
         //  Nothing to do.
         return Promise.resolve();
     }
 
+    /**
+     * This function is invoked immediately after HTTP server stops listening.
+     * @return {Promise}
+     */
     afterListening() {
         //  Nothing to do.
         return Promise.resolve();
     }
 
-    customizeExpressApp() {
+    /**
+     * This function allows engines to customize the underlying Express app.
+     * (e.g. adding new routes, middleware, etc.) It is invoked before `beforeListening`;
+     * @return {undefined}
+     */
+    customizeExpressApp(app) {
         //  Nothing to do.
     }
 
+    /**
+     * This function is invoked on GET /meta.
+     * @return {object}
+     */
     getMeta() {
+        //  Nothing to do.
         return {};
+    }
+
+    /**
+     * This function is invoked on POST /file.
+     * @return {object}
+     */
+    analyzeFile() {
+        //  Nothing to do.
+        return Promise.resolve({});
     }
 
     _initializeExpressApp(resolve, reject) {
