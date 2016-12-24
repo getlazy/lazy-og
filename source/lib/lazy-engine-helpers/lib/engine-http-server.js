@@ -66,9 +66,10 @@ class EngineHttpServer
     /**
      * This function allows engines to customize the underlying Express app.
      * (e.g. adding new routes, middleware, etc.) It is invoked before `beforeListening`;
+     * @param {Express} app Express app object to be customized.
      * @return {undefined}
      */
-    customizeExpressApp(app) {
+    customizeExpressApp(/* app */) {
         //  Nothing to do.
     }
 
