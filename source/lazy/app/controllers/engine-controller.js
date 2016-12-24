@@ -91,11 +91,10 @@ const addEndpoints = (app, options) => {
             //  Key is lower case because the search is case-insensitive.
             const languageKey = _.toLower(language);
 
-            //  Analyze the content in all the engines and merge all their warnings.
-            const enginesForLanguage = _.union(languagesToEnginesMap[languageKey],
-                allLanguagesEngines);
+            const enginesForLanguage = languagesToEnginesMap[languageKey];
 
-            return async.each(enginesForLanguage, (engine, next) => {
+            //  Analyze the content in all the corresponding engines and merge all their warnings.
+            return async.each(_.union(enginesForLanguage, allLanguagesEngines), (engine, next) => {
                 engine.analyzeFile(hostPath, language, content, context)
                     .then((engineResults) => {
                         allEnginesResults = _.assignIn(allEnginesResults, engineResults);
@@ -128,8 +127,11 @@ const addEndpoints = (app, options) => {
                     });
                 }
 
+                //  Set the flag for no-registered-language-engines so that clients can
+                //  display something to the user indicating that no actual language-specific
+                //  analysis was performed.
                 if (_.isEmpty(enginesForLanguage)) {
-                    logger.warn('No engines registered', { language });
+                    allEnginesResults.noRegisteredLanguageEngines = true;
                 }
 
                 return res.send(allEnginesResults);
