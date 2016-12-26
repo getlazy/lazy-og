@@ -74,8 +74,11 @@ class Engine
                     host: containerStatus.Config.Hostname
                 });
             })
-            .then(() => (!self._config.boot_wait ? Promise.resolve() : self._waitEngine()))
-            .then(() => (self._config.meta ? self._config.meta : self._getMeta()))
+            .then(() =>
+                //  boot_wait must be explicitly set to false for us to not wait for boot.
+                (self._config.boot_wait === false ? Promise.resolve() : self._waitEngine()))
+            .then(() =>
+                (self._config.meta ? Promise.resolve(self._config.meta) : self._getMeta()))
             .then((meta) => {
                 self._meta = meta;
             });
