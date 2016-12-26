@@ -7,7 +7,7 @@ const _ = require('lodash');
 const H = require('higher');
 const selectn = require('selectn');
 const async = require('async');
-const proxy = require('express-http-proxy');
+const proxy = require('http-proxy-middleware');
 const PACKAGE_VERSION = require('../../package.json').version;
 
 //  Maps to and from loaded engines.
@@ -146,13 +146,28 @@ const addEndpoints = (app, options) => {
 
     //  Create proxies to pass all requests that get to /engine/{engine.name}/* paths.
     _.forEach(namesToEnginesMap, (engine) => {
-        app.use(`/engine/${engine.name}`, proxy(engine.url));
+        const enginePath = `^/engine/${engine.name}`;
+
+        //  Proxy all calls from /engine/<engine.name> to the engine.
+        //  Allow websockets upgrade.
+        const proxyOptions = {
+            target: engine.url,
+            ws: true,
+            pathRewrite: {}
+        };
+        proxyOptions.pathRewrite[enginePath] = '';
+
+        app.use(enginePath, proxy(proxyOptions));
     });
 
-    //  Proxy /dashboard to dashboard engine if one has been configured.
-    const dashboard = _.get(options, 'engineManager.dashboard');
-    if (dashboard) {
-        app.use('/dashboard', proxy(dashboard.url));
+    //  Proxy the rest of calls to / to UI engine if one has been configured.
+    const uiEngine = _.get(options, 'engineManager.uiEngine');
+    if (uiEngine) {
+        //  Proxy all calls from / to the engine and allow websockets upgrade.
+        app.use('/', proxy({
+            target: uiEngine.url,
+            ws: true
+        }));
     }
 };
 

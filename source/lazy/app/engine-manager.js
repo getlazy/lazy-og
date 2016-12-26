@@ -59,11 +59,11 @@ class EngineManager
                 self._engines = engines;
             })
             .then(() => {
-                //  Install dashboard if one is specified.
-                if (_.isObject(self._config.dashboard)) {
-                    return self._installEngine('dashboard', self._config.dashboard)
-                        .then((dashboard) => {
-                            self._dashboard = dashboard;
+                //  Install ui if one is specified.
+                if (_.isObject(self._config.ui)) {
+                    return self._installEngine('ui', self._config.ui)
+                        .then((uiEngine) => {
+                            self._uiEngine = uiEngine;
                         });
                 }
 
@@ -75,8 +75,8 @@ class EngineManager
         return this._engines;
     }
 
-    get dashboard() {
-        return this._dashboard;
+    get uiEngine() {
+        return this._uiEngine;
     }
 
     _installAllEngines() {
