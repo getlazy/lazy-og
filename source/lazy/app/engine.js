@@ -74,7 +74,7 @@ class Engine
                     host: containerStatus.Config.Hostname
                 });
             })
-            .then(() => (self._config.skip_boot ? Promise.resolve() : self._waitEngine()))
+            .then(() => (!self._config.boot_wait ? Promise.resolve() : self._waitEngine()))
             .then(() => (self._config.meta ? self._config.meta : self._getMeta()))
             .then((meta) => {
                 self._meta = meta;

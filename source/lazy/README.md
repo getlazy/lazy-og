@@ -71,7 +71,9 @@ repository_auth: # optional, only needed if your engines are in a private Docker
 engines: # each of these engines can be left out and other custom or official engines may be added
     eslint:
         image: ierceg/lazy-eslint-engine:latest
+        boot_wait: true # optional, defaults to true, flag instructing lazy to wait for engine's boot process to finish
         boot_timeout: 120 # optional timeout to wait for engine to boot
+        meta: {} # optional metadata for the engine, if not provided lazy queries the engine for it
     stylelint:
         image: ierceg/lazy-stylelint-engine:latest
     tidy-html:
