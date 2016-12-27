@@ -1,7 +1,0 @@
-#/bin/bash
-docker run -it --rm \
-    -v "$(pwd)/lazy.yaml:/app/lazy.yaml" \
-    -v "/var/run/docker.sock:/var/run/docker.sock" \
-    -p "16827:80" \
-    --stop-signal SIGTERM \
-    ierceg/lazy:latest

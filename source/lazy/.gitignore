@@ -39,3 +39,5 @@ jspm_packages
 
 lazy.yaml
 test/lazy-test.yaml
+
+env
