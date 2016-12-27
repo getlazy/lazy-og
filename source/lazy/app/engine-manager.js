@@ -90,29 +90,39 @@ class EngineManager
         const self = this;
 
         const imageName = engineConfig.image;
+        //  Get repository auth configuration either from engine or failing that from lazy level.
         let repositoryAuth = {};
         if (!_.isEmpty(engineConfig.repository_auth)) {
             repositoryAuth = engineConfig.repository_auth;
         } else if (!_.isEmpty(self._config.repository_auth)) {
             repositoryAuth = self._config.repository_auth;
         }
+        //  Resolve the repository auth if its values are kept in the lazy's process environment.
+        const resolvedRepositoryAuth = self._resolveRepositoryAuthValues(repositoryAuth);
 
         logger.info('Pulling image', imageName, 'for engine', engineName);
-        return HigherDockerManager.pullImage(repositoryAuth, imageName)
+        return HigherDockerManager.pullImage(resolvedRepositoryAuth, imageName)
             .then((engineImage) => {
                 const createEngineParams = {
                     Image: imageName,
                     Cmd: engineConfig.command ? engineConfig.command.split(' ') : undefined,
-                    Env: _.union(engineConfig.env, [
-                        `LAZY_HOSTNAME=${_.get(self._container, 'Config.Hostname')}`,
-                        `LAZY_ENGINE_NAME=${engineName}`,
-                        `LAZY_SERVICE_URL=${selectn('_config.service_url', self)}`,
-                        //  TODO: Fix this as special engines don't follow this URL pattern.
-                        `LAZY_ENGINE_URL=${selectn('_config.service_url', self)}/engine/${engineName}`,
-                        `LAZY_VOLUME_NAME=${self._volume.Name}`,
-                        'LAZY_VOLUME_MOUNT=/lazy',
-                        `LAZY_ENGINE_SANDBOX_DIR=/lazy/sandbox/${engineName}`
-                    ]),
+                    //  Engine's environment consists of the variables set in the config,
+                    //  variables imported from lazy's environment and variables created by
+                    //  lazy itself.
+                    Env: _.union(
+                        engineConfig.env,
+                        _.map(engineConfig.import_env,
+                            importEnvvar => `${importEnvvar}=${process.env[importEnvvar]}`),
+                        [
+                            `LAZY_HOSTNAME=${_.get(self._container, 'Config.Hostname')}`,
+                            `LAZY_ENGINE_NAME=${engineName}`,
+                            `LAZY_SERVICE_URL=${selectn('_config.service_url', self)}`,
+                            //  TODO: Fix this as special engines don't follow this URL pattern.
+                            `LAZY_ENGINE_URL=${selectn('_config.service_url', self)}/engine/${engineName}`,
+                            `LAZY_VOLUME_NAME=${self._volume.Name}`,
+                            'LAZY_VOLUME_MOUNT=/lazy',
+                            `LAZY_ENGINE_SANDBOX_DIR=/lazy/sandbox/${engineName}`
+                        ]),
                     HostConfig: {
                         //  When networking mode is a name of another network it's
                         //  automatically attached.
@@ -247,6 +257,20 @@ class EngineManager
         return self._network.connect({
             Container: self._container.id
         });
+    }
+
+    _resolveRepositoryAuthValues(repositoryAuth) {
+        const resolvedRepositoryAuth = {};
+        //  Resolve the values of properties defined with _env suffix. Those properties instruct
+        //  lazy to read their values from its own environment.
+        _.each(repositoryAuth, (value, key) => {
+            if (_.endsWith(key, '_env')) {
+                resolvedRepositoryAuth[_.trimEnd(key, '_env')] = process.env[value];
+            } else {
+                resolvedRepositoryAuth[key] = value;
+            }
+        });
+        return resolvedRepositoryAuth;
     }
 }
 

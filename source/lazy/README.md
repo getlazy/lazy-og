@@ -64,33 +64,34 @@ On start lazy loads engine configurations and runs them. The engine configuratio
 ```yaml
 version: 1
 # id: default # optional lazy ID, useful when hacking
-repository_auth: # optional, only needed if your engines are in a private Docker repository
-    username: <your-user-name>
-    password: <your-password>
-    email: <your-email>
+repository_auth: # optional, only needed if your engines are in a private Docker repository; alternatively use username, password_env and email_env to specify the names of environment variables in lazy's environment in which these values are kept
+    username_env: <docker-repository-username-envvar-name>
+    password_env: <docker-repository-password-envvar-name>
+    email_env: <docker-repository-email-envvar-name>
 engines: # each of these engines can be left out and other custom or official engines may be added
     eslint:
         image: ierceg/lazy-eslint-engine:latest
         boot_wait: true # optional, defaults to true, flag instructing lazy to wait for engine's boot process to finish
         boot_timeout: 120 # optional timeout to wait for engine to boot
         meta: {} # optional metadata for the engine, if not provided lazy queries the engine for it
+        env: # optional list of environment variables to set in engine's environment
+            - MODE=strict # for example, not real
     stylelint:
         image: ierceg/lazy-stylelint-engine:latest
     tidy-html:
         image: ierceg/lazy-tidy-html-engine:latest
-    emcc:
-        image: ierceg/lazy-emcc-engine:latest
-    php-l:
-        image: ierceg/lazy-php-l-engine:latest
-    pmd-java:
-        image: ierceg/lazy-pmd-java-engine:latest
+    github-access:
+        image: ierceg/lazy-github-access-engine:latest
+        import_env: # optional list of environment variables to import from lazy environment into engine environment
+            - GITHUB_CLIENT_ID
+            - GITHUB_CLIENT_SECRET
 ```
 
 Note:
 
 * `version` must be equal to `1`
 * `id` is optional and if not provided it's set to `default`
-* `repository_auth` can also be provided with tokens
+* `repository_auth` can also be provided with tokens or by directly providing values in lazy.yaml (not recommended)
 * `boot_timeout` is optional and its default is 30 seconds
 
 To allow easier hacking lazy can run engines mounted from local host filesystem. For example if we wanted to hack on `lazy-eslint-engine` we could specify it like this:
