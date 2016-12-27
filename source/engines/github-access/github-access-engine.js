@@ -32,6 +32,8 @@ class GithubAccessEngineHttpServer extends EngineHttpServer
             GitHubLogin: []
         })
             .value();
+
+        return Promise.resolve();
     }
 
     customizeExpressApp(app) {
