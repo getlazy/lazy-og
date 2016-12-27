@@ -1,7 +1,7 @@
 {
-  "name": "lazy",
+  "name": "@lazyass/lazy",
   "version": "2.4.0",
-  "description": "Hackbable coding assistant",
+  "description": "Hackable coding assistant",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
@@ -23,7 +23,6 @@
   },
   "homepage": "https://github.com/SoftwareMarbles/lazy#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^1.2.1",
     "@lazyass/higher-docker-manager": "^1.4.0",
     "async": "^2.1.4",
     "body-parser": "^1.15.2",
