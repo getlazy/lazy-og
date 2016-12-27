@@ -1,10 +1,14 @@
 'use babel'; // this must be the absolutely first line in the file otherwise Atom gets confused
 
+/* eslint indent: "off" */
+
 /* global atom */
 
 import _ from 'lodash';
 
-import {CompositeDisposable} from 'atom';
+import {
+  CompositeDisposable
+} from 'atom';
 import request from 'request';
 import escape from 'escape-html';
 import os from 'os';
@@ -48,14 +52,41 @@ module.exports = {
     this.subscriptions.dispose();
   },
 
+  getDirectoryForPath(path) {
+    return _.find(atom.project.getDirectories(), (directory) => {
+      return directory.contains(path);
+    });
+  },
+
+  getUpdatedLineNumber(line, fileText, filePath, repository) {
+
+    const diffs = repository.getLineDiffs(filePath, fileText);
+console.log(diffs);
+    let newLine = line-1;
+
+    _.forEach(diffs, (diff) => {
+      if ((diff.oldStart <= line) && (line <= diff.oldStart + diff.oldLines)) {
+        newLine = -1;
+      } else {
+        newLine = newLine - diff.oldLines + diff.newLines;
+      }
+    });
+
+    if (newLine <= 0)
+      return 1;
+
+    return newLine - 1;
+  },
+
   provideLinter(): Linter$Provider {
     const linter = {
       name: 'lazy',
       grammarScopes: this.scopes,
       scope: 'file',
       lintOnFly: true,
-      lintOnFlyInterval: 250, /* Don't trigger lazy too often when typing */
-      lint: async (editor) => {
+      lintOnFlyInterval: 250,
+      /* Don't trigger lazy too often when typing */
+      lint: async(editor) => {
         const self = this;
 
         const path = editor.getPath();
@@ -81,7 +112,11 @@ module.exports = {
             return self.makeRequest(path, grammar, fileContents, repoInfo);
           })
           .then((requestResults) => {
-            const {err, response, body} = requestResults;
+            const {
+              err,
+              response,
+              body
+            } = requestResults;
 
             if (err) {
               return Promise.resolve([{
@@ -108,44 +143,65 @@ module.exports = {
               }]);
             }
 
-            //  Group all the warnings per their line and then
-            //  merge all warnings on the same line into a single warning.
-            const results = _
-              .chain(body.warnings)
-              .groupBy((warning) => warning.line)
-              .map((warnings, line) => {
-                //  Screen coordinate system is rooted in (0,0) rather than (1,1)
-                line = _.toNumber(line) - 1;
+            const directory = self.getDirectoryForPath(path);
 
-                //  Sort the warnings in descending order of severity.
-                warnings = _
-                  .chain(warnings)
-                  .sortBy((warning) => {
-                    switch (_.toLower(warning.type)) {
-                      case 'warning':
-                        return 1;
-                      case 'error':
-                        return 2;
-                      default:
-                        return 0;
-                    }
+            return atom.project.repositoryForDirectory(directory)
+              .then((repository) => {
+
+                // For warnings that are comming from Pull Requests
+                // we need to update line number to accomodate for
+                // not commited local edits
+                const allWarns = _.map(body.warnings, (warn) => {
+                  if ((!_.isNil(repository)) && (warn.type === 'Pull Request')) {
+                    warn.line = self.getUpdatedLineNumber(warn.line, fileContents, path, repository);
+                  }
+                  return warn;
+                });
+//                console.log(allWarns);
+
+
+                //  Group all the warnings per their line and then
+                //  merge all warnings on the same line into a single warning.
+                const results = _
+                  .chain(allWarns)
+                  .groupBy((warning) => warning.line)
+                  .map((warnings, line) => {
+                    //  Screen coordinate system is rooted in (0,0) rather than (1,1)
+                    line = _.toNumber(line) - 1;
+
+                    //  Sort the warnings in descending order of severity.
+                    warnings = _
+                      .chain(warnings)
+                      .sortBy((warning) => {
+                        switch (_.toLower(warning.type)) {
+                          case 'warning':
+                            return 1;
+                          case 'error':
+                            return 2;
+                          default:
+                            return 0;
+                        }
+                      })
+                      .reverse()
+                      .value();
+
+                    return {
+                      type: _.first(warnings).type || 'Warning',
+                      html: _.map(warnings,
+                        (warning) => escape(warning.message)).join('<br>'),
+                      //  We always show all the warnings on the entire line rather than just on
+                      //  (line, column).
+                      range: [
+                        [line, 0],
+                        [line, ARBITRARILY_VERY_LARGE_COLUMN_NUMBER]
+                      ],
+                      filePath: editor.getPath()
+                    };
                   })
-                  .reverse()
                   .value();
 
-                return {
-                  type: _.first(warnings).type || 'Warning',
-                  html: _.map(warnings,
-                    (warning) => escape(warning.message)).join('<br>'),
-                  //  We always show all the warnings on the entire line rather than just on
-                  //  (line, column).
-                  range: [[line, 0], [line, ARBITRARILY_VERY_LARGE_COLUMN_NUMBER]],
-                  filePath: editor.getPath()
-                };
-              })
-              .value();
-
-            return Promise.resolve(results);
+                return Promise.resolve(results);
+              });
           })
           .then((result) => {
             //  Delete the request from the map of running requests.
@@ -166,7 +222,7 @@ module.exports = {
 
     return linter;
   },
-  
+
   getLocalFileInfo(fullPath) {
     const pathInfo = atom.project.relativizePath(fullPath);
     return {
@@ -178,9 +234,7 @@ module.exports = {
   getRepoInfoForPath(path) {
     const self = this;
 
-    const directory = _.find(atom.project.getDirectories(), (directory) => {
-      return directory.contains(path);
-    });
+    const directory = self.getDirectoryForPath(path);
 
     if (_.isNil(directory)) {
       return null;
@@ -195,7 +249,7 @@ module.exports = {
         return new Promise((resolve) => {
           const git = simpleGit(repository.getWorkingDirectory());
           async.parallel(async.reflectAll(
-            [_.bind(git.getRemotes, git, true), git.status.bind(git), git.branch.bind(git)]),
+              [_.bind(git.getRemotes, git, true), git.status.bind(git), git.branch.bind(git)]),
             (err, reflectedResults) => {
               if (err) {
                 console.log('Error getting complete repository info', err);
@@ -249,7 +303,11 @@ module.exports = {
       };
 
       request(requestParams, (err, response, body) => {
-        resolve({err, response, body});
+        resolve({
+          err,
+          response,
+          body
+        });
       });
     });
   }
