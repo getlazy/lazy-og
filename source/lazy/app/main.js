@@ -13,6 +13,7 @@ const EngineManager = require('./engine-manager');
 
 //  Engine manager object managing all the engine containers.
 let engineManager = null;
+let config = null;
 
 let app;
 
@@ -69,7 +70,7 @@ class Main
         app = express();
         app.use(bodyParser.json());
 
-        return controllers.initialize(app, { engineManager })
+        return controllers.initialize(app, { engineManager, config })
             .then(() => new Promise((resolve) => {
                 const port = process.env.PORT || 80;
                 app.listen(port, () => {
@@ -93,6 +94,7 @@ class Main
         return LazyYamlFile.load(lazyYamlFilePath)
             .then((lazyConfig) => {
                 engineManager = new EngineManager(lazyConfig);
+                config = lazyConfig.config;
                 return engineManager.start();
             });
     }

@@ -15,6 +15,9 @@ const namesToEnginesMap = new Map();
 const languagesToEnginesMap = new Map();
 const allLanguagesEngines = [];
 
+let maxWarningsPerRule = null;
+let maxWarnings = null;
+
 const populateLanguagesToEnginesStructures = (engineManager) => {
     const engines = engineManager.engines;
 
@@ -134,6 +137,31 @@ const addEndpoints = (app, options) => {
                     allEnginesResults.noRegisteredLanguageEngines = true;
                 }
 
+                //  Reduce the number of warnings per max warnings per rule and max warnings
+                //  settings.
+                const reducedWarnings = _(allEnginesResults.warnings)
+                    .groupBy('ruleId')
+                    .mapValues((warnings, ruleId) => {
+                        if (!_.isNumber(maxWarningsPerRule) ||
+                            warnings.length <= maxWarningsPerRule) {
+                            return warnings;
+                        }
+
+                        const firstWarning = _.head(_.sortBy(warnings, 'line'));
+
+                        //  Use the first warning plus an info on the same line with the number
+                        //  of warnings left for the same rule.
+                        return [firstWarning, _.assignIn(_.clone(firstWarning), {
+                            type: 'Info',
+                            message: `And ${warnings.length - 1} other warnings of [${ruleId}] rule`
+                        })];
+                    })
+                    .flatMap()
+                    //  If max warnings is defined then limit the number of warnings.
+                    .take(_.isNumber(maxWarnings) ? maxWarnings : allEnginesResults.warnings.length)
+                    .value();
+                allEnginesResults.warnings = reducedWarnings;
+
                 return res.send(allEnginesResults);
             });
         } catch (e) {
@@ -173,6 +201,8 @@ const addEndpoints = (app, options) => {
 
 const initialize = (app, options) => {
     populateLanguagesToEnginesStructures(options.engineManager);
+    maxWarningsPerRule = _.get(options, 'config.max_warnings_per_rule');
+    maxWarnings = _.get(options, 'config.max_warnings');
     addEndpoints(app, options);
     return Promise.resolve();
 };

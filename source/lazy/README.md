@@ -68,6 +68,9 @@ repository_auth: # optional, only needed if your engines are in a private Docker
     username_env: <docker-repository-username-envvar-name>
     password_env: <docker-repository-password-envvar-name>
     email_env: <docker-repository-email-envvar-name>
+config:
+    max_warnings_per_rule: 5 # optional value instructing lazy to replace too many per rule warnings with a single warning plus additional details
+    max_warnings: 20 # optional value instructing lazy to never send more than this number of warnings, applied after max_warnings_per_rule
 engines: # each of these engines can be left out and other custom or official engines may be added
     eslint:
         image: ierceg/lazy-eslint-engine:latest
