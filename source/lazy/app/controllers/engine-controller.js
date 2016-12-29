@@ -177,7 +177,7 @@ const addEndpoints = (app, options) => {
 
     //  Create proxies to pass all requests that get to /engine/{engine.name}/* paths.
     _.forEach(namesToEnginesMap, (engine) => {
-        const enginePath = `^/engine/${engine.name}`;
+        const enginePath = `/engine/${engine.name}`;
 
         //  Proxy all calls from /engine/<engine.name> to the engine.
         //  Allow websockets upgrade.
@@ -186,9 +186,9 @@ const addEndpoints = (app, options) => {
             ws: true,
             pathRewrite: {}
         };
-        proxyOptions.pathRewrite[enginePath] = '';
+        proxyOptions.pathRewrite[`^${enginePath}`] = '';
 
-        app.use(enginePath, proxy(proxyOptions));
+        app.use(enginePath, proxy(enginePath, proxyOptions));
     });
 
     //  Proxy the rest of calls to / to UI engine if one has been configured.
