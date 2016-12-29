@@ -2,11 +2,8 @@
 
 const _ = require('lodash');
 const EngineHelpers = require('@lazyass/engine-helpers');
-
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
-
 const RepoLinter = require('./app/repo-linter.js');
-
 
 class PullRequestEngine {
 
