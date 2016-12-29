@@ -58,6 +58,10 @@ class Engine
         return this._meta;
     }
 
+    get config() {
+        return this._config;
+    }
+
     /**
      * Boots the engine.
      * @return {Promise} Promise resolved when boot operation has finished.
@@ -71,7 +75,8 @@ class Engine
             .then((containerStatus) => {
                 self._containerUrl = url.format({
                     protocol: 'http',
-                    host: containerStatus.Config.Hostname
+                    hostname: containerStatus.Config.Hostname,
+                    port: self._config.port
                 });
             })
             .then(() =>
