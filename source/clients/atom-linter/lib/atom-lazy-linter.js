@@ -58,20 +58,21 @@ module.exports = {
     });
   },
 
+  /**
+   * Calculate the difference between local (not commited) and
+   * remote (commited) line numbers.
+   */
   getUpdatedLineNumber(line, fileText, filePath, repository) {
     const diffs = repository.getLineDiffs(filePath, fileText);
-    //    console.log(diffs);
-    let newLine = line - 1;
+
+    let newLine = line;
 
     _.forEach(diffs, (diff) => {
-      if ((diff.oldStart <= line) && (line <= diff.oldStart + diff.oldLines)) {
-        newLine = -1;
-      } else {
-        newLine = newLine - diff.oldLines + diff.newLines;
+      if (diff.oldStart <= line) {
+        newLine = (newLine - diff.oldLines) + diff.newLines;
       }
     });
-
-    return (newLine <= 0) ? 1 : newLine - 1;
+    return (newLine <= 0) ? 1 : newLine;
   },
 
   provideLinter(): Linter$Provider {
@@ -148,13 +149,11 @@ module.exports = {
                 // we need to update line number to accomodate for
                 // not commited local edits
                 const allWarns = _.map(body.warnings, (warn) => {
-                  if ((!_.isNil(repository)) && (warn.type === 'Pull Request')) {
+                  if ((!_.isNil(repository)) && (_.isEqual(warn.type, 'PR'))) {
                     warn.line = self.getUpdatedLineNumber(warn.line, fileContents, path, repository);
                   }
                   return warn;
                 });
-                //                console.log(allWarns);
-
 
                 //  Group all the warnings per their line and then
                 //  merge all warnings on the same line into a single warning.
@@ -230,7 +229,7 @@ module.exports = {
     return {
       baseDir: pathInfo[0],
       relativePath: pathInfo[1]
-    }
+    };
   },
 
   getRepoInfoForPath(path) {
