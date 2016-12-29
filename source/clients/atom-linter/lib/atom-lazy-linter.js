@@ -59,10 +59,9 @@ module.exports = {
   },
 
   getUpdatedLineNumber(line, fileText, filePath, repository) {
-
     const diffs = repository.getLineDiffs(filePath, fileText);
-console.log(diffs);
-    let newLine = line-1;
+    //    console.log(diffs);
+    let newLine = line - 1;
 
     _.forEach(diffs, (diff) => {
       if ((diff.oldStart <= line) && (line <= diff.oldStart + diff.oldLines)) {
@@ -72,10 +71,7 @@ console.log(diffs);
       }
     });
 
-    if (newLine <= 0)
-      return 1;
-
-    return newLine - 1;
+    return (newLine <= 0) ? 1 : newLine - 1;
   },
 
   provideLinter(): Linter$Provider {
@@ -157,7 +153,7 @@ console.log(diffs);
                   }
                   return warn;
                 });
-//                console.log(allWarns);
+                //                console.log(allWarns);
 
 
                 //  Group all the warnings per their line and then
@@ -188,7 +184,13 @@ console.log(diffs);
                     return {
                       type: _.first(warnings).type || 'Warning',
                       html: _.map(warnings,
-                        (warning) => escape(warning.message)).join('<br>'),
+                        (warning) => {
+                          let moreInfo = '';
+                          if (!_.isNil(warning.moreInfo)) {
+                            moreInfo = ' <a href="' + warning.moreInfo + '">more &raquo;</a><br>&nbsp;';
+                          }
+                          return escape(warning.message) + moreInfo;
+                        }).join('<br>'),
                       //  We always show all the warnings on the entire line rather than just on
                       //  (line, column).
                       range: [
