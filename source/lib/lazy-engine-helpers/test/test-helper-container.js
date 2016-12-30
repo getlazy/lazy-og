@@ -1,7 +1,7 @@
 
 'use strict';
 
-/* global logger, describe, it */
+/* global logger, describe, it, after */
 
 //  To set some properties we need `this` of `describe` and `it` callback functions.
 /* eslint prefer-arrow-callback: off, func-names: off */
@@ -12,6 +12,7 @@ const _ = require('lodash');
 const assert = require('assert');
 const HelperContainer = require('../lib/helper-container');
 const Docker = require('node-docker-api').Docker;
+const HigherDockerManager = require('@lazyass/higher-docker-manager');
 
 const docker = new Docker({
     socketPath: '/var/run/docker.sock'
@@ -20,8 +21,25 @@ const docker = new Docker({
 //  Use old node-dev image for testing.
 const TEST_IMAGE = 'ierceg/node-dev:1.0.0';
 
-describe('HelperContainer', function _HelperContainerTest() {
-    describe('createContainer', function _createContainerTest() {
+describe('HelperContainer', function () {
+    after(function () {
+        //  Delete all containers in the test container network.
+        this.timeout(60000);
+        return HigherDockerManager.getOwnContainer()
+            .then((testContainer) => {
+                const networks = _.get(testContainer, 'NetworkSettings.Networks');
+                return HigherDockerManager.getContainersInNetworks(networks)
+                    .then(containers => Promise.all(_.map(containers, (container) => {
+                        if (_.isObject(container) && container.Id !== testContainer.Id) {
+                            return HelperContainer.deleteContainer(container);
+                        }
+
+                        return Promise.resolve();
+                    })));
+            });
+    });
+
+    describe('createContainer', function () {
         this.timeout(15000);
 
         it('fails for images that are unavailable', function () {
