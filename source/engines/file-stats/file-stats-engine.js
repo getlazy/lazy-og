@@ -53,22 +53,23 @@ class FileStatsEngineHttpServer extends EngineHttpServer
 
         app.get('/stats', (req, res) => {
             const stats = this._db.get('AnalyzeFileEvent')
-                .reduce((stats, event) => {
-                    ++stats.requests;
-                    stats.requestsPerLanguage[event.language] =
-                        (stats.requestsPerLanguage[event.language] + 1) || 1;
-                    stats.requestsPerPath[event.hostPath] =
-                        (stats.requestsPerPath[event.hostPath] + 1) || 1;
+                .reduce((statsReduce, event) => {
+                    /* eslint no-param-reassign: off */
+                    statsReduce.requests += 1;
+                    statsReduce.requestsPerLanguage[event.language] =
+                        (statsReduce.requestsPerLanguage[event.language] + 1) || 1;
+                    statsReduce.requestsPerPath[event.hostPath] =
+                        (statsReduce.requestsPerPath[event.hostPath] + 1) || 1;
                     if (event.client) {
-                        stats.requestsPerClient[event.client] =
-                            (stats.requestsPerClient[event.client] + 1) || 1;
+                        statsReduce.requestsPerClient[event.client] =
+                            (statsReduce.requestsPerClient[event.client] + 1) || 1;
                     }
                     if (event.originRepository && event.branch) {
-                        const key = event.originRepository + ':' + event.branch;
-                        stats.requestsPerOriginRepositoryBranch[key] =
-                            (stats.requestsPerOriginRepositoryBranch[key] + 1) || 1;
+                        const key = `${event.originRepository}:${event.branch}`;
+                        statsReduce.requestsPerOriginRepositoryBranch[key] =
+                            (statsReduce.requestsPerOriginRepositoryBranch[key] + 1) || 1;
                     }
-                    return stats;
+                    return statsReduce;
                 }, {
                     requests: 0,
                     requestsPerLanguage: {},
