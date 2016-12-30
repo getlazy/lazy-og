@@ -99,8 +99,10 @@ const addEndpoints = (app, options) => {
             //  Analyze the content in all the corresponding engines and merge all their warnings.
             return async.each(_.union(enginesForLanguage, allLanguagesEngines), (engine, next) => {
                 engine.analyzeFile(hostPath, language, content, context)
-                    .then((engineResults) => {
-                        allEnginesResults = _.assignIn(allEnginesResults, engineResults);
+                    .then((engineResults) => {                        
+                        allEnginesResults = {
+                           warnings:_.compact(_.concat(allEnginesResults.warnings, engineResults.warnings))
+                        };
                         next();
                     })
                     .catch((err) => {
@@ -136,7 +138,7 @@ const addEndpoints = (app, options) => {
                 if (_.isEmpty(enginesForLanguage)) {
                     allEnginesResults.noRegisteredLanguageEngines = true;
                 }
-
+  
                 //  Reduce the number of warnings per max warnings per rule and max warnings
                 //  settings.
                 const reducedWarnings = _(allEnginesResults.warnings)
