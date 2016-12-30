@@ -73,6 +73,7 @@ class EslintEngineHttpServer extends EngineHttpServer {
                     return {
                         type: _.eq(warning.severity, 2) ? 'Error' : 'Warning',
                         message: `[${warning.ruleId}]: ${warning.message}`,
+                        ruleId: warning.ruleId,
                         line: warning.line,
                         column: warning.column
                     };
