@@ -263,9 +263,10 @@ class EngineManager
         const resolvedRepositoryAuth = {};
         //  Resolve the values of properties defined with _env suffix. Those properties instruct
         //  lazy to read their values from its own environment.
-        _.each(repositoryAuth, (value, key) => {
+        _.forEach(repositoryAuth, (value, key) => {
             if (_.endsWith(key, '_env')) {
-                resolvedRepositoryAuth[_.trimEnd(key, '_env')] = process.env[value];
+                resolvedRepositoryAuth[key.slice(0, key.length - '_env'.length)] =
+                    process.env[value];
             } else {
                 resolvedRepositoryAuth[key] = value;
             }
