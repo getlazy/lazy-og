@@ -35,6 +35,22 @@ class FileStatsEngineHttpServer extends EngineHttpServer
     }
 
     customizeExpressApp(app) {
+        app.get('/', (req, res) => {
+            res.send(this._db.get('AnalyzeFileEvent').value());
+        });
+
+        app.get('/stats/time', (req, res) => {
+            const TIME_INTERVAL_MS = 5 * 60 * 1000;
+            //  Count the language requests in time intervals.
+            const stats = this._db.get('AnalyzeFileEvent')
+                .groupBy(event => TIME_INTERVAL_MS * _.floor(event.time / TIME_INTERVAL_MS))
+                .mapValues(events => _.countBy(events, event =>
+                    event.originRepository || '<unknown>'))
+                .value();
+
+            res.send(stats);
+        });
+
         app.get('/stats', (req, res) => {
             const stats = this._db.get('AnalyzeFileEvent')
                 .reduce((stats, event) => {
