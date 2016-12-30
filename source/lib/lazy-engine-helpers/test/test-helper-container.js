@@ -1,7 +1,7 @@
 
 'use strict';
 
-/* global logger, describe, it, after */
+/* global logger, describe, it, before, after */
 
 //  To set some properties we need `this` of `describe` and `it` callback functions.
 /* eslint prefer-arrow-callback: off, func-names: off */
@@ -72,6 +72,37 @@ describe('HelperContainer', function () {
                     assert(_.startsWith(err.message, '(HTTP code 404) no such image'));
                 })
                 .then(() => HelperContainer.createContainer({}, TEST_IMAGE));
+        });
+    });
+
+    describe('deleteContainer', function () {
+        this.timeout(60000);
+
+        it('deletes container', function () {
+            return HelperContainer.createContainer({}, TEST_IMAGE)
+                .then(container => HelperContainer.deleteContainer(container));
+        });
+    });
+
+    describe('Object methods', function () {
+        this.timeout(60000);
+
+        let helperContainer;
+
+        before(function () {
+            return HelperContainer.createContainer({}, TEST_IMAGE)
+                .then((container) => {
+                    helperContainer = new HelperContainer(container);
+                });
+        });
+
+        describe('analyzeFile', function () {
+            it('works', function () {
+                return helperContainer.analyzeFile('hostname', '', 'test')
+                    .then((results) => {
+                        assert(results);
+                    });
+            });
         });
     });
 });
