@@ -84,7 +84,7 @@ class FileStatsEngineHttpServer extends EngineHttpServer
             self._db.get('AnalyzeFileEvent')
                 .push({
                     time: Date.now(),
-                    host: context && context.host,
+                    hostname: context && context.hostname,
                     hostPath,
                     language,
                     client: context && context.client,
