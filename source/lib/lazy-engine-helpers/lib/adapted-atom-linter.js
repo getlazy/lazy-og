@@ -3,6 +3,7 @@
 
 //  Code picked up from atom-linter project (MIT license) and adapted for our purposes.
 
+const _ = require('lodash');
 const NamedRegexp = require('named-js-regexp');
 
 /**
@@ -16,17 +17,21 @@ const NamedRegexp = require('named-js-regexp');
  * @return {array} array of error/warning objects resulting from the analysis
  */
 const parse = (data, regex, givenOptions) => {
-    if (typeof data !== 'string') {
+    // istanbul ignore if
+    if (!_.isString(data)) {
         throw new Error('Invalid or no `data` provided');
-    } else if (typeof regex !== 'string') {
+    }
+    // istanbul ignore if
+    if (!_.isString(regex)) {
         throw new Error('Invalid or no `regex` provided');
-    } else if (typeof givenOptions !== 'object') {
-        givenOptions = {};
     }
 
-    const defaultOptions = {flags: ''};
-    const options = Object.assign(defaultOptions, givenOptions);
-    if (options.flags.indexOf('g') === -1) {
+    const defaultOptions = {
+        flags: ''
+    };
+    const options = _.assign(defaultOptions, _.isObject(givenOptions) ? givenOptions : {});
+    // istanbul ignore else
+    if (!_.includes(options.flags, 'g')) {
         options.flags += 'g';
     }
 
@@ -58,5 +63,5 @@ const parse = (data, regex, givenOptions) => {
 };
 
 module.exports = {
-    parse: parse
+    parse
 };
