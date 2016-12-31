@@ -27,8 +27,13 @@ class EngineHttpServer
         return this._isReady;
     }
 
+    get port() {
+        // istanbul ignore next
+        return this._port;
+    }
+
     start() {
-        return new Promise(this._initializeExpressApp.bind(this));
+        return this._initializeExpressApp();
     }
 
     stop() {
@@ -36,10 +41,12 @@ class EngineHttpServer
         this._isReady = false;
 
         //  Close the server and stop the engine.
+        // istanbul ignore else
         if (this._httpServer) {
             this._httpServer.close();
         }
         this._httpServer = null;
+
         return this.afterListening();
     }
 
@@ -79,6 +86,7 @@ class EngineHttpServer
      */
     getMeta() {
         //  Nothing to do.
+        // istanbul ignore next
         return {};
     }
 
@@ -88,94 +96,125 @@ class EngineHttpServer
      */
     analyzeFile() {
         //  Nothing to do.
+        // istanbul ignore next
         return Promise.resolve({});
     }
 
     _initializeExpressApp(resolve, reject) {
-        const self = this;
-
-        if (self._isReady) {
+        // istanbul ignore if
+        if (this._isReady) {
             return reject(new Error('Engine HTTP server is already running.'));
         }
 
         //  Setup Express application.
-        const app = express();
+        const app = this._createExpressApp();
         app.use(bodyParser.json());
 
         //  Middleware that returns 503 if the engine isn't ready to accept requests yet.
-        app.use((req, res, next) => {
-            if (self._isReady) {
-                return next();
-            }
-
-            //  Send service unavailable with an arbitrary length of Retry-After header.
-            //  This allows lazy service running this engine to gracefully handle the case.
-            const ARBITRARY_SERVICE_UNAVAILABLE_RETRY_AFTER = 5/* seconds */;
-            res.setHeader('Retry-After', ARBITRARY_SERVICE_UNAVAILABLE_RETRY_AFTER);
-            return res.sendStatus(503);
-        });
+        app.use(this._middleware503IfNotReady.bind(this));
 
         //  GET /status is used by lazy to determine if the engine is healthy.
-        app.get('/status', (req, res) => {
-            //  Return 200. The above middleware will return 503 if engine is still not ready.
-            res.sendStatus(200);
-        });
+        app.get('/status', this._endpointGetStatus.bind(this));
 
-        app.get('/meta', (req, res) => {
-            res.send(self.getMeta());
-        });
+        app.get('/meta', this._endpointGetMeta.bind(this));
 
-        //  Listen on POST /file for requests. These requests are not 100% the same as the one
-        //  we are receiving in lazy service as language most notably needs to be translated from
-        //  the client values into common values.
-        app.post('/file', (req, res) => {
-            const hostPath = _.get(req, 'body.hostPath');
-            const language = _.get(req, 'body.language');
-            const content = _.get(req, 'body.content');
-            const context = _.get(req, 'body.context');
+        //  Listen on POST /file for requests forwarded to us by lazy.
+        app.post('/file', this._endpointPostFile.bind(this));
 
-            self.analyzeFile(hostPath, language, content, context)
-                .then((results) => {
-                    res.send(results);
-                })
-                .catch((err) => {
-                    logger.info(err);
-                    res.status(500).send({
-                        error: err.message
-                    });
-                });
-        });
-
-        self.customizeExpressApp(app);
+        //  Allow inheriting classes to customize express app.
+        this.customizeExpressApp(app);
 
         //  Finish initialization before we start listening on the port.
-        self.beforeListening()
-            .then(() => {
-                //  Capture the HTTP server instance so that we can shut it down on `stop()`.
-                self._httpServer = app.listen(self._port, (err) => {
-                    if (err) {
-                        logger.warn(`Failed to listen on port ${self._port}`, err);
-                        //  We have to cleanup as we have already invoked `beforeListening`.
-                        return self.afterListening()
-                            .then(() => {
-                                //  Reject the entire promise with the original error.
-                                reject(err);
-                            })
-                            .catch((afterListeningErr) => {
-                                //  Log the error and reject with the original error as
-                                //  there is nothing we can do about this.
-                                logger.error('After listening failed', afterListeningErr);
-                                reject(err);
-                            });
-                    }
+        return this.beforeListening()
+            .then(() => this._startListening(app))
+            .then((httpServer) => {
+                //  Capture the HTTP server instance so that we can shut it down on `stop()`
+                this._httpServer = httpServer;
+                //  HTTP server has booted and engine is now ready to accept requests.
+                this._isReady = true;
+            })
+            .catch((err) => {
+                logger.warn(`Failed to listen on port ${this._port}`, err);
+                //  We have to cleanup as we have already invoked `beforeListening`.
+                return this.afterListening()
+                    //  Note that in this case it makes sense to define functions for
+                    //  success and failure at the same time as even our success has
+                    //  to fail with the original error and chaining them requires
+                    //  additional checks.
+                    .then(() => {
+                        //  Reject the entire promise with the original error.
+                        return Promise.reject(err);
+                    }, (afterListeningErr) => {
+                        //  Log the error and reject with the original error as
+                        //  there is nothing we can do about this.
+                        logger.error('After listening failed', afterListeningErr);
+                        return Promise.reject(err);
+                    });
+            });
+    }
 
-                    //  HTTP server has booted and engine is now ready to accept requests.
-                    self._isReady = true;
-                    return resolve();
+    /**
+     * Sends 503 HTTP status if server is not ready.
+     */
+    _middleware503IfNotReady(req, res, next) {
+        if (this._isReady) {
+            return next();
+        }
+
+        //  Send service unavailable with an arbitrary length of Retry-After header.
+        //  This allows lazy service running this engine to gracefully handle the case.
+        const ARBITRARY_SERVICE_UNAVAILABLE_RETRY_AFTER = 5/* seconds */;
+        res.setHeader('Retry-After', ARBITRARY_SERVICE_UNAVAILABLE_RETRY_AFTER);
+        res.sendStatus(503);
+    }
+
+    _endpointGetStatus(req, res) {
+        //  Return 200. The above middleware will return 503 if engine is still not ready.
+        // istanbul ignore next
+        res.sendStatus(200);
+    }
+
+    _endpointGetMeta(req, res) {
+        // istanbul ignore next
+        res.send(this.getMeta());
+    }
+
+    _endpointPostFile(req, res) {
+        const hostPath = _.get(req, 'body.hostPath');
+        const language = _.get(req, 'body.language');
+        const content = _.get(req, 'body.content');
+        const context = _.get(req, 'body.context');
+
+        return this.analyzeFile(hostPath, language, content, context)
+            .then((results) => {
+                res.send(results);
+            })
+            .catch((err) => {
+                logger.info(err);
+                res.status(500).send({
+                    error: err.message
                 });
             });
+    }
 
-        return this._httpServer;
+    _startListening(app) {
+        return new Promise((resolve, reject) => {
+            const httpServer = app.listen(this.port, (err) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                //  httpServer is undefined if this is executed synchronously (like in tests)
+                return setImmediate(() => {
+                    resolve(httpServer);
+                });
+            });
+        });
+    }
+
+    _createExpressApp() {
+        // istanbul ignore next
+        return express();
     }
 }
 
