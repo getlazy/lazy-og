@@ -7,7 +7,6 @@ const _ = require('lodash');
 const tmp = require('tmp');
 const fs = require('fs');
 const path = require('path');
-const selectn = require('selectn');
 const mkdirp = require('mkdirp-then');
 
 const HigherDockerManager = require('@lazyass/higher-docker-manager');
@@ -44,8 +43,8 @@ class HelperContainer
                 //  Get the engine network name assuming that it's the first of all the networks
                 //  that engine container has access to. This is a safe assumption as engines should
                 //  be attached only to stack networks.
-                const engineNetworkName = _.head(_.keys(selectn(
-                    'NetworkSettings.Networks', engineContainer)));
+                const engineNetworkName = _.head(_.keys(_.get(
+                    engineContainer, 'NetworkSettings.Networks')));
 
                 //  Create the helper container.
                 const createHelperParams = {

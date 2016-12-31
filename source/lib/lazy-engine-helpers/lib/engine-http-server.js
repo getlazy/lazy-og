@@ -3,9 +3,9 @@
 
 /* global logger */
 
+const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
-const selectn = require('selectn');
 
 //  We are implicitly using `this` in overriden methods but eslint keep telling us not to.
 /* eslint class-methods-use-this: off */
@@ -129,10 +129,10 @@ class EngineHttpServer
         //  we are receiving in lazy service as language most notably needs to be translated from
         //  the client values into common values.
         app.post('/file', (req, res) => {
-            const hostPath = selectn('body.hostPath', req);
-            const language = selectn('body.language', req);
-            const content = selectn('body.content', req);
-            const context = selectn('body.context', req);
+            const hostPath = _.get(req, 'body.hostPath');
+            const language = _.get(req, 'body.language');
+            const content = _.get(req, 'body.content');
+            const context = _.get(req, 'body.context');
 
             self.analyzeFile(hostPath, language, content, context)
                 .then((results) => {
