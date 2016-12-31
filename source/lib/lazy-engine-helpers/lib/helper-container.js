@@ -8,10 +8,14 @@ const tmp = require('tmp');
 const fs = require('fs');
 const path = require('path');
 const selectn = require('selectn');
+const mkdirp = require('mkdirp-then');
 
 const HigherDockerManager = require('@lazyass/higher-docker-manager');
 
+//  HACK: We hard-code the path instead of using sandbox path which "belongs"
 const TEMPORARY_DIR_LAZY_PATH = '/lazy/tmp';
+
+/* eslint class-methods-use-this: off */
 
 /**
  * Base class for helper containers running as sibil Docker containers.
@@ -34,8 +38,8 @@ class HelperContainer
      * @return {Promise} Promise resolving with a new instance of HelperContainer.
      */
     static createContainer(auth, imageName, lazyVolumeName) {
-        return HigherDockerManager.pullImage(auth, imageName)
-            .then(() => HigherDockerManager.getOwnContainer())
+        return HelperContainer._pullImage(auth, imageName)
+            .then(() => HelperContainer._getOwnContainer())
             .then((engineContainer) => {
                 //  Get the engine network name assuming that it's the first of all the networks
                 //  that engine container has access to. This is a safe assumption as engines should
@@ -68,7 +72,7 @@ class HelperContainer
                     WorkingDir: '/lazy'
                 };
 
-                return HigherDockerManager.createContainer(createHelperParams);
+                return HelperContainer._createContainer(createHelperParams);
             })
             .then(container => container.start());
     }
@@ -87,20 +91,6 @@ class HelperContainer
         this._container = container;
     }
 
-    static _createTempDir() {
-        return new Promise((resolve, reject) => {
-            fs.mkdir(TEMPORARY_DIR_LAZY_PATH, (err) => {
-                if (err) {
-                    if (err.code !== 'EEXIST') {
-                        return reject(err);
-                    }
-                }
-
-                return resolve();
-            });
-        });
-    }
-
     /**
      * Creates temporary file in `/lazy` directory which is (HACK) is mounted to a known shared
      * volume.
@@ -112,6 +102,7 @@ class HelperContainer
      * @private
      */
     static _createTempFileWithContent(content, hostPath) {
+        // istanbul ignore next
         return new Promise((resolve, reject) => {
             tmp.file({
                 //  HACK: We hard-code the volume mount path to /lazy which is known to all
@@ -157,6 +148,7 @@ class HelperContainer
                     temporaryFileCleanupCallback();
                 }
             } catch (e) {
+                // istanbul ignore next
                 logger.error('Failed to cleanup temporary file', e);
                 //  Don't pass on this error - there is nothing we can do about it.
             }
@@ -179,7 +171,7 @@ class HelperContainer
         //  temporary directory of engine container. Volume of the engine container
         //  is shared with helper container and can thus be read by it.
         //  TODO: unhack temporary directory thingamajig
-        return HelperContainer._createTempDir()
+        return HelperContainer._mkdirp()
             .then(() => HelperContainer._createTempFileWithContent(content, hostPath))
             .then((fileInfo) => {
                 temporaryFileInfo = fileInfo;
@@ -187,12 +179,15 @@ class HelperContainer
                 //  Create exec parameters for the container.
                 let execParams = {};
                 //  Delegate parts of exec param creation to inheriting classes.
+                // istanul ignore else
                 if (_.isFunction(self._getBaseContainerExecParams)) {
                     execParams = self._getBaseContainerExecParams();
                 }
+                // istanul ignore else
                 if (_.isFunction(self._getContainerEntrypoint)) {
                     execParams.Entrypoint = self._getContainerEntrypoint();
                 }
+                // istanul ignore else
                 if (_.isFunction(self._getContainerCmd)) {
                     execParams.Cmd = self._getContainerCmd();
                 }
@@ -206,12 +201,23 @@ class HelperContainer
                 execParams.Cmd = execParams.Cmd
                     .concat(`${TEMPORARY_DIR_LAZY_PATH}/${path.basename(temporaryFileInfo.path)}`);
 
-                return HigherDockerManager.execInContainer(self._container, execParams);
+                return HelperContainer._execInContainer(self._container, execParams);
             })
             //  Delegate the processing of the output to inheriting classes.
-            .then(self._processContainerOutput)
+            .then((containerOutput) => {
+                if (_.isFunction(self._processContainerOutput)) {
+                    return self._processContainerOutput(containerOutput);
+                }
+
+                return null;
+            })
             .then((results) => {
+                if (_.isNil(results)) {
+                    return [];
+                }
+
                 const processedResults = _.cloneDeep(results);
+                // istanbul ignore else
                 if (_.isArray(processedResults.warnings)) {
                     //  Fix the file path to use the actual client path rather than
                     //  the temporary one we used.
@@ -231,11 +237,57 @@ class HelperContainer
             })
             .catch((err) => {
                 //  Schedule the cleanup and pass on the error.
+                // istanbul ignore else
                 if (temporaryFileInfo) {
                     HelperContainer._scheduleDelayedCleanup(temporaryFileInfo.cleanupCallback);
                 }
                 return Promise.reject(err);
             });
+    }
+
+    /**
+     * Wrapper around HigherDockerManager.pullImage for easier unit testing.
+     * @private
+     */
+    static _pullImage(...args) {
+        // istanbul ignore next
+        return HigherDockerManager.pullImage(...args);
+    }
+
+    /**
+     * Wrapper around HigherDockerManager.getOwnContainer for easier unit testing.
+     * @private
+     */
+    static _getOwnContainer(...args) {
+        // istanbul ignore next
+        return HigherDockerManager.getOwnContainer(...args);
+    }
+
+    /**
+     * Wrapper around HigherDockerManager.createContainer for easier unit testing.
+     * @private
+     */
+    static _createContainer(...args) {
+        // istanbul ignore next
+        return HigherDockerManager.createContainer(...args);
+    }
+
+    /**
+     * Wrapper around HigherDockerManager.execInContainer for easier unit testing.
+     * @private
+     */
+    static _execInContainer(...args) {
+        // istanbul ignore next
+        return HigherDockerManager.execInContainer(...args);
+    }
+
+    /**
+     * Wrapper around mkdirp for easier unit testing.
+     * @private
+     */
+    static _mkdirp() {
+        // istanbul ignore next
+        return mkdirp(TEMPORARY_DIR_LAZY_PATH);
     }
 }
 

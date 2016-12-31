@@ -1,108 +1,254 @@
 
 'use strict';
 
-/* global logger, describe, it, before, after */
+/* global logger, describe, it, before, after, afterEach */
 
 //  To set some properties we need `this` of `describe` and `it` callback functions.
-/* eslint prefer-arrow-callback: off, func-names: off */
+/* eslint prefer-arrow-callback: off, func-names: off, class-methods-use-this: off, lodash/prefer-constant: off */
 
 require('./bootstrap');
+
+const td = require('testdouble');
+
+//  We replace HigherDockerManager as it does some things during its module initialization.
+const HigherDockerManager = td.replace('@lazyass/higher-docker-manager');
 
 const _ = require('lodash');
 const assert = require('assert');
 const HelperContainer = require('../lib/helper-container');
-const Docker = require('node-docker-api').Docker;
-const HigherDockerManager = require('@lazyass/higher-docker-manager');
-
-const docker = new Docker({
-    socketPath: '/var/run/docker.sock'
-});
 
 //  Use old node-dev image for testing.
 const TEST_IMAGE = 'ierceg/node-dev:1.0.0';
 
 describe('HelperContainer', function () {
-    after(function () {
-        //  Delete all containers in the test container network.
-        this.timeout(60000);
-        return HigherDockerManager.getOwnContainer()
-            .then((testContainer) => {
-                const networks = _.get(testContainer, 'NetworkSettings.Networks');
-                return HigherDockerManager.getContainersInNetworks(networks)
-                    .then(containers => Promise.all(_.map(containers, (container) => {
-                        if (_.isObject(container) && container.Id !== testContainer.Id) {
-                            return HelperContainer.deleteContainer(container);
-                        }
-
-                        return Promise.resolve();
-                    })));
-            });
+    afterEach(() => {
+        td.reset();
     });
 
     describe('createContainer', function () {
-        this.timeout(15000);
-
-        it('fails for images that are unavailable', function () {
-            return HelperContainer
-                .createContainer({}, 'inexisting-account/inexisting-image:inexisting.tag')
-                .then(() => {
-                    //  This should never happen.
-                    assert(false);
-                })
-                .catch((err) => {
-                    assert(err);
-                    assert.equal(err.statusCode, 404);
-                    assert(_.startsWith(err.message, '(HTTP code 404) unexpected'));
-                });
-        });
-
-        it('pulls image that is not available', function () {
-            //  First make sure the test image doesn't exist.
-            return docker.image.status(TEST_IMAGE)
-                .then((image) => {
-                    if (image) {
-                        return image.remove();
+        it('works', function () {
+            td.when(td.replace(HelperContainer, '_pullImage')({}, TEST_IMAGE)).thenResolve();
+            td.when(td.replace(HelperContainer, '_getOwnContainer')()).thenResolve(td.object({
+                NetworkSettings: {
+                    Networks: {
+                        'test-network': {}
                     }
+                }
+            }));
+            const container = td.object('start');
+            td.when(container.start()).thenResolve('test-done-signal');
+            td.when(td.replace(HelperContainer, '_createContainer')(td.matchers.argThat((params) => {
+                assert.equal(params.Image, TEST_IMAGE);
+                assert.equal(_.get(params, 'HostConfig.NetworkMode'), 'test-network');
+                return true;
+            }))).thenResolve(container);
 
-                    return Promise.resolve();
-                })
-                .catch((err) => {
-                    assert(err);
-                    assert.equal(err.statusCode, 404);
-                    assert(_.startsWith(err.message, '(HTTP code 404) no such image'));
-                })
-                .then(() => HelperContainer.createContainer({}, TEST_IMAGE));
+            return HelperContainer.createContainer({}, TEST_IMAGE)
+                .then((testDoneSignal) => {
+                    assert.equal(testDoneSignal, 'test-done-signal');
+                });
         });
     });
 
     describe('deleteContainer', function () {
-        this.timeout(60000);
-
-        it('deletes container', function () {
-            return HelperContainer.createContainer({}, TEST_IMAGE)
-                .then(container => HelperContainer.deleteContainer(container));
+        it('works', function () {
+            const container = td.object(['stop', 'wait', 'delete']);
+            td.when(container.stop()).thenResolve();
+            td.when(container.wait()).thenResolve();
+            td.when(container.delete()).thenResolve('test-done-signal');
+            return HelperContainer.deleteContainer(container)
+                .then((testDoneSignal) => {
+                    assert.equal(testDoneSignal, 'test-done-signal');
+                });
         });
     });
 
     describe('Object methods', function () {
-        this.timeout(60000);
-
-        let helperContainer;
-
-        before(function () {
-            return HelperContainer.createContainer({}, TEST_IMAGE)
-                .then((container) => {
-                    helperContainer = new HelperContainer(container);
-                });
-        });
-
         describe('analyzeFile', function () {
-            it('works', function () {
-                return helperContainer.analyzeFile('hostname', '', 'test')
+            it('ensures Cmd params are an array', function () {
+                const container = td.object({});
+                const helperContainer = new HelperContainer(container);
+                let _execInContainerInvoked = false;
+                td.when(td.replace(HelperContainer, '_mkdirp')()).thenResolve();
+                td.when(td.replace(HelperContainer, '_createTempFileWithContent')(
+                    'content', 'hostPath')).thenResolve({
+                        path: 'temp-test-path'
+                    });
+                td.when(td.replace(HelperContainer, '_execInContainer')(container, td.matchers.argThat((execParams) => {
+                    assert(execParams);
+                    assert(_.isArray(execParams.Cmd));
+                    _execInContainerInvoked = true;
+                    return true;
+                }))).thenResolve([]);
+
+                return helperContainer.analyzeFile('hostPath', 'language', 'content')
                     .then((results) => {
                         assert(results);
+                        assert(_.isEmpty(results));
+                        assert(_execInContainerInvoked);
                     });
             });
+
+            it('uses _getBaseContainerExecParams if available', function () {
+                const container = td.object({});
+
+                class TestHelperContainer extends HelperContainer {
+                    _getBaseContainerExecParams() {
+                        return {
+                            Entrypoint: 'test-entrypoint',
+                            Cmd: ['this', 'now']
+                        };
+                    }
+                }
+
+                const helperContainer = new TestHelperContainer(container);
+                let _execInContainerInvoked = false;
+                td.when(td.replace(HelperContainer, '_mkdirp')()).thenResolve();
+                td.when(td.replace(HelperContainer, '_createTempFileWithContent')(
+                    'content', 'hostPath')).thenResolve({
+                        path: 'temp-test-path'
+                    });
+                td.when(td.replace(HelperContainer, '_execInContainer')(container, td.matchers.argThat((execParams) => {
+                    assert(execParams);
+                    assert.equal(execParams.Entrypoint, 'test-entrypoint');
+                    assert(_.isArray(execParams.Cmd));
+                    assert.equal(execParams.Cmd.length, 3);
+                    assert.equal(execParams.Cmd[0], 'this');
+                    assert.equal(execParams.Cmd[1], 'now');
+                    assert(_.endsWith(execParams.Cmd[2], 'temp-test-path'));
+                    _execInContainerInvoked = true;
+                    return true;
+                }))).thenResolve([]);
+
+                return helperContainer.analyzeFile('hostPath', 'language', 'content')
+                    .then((results) => {
+                        assert(results);
+                        assert(_.isEmpty(results));
+                        assert(_execInContainerInvoked);
+                    });
+            });
+
+            it('uses _getContainerEntrypoint if available', function () {
+                const container = td.object({});
+
+                class TestHelperContainer extends HelperContainer {
+                    _getContainerEntrypoint() {
+                        return 'test-entrypoint';
+                    }
+                }
+
+                const helperContainer = new TestHelperContainer(container);
+                let _execInContainerInvoked = false;
+                td.when(td.replace(HelperContainer, '_mkdirp')()).thenResolve();
+                td.when(td.replace(HelperContainer, '_createTempFileWithContent')(
+                    'content', 'hostPath')).thenResolve({
+                        path: 'temp-test-path'
+                    });
+                td.when(td.replace(HelperContainer, '_execInContainer')(container, td.matchers.argThat((execParams) => {
+                    assert(execParams);
+                    assert.equal(execParams.Entrypoint, 'test-entrypoint');
+                    assert(_.isArray(execParams.Cmd));
+                    assert.equal(execParams.Cmd.length, 1);
+                    assert(_.endsWith(execParams.Cmd[0], 'temp-test-path'));
+                    _execInContainerInvoked = true;
+                    return true;
+                }))).thenResolve([]);
+
+                return helperContainer.analyzeFile('hostPath', 'language', 'content')
+                    .then((results) => {
+                        assert(results);
+                        assert(_.isEmpty(results));
+                        assert(_execInContainerInvoked);
+                    });
+            });
+
+            it('uses _getContainerCmd if available', function () {
+                const container = td.object({});
+
+                class TestHelperContainer extends HelperContainer {
+                    _getContainerCmd() {
+                        return ['test-arg0', 'test-arg1'];
+                    }
+                }
+
+                const helperContainer = new TestHelperContainer(container);
+                let _execInContainerInvoked = false;
+                td.when(td.replace(HelperContainer, '_mkdirp')()).thenResolve();
+                td.when(td.replace(HelperContainer, '_createTempFileWithContent')(
+                    'content', 'hostPath')).thenResolve({
+                        path: 'temp-test-path'
+                    });
+                td.when(td.replace(HelperContainer, '_execInContainer')(container, td.matchers.argThat((execParams) => {
+                    assert(execParams);
+                    assert(_.isUndefined(execParams.Entrypoint));
+                    assert(_.isArray(execParams.Cmd));
+                    assert.equal(execParams.Cmd.length, 3);
+                    assert.equal(execParams.Cmd[0], 'test-arg0');
+                    assert.equal(execParams.Cmd[1], 'test-arg1');
+                    assert(_.endsWith(execParams.Cmd[2], 'temp-test-path'));
+                    _execInContainerInvoked = true;
+                    return true;
+                }))).thenResolve([]);
+
+                return helperContainer.analyzeFile('hostPath', 'language', 'content')
+                    .then((results) => {
+                        assert(results);
+                        assert(_.isEmpty(results));
+                        assert(_execInContainerInvoked);
+                    });
+            });
+
+            it('uses _processContainerOutput if available', function () {
+                const container = td.object({});
+
+                class TestHelperContainer extends HelperContainer {
+                    _processContainerOutput() {
+                        return {
+                            warnings: [{
+                                id: 'output0'
+                            }, {
+                                id: 'output1'
+                            }]
+                        };
+                    }
+                }
+
+                const helperContainer = new TestHelperContainer(container);
+                td.when(td.replace(HelperContainer, '_mkdirp')()).thenResolve();
+                td.when(td.replace(HelperContainer, '_createTempFileWithContent')(
+                    'content', 'hostPath')).thenResolve({
+                        path: 'test-path'
+                    });
+                td.when(td.replace(HelperContainer, '_execInContainer')(
+                    container, td.matchers.anything())).thenResolve([]);
+
+                return helperContainer.analyzeFile('hostPath', 'language', 'content')
+                    .then((results) => {
+                        assert(results);
+                        assert(_.isArray(results.warnings));
+                        assert.equal(results.warnings.length, 2);
+                        assert.equal(results.warnings[0].id, 'output0');
+                        assert.equal(results.warnings[1].id, 'output1');
+                    });
+            });
+        });
+
+        it('handles failures', function () {
+            const container = td.object({});
+            const helperContainer = new HelperContainer(container);
+            td.when(td.replace(HelperContainer, '_mkdirp')()).thenResolve();
+            td.when(td.replace(HelperContainer, '_createTempFileWithContent')(
+                'content', 'hostPath')).thenResolve({
+                    path: 'temp-test-path'
+                });
+            td.when(td.replace(HelperContainer, '_execInContainer')(
+                container, td.matchers.anything())).thenReject(new Error('test-error'));
+
+            return helperContainer.analyzeFile('hostPath', 'language', 'content')
+                .catch((err) => {
+                    assert(err);
+                    assert.equal(err.message, 'test-error');
+                });
         });
     });
 });
