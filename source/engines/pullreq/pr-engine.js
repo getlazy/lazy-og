@@ -5,8 +5,7 @@ const EngineHelpers = require('@lazyass/engine-helpers');
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 const RepoLinter = require('./app/repo-linter.js');
 
-class PullRequestEngine {
-
+class PREngineHttpServer extends EngineHttpServer {
     /**
      * Get all PR comments and turn them into lint messages.
      * @param {string} hostPath Path of the source file requesting lazy to analyze.
@@ -34,15 +33,11 @@ class PullRequestEngine {
             });
         });
     }
-}
 
-class PREngineHttpServer extends EngineHttpServer {
-    _bootEngine() {
-        return Promise.resolve(new PullRequestEngine());
-    }
-
-    _stopEngine() {
-        return Promise.resolve();
+    getMeta() {
+        return {
+            languages: []
+        };
     }
 }
 

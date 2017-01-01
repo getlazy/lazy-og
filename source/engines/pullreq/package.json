@@ -1,7 +1,7 @@
 {
   "name": "lazy-pullreq-engine",
   "version": "1.0.0",
-  "description": "Linter for GitHub pull requests.",
+  "description": "lazy engine for serving comments from GitHub pull requests",
   "main": "pr-engine.js",
   "scripts": {
     "test": "test"
@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/SoftwareMarbles/lazy-pullreq-engine#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^1.11.0",
+    "@lazyass/engine-helpers": "^2.0.0",
     "lodash": "^4.17.3",
     "lowdb": "^0.14.0",
     "octokat": "^0.4.18",
