@@ -1,3 +1,4 @@
+
 'use strict';
 
 const _ = require('lodash');
@@ -7,8 +8,7 @@ const EngineHelpers = require('@lazyass/engine-helpers');
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
-class YamlEngine {
-
+class YamlEngineHttpServer extends EngineHttpServer {
     _processMsg(type, message) {
             return {
                 type: type,
@@ -48,15 +48,11 @@ class YamlEngine {
             });
         });
     }
-}
 
-class YamlEngineHttpServer extends EngineHttpServer {
-    _bootEngine() {
-        return Promise.resolve(new YamlEngine());
-    }
-
-    _stopEngine() {
-        return Promise.resolve();
+    getMeta() {
+        return {
+            languages: ['yaml']
+        };
     }
 }
 
