@@ -1,6 +1,6 @@
 {
   "name": "lazy-pullreq-engine",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "lazy engine for serving comments from GitHub pull requests",
   "main": "pr-engine.js",
   "scripts": {
