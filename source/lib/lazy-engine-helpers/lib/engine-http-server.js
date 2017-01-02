@@ -100,10 +100,10 @@ class EngineHttpServer
         return Promise.resolve({});
     }
 
-    _initializeExpressApp(resolve, reject) {
+    _initializeExpressApp() {
         // istanbul ignore if
         if (this._isReady) {
-            return reject(new Error('Engine HTTP server is already running.'));
+            return Promise.reject(new Error('Engine HTTP server is already running.'));
         }
 
         //  Setup Express application.
@@ -141,15 +141,15 @@ class EngineHttpServer
                     //  success and failure at the same time as even our success has
                     //  to fail with the original error and chaining them requires
                     //  additional checks.
-                    .then(() => {
-                        //  Reject the entire promise with the original error.
-                        return Promise.reject(err);
-                    }, (afterListeningErr) => {
-                        //  Log the error and reject with the original error as
-                        //  there is nothing we can do about this.
-                        logger.error('After listening failed', afterListeningErr);
-                        return Promise.reject(err);
-                    });
+                    //  Reject the entire promise with the original error.
+                    .then(
+                        () => Promise.reject(err),
+                        (afterListeningErr) => {
+                            //  Log the error and reject with the original error as
+                            //  there is nothing we can do about this.
+                            logger.error('After listening failed', afterListeningErr);
+                            return Promise.reject(err);
+                        });
             });
     }
 
