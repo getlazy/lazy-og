@@ -5,9 +5,8 @@
 
 const _ = require('lodash');
 const url = require('url');
-const request = require('request');
+const request = require('request-promise-native');
 const async = require('async');
-const selectn = require('selectn');
 const HigherDockerManager = require('@lazyass/higher-docker-manager');
 
 const DEFAULT_ARBITRARY_BOOT_TIMEOUT_S = 30;
@@ -98,24 +97,7 @@ class Engine
             }
         };
 
-        return new Promise((resolve, reject) => {
-            request(requestParams, (err, response, body) => {
-                if (err) {
-                    return reject(err);
-                }
-
-                if (response.statusCode !== 200) {
-                    let message = `HTTP engine failed with ${response.statusCode} status code`;
-                    if (body && body.error) {
-                        message += ` (${body.error})`;
-                    }
-
-                    return reject(new Error(message));
-                }
-
-                return resolve(body);
-            });
-        });
+        return request(requestParams);
     }
 
     /**
@@ -145,24 +127,7 @@ class Engine
             }
         };
 
-        return new Promise((resolve, reject) => {
-            request(requestParams, (err, response, body) => {
-                if (err) {
-                    return reject(err);
-                }
-
-                if (response.statusCode !== 200) {
-                    let message = `HTTP engine failed with ${response.statusCode} status code`;
-                    if (body && body.error) {
-                        message += ` (${body.error})`;
-                    }
-
-                    return reject(new Error(message));
-                }
-
-                return resolve(body);
-            });
-        })
+        return request(requestParams)
             .then((results) => {
                 const processedWarnings = {};
                 if (_.isArray(results.warnings)) {
@@ -216,7 +181,7 @@ class Engine
 
         //  Calculate the max number of status requests based on the configured timeout or
         //  if timeout hasn't been configured, then use the default.
-        const bootTimeoutInMs = 1000 * (selectn('_config.boot_timeout', self) ||
+        const bootTimeoutInMs = 1000 * (_.get(self, '_config.boot_timeout') ||
             DEFAULT_ARBITRARY_BOOT_TIMEOUT_S);
         const maxNumberOfStatusRequests = bootTimeoutInMs / ARBITRARY_ENGINE_BOOT_CHECK_DELAY_MS;
 
@@ -267,25 +232,7 @@ class Engine
             }
         };
 
-        return new Promise((resolve, reject) => {
-            request(requestParams, (err, response, body) => {
-                if (err) {
-                    return reject(err);
-                }
-
-                if (response.statusCode !== 200) {
-                    let message =
-                        `Engine ${self.name} failed with ${response.statusCode} status code`;
-                    if (body && body.error) {
-                        message += ` (${body.error})`;
-                    }
-
-                    return reject(new Error(message));
-                }
-
-                return resolve(body);
-            });
-        });
+        return request(requestParams);
     }
 }
 
