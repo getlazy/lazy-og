@@ -141,16 +141,8 @@ class EngineManager
                         }
                     },
                     WorkingDir: engineConfig.working_dir,
-                    Labels: engineConfig.labels || {}
+                    Labels: {}
                 };
-                //  Add labels.
-                createEngineParams.Labels[Label.IoLazyassLazyEngineManagerOwned] = 'true';
-                //  Copy the languages label from the image into container so that we can use
-                //  the metadata.
-                if (engineImage.Config.Labels[Label.IoLazyassLazyEngineLanguages]) {
-                    createEngineParams.Labels[Label.IoLazyassLazyEngineLanguages] =
-                        engineImage.Config.Labels[Label.IoLazyassLazyEngineLanguages];
-                }
 
                 logger.info('Creating engine', {
                     engine: engineName,
@@ -161,17 +153,9 @@ class EngineManager
             })
             .then(engineContainer =>
                 engineContainer.start()
-                    .then(() => engineContainer.status())
-                    .then((engineContainerStatus) => {
-                        const languagesLabel =
-                            engineContainerStatus.Config.Labels[Label.IoLazyassLazyEngineLanguages];
-                        const languages = H.isNonEmptyString(languagesLabel) ?
-                            languagesLabel.split(',') : [];
-
-                        return new Engine(engineName, languages, engineContainer, engineConfig);
-                    })
+                    .then(() => new Engine(engineName, engineContainer, engineConfig))
             )
-            .then(engine => engine.boot().then(() => engine));
+            .then(engine => engine.start().then(() => engine));
     }
 
     _findLazyVolumeOrCreateIt() {

@@ -21,16 +21,13 @@ class Engine
     /**
      * Constructs a new instance of Engine with the given name and languages.
      * @param {string} name Name of the engine
-     * @param {Array} languages Array of language strings which this engine can process.
      * @param {Container} container Container in which this engine is running.
      * @param {Object} config Defined configuration of this engine.
      */
     constructor(name, languages, container, config) {
         this._name = name;
-        this._languages = languages;
         this._container = container;
         this._config = config;
-        this._meta = {};
     }
 
     /**
@@ -44,7 +41,7 @@ class Engine
      * @return {Array} Array of strings with languages that this engine can analyze.
      */
     get languages() {
-        return this._languages;
+        return _.get(this._meta, 'languages');
     }
 
     /**
@@ -63,13 +60,13 @@ class Engine
     }
 
     /**
-     * Boots the engine.
-     * @return {Promise} Promise resolved when boot operation has finished.
+     * Starts the engine.
+     * @return {Promise} Promise resolved when start operation has finished.
      */
-    boot() {
+    start() {
         const self = this;
 
-        logger.info('Booting', self.name, 'engine');
+        logger.info('Starting', self.name, 'engine');
         return self._redirectContainerLogsToLogger()
             .then(() => self._container.status())
             .then((containerStatus) => {
