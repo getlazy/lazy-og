@@ -98,7 +98,7 @@ class EngineManager
             repositoryAuth = self._config.repository_auth;
         }
         //  Resolve the repository auth if its values are kept in the lazy's process environment.
-        const resolvedRepositoryAuth = self._resolveRepositoryAuthValues(repositoryAuth);
+        const resolvedRepositoryAuth = EngineManager._resolveRepositoryAuthValues(repositoryAuth);
 
         logger.info('Pulling image', imageName, 'for engine', engineName);
         return HigherDockerManager.pullImage(resolvedRepositoryAuth, imageName)
@@ -259,7 +259,7 @@ class EngineManager
         });
     }
 
-    _resolveRepositoryAuthValues(repositoryAuth) {
+    static _resolveRepositoryAuthValues(repositoryAuth) {
         const resolvedRepositoryAuth = {};
         //  Resolve the values of properties defined with _env suffix. Those properties instruct
         //  lazy to read their values from its own environment.
