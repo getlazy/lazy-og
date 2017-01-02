@@ -50,15 +50,30 @@ class RepoLinter {
         if (_.isNil(repos)) {
             return [];
         }
+
         return _.chain(repos)
             .map((remote) => {
-                const regex = /https:\/\/github.com\/(.+)\/(.+)\.git/g;
-                const fetch = regex.exec(remote.refs.fetch);
-                return {
-                    owner: fetch[1],
-                    repo: fetch[2]
-                };
+                const httpProtocolRegex = /^https:\/\/github.com\/(.+)\/(.+)\.git/g;
+                const httpFetch = httpProtocolRegex.exec(remote.refs.httpFetch);
+                if (httpFetch) {
+                    return {
+                        owner: httpFetch[1],
+                        repo: httpFetch[2]
+                    };
+                }
+
+                const sshProtocolRegex = /^git@github.com:(.+)\/(.+)\.git/g;
+                const sshFetch = sshProtocolRegex.exec(remote.refs.fetch);
+                if (sshFetch) {
+                    return {
+                        owner: sshFetch[1],
+                        repo: sshFetch[2]
+                    };
+                }
+
+                return null;
             })
+            .filter()
             .flatten()
             .value();
     }
