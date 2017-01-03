@@ -8,7 +8,7 @@ const H = require('higher');
 const selectn = require('selectn');
 const async = require('async');
 const proxy = require('http-proxy-middleware');
-const PACKAGE_VERSION = require('../../package.json').version;
+const PACKAGE_VERSION = require('../../../package.json').version;
 
 //  Maps to and from loaded engines.
 const namesToEnginesMap = new Map();
@@ -73,20 +73,6 @@ const addEndpoints = (app, options) => {
             };
             return engines;
         }, {}));
-    });
-
-    //  TODO: See https://github.com/SoftwareMarbles/lazy/issues/44 for proposal to change
-    //  this endpoint.
-    app.get('/config', (req, res) => {
-        const engineName = _.toLower(_.get(req, 'query.engine'));
-        const engine = namesToEnginesMap[engineName];
-
-        if (_.isNil(engine)) {
-            res.sendStatus(404);
-            return;
-        }
-
-        res.send(engine.config);
     });
 
     app.post('/file', (req, res) => {
