@@ -10,9 +10,7 @@ const HigherDockerManager = require('@lazyass/higher-docker-manager');
 const Engine = require('./engine');
 
 const Label = {
-    IoLazyassLazyEngineManagerOwned: 'io.lazyass.lazy.engine-manager.owned',
-    IoLazyassLazyEngineManagerVersion: 'io.lazyass.lazy.engine-manager.version',
-    IoLazyassLazyEngineLanguages: 'io.lazyass.lazy.engine.languages'
+    IoLazyassLazyEngineManagerOwned: 'io.lazyass.lazy.engine-manager.owned'
 };
 
 /**
