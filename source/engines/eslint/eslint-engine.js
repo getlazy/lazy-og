@@ -90,7 +90,7 @@ class EslintEngineHttpServer extends EngineHttpServer {
     /* eslint class-methods-use-this: off */
     getMeta() {
         return {
-            languages: ['JavaScript']
+            languages: ['JavaScript', 'Babel ES6 JavaScript']
         };
     }
 }
