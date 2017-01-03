@@ -8,6 +8,7 @@ const low = require('lowdb');
 const LowdbLibFileAsync = require('lowdb/lib/file-async');
 const mkdirp = require('mkdirp');
 const EngineHelpers = require('@lazyass/engine-helpers');
+const request = require('request-promise-native');
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
@@ -101,12 +102,28 @@ class GithubAccessEngineHttpServer extends EngineHttpServer
         });
 
         app.get('/auth/success', (req, res) => {
-            //  TODO: Implement this.
+            //  If success path is defined redirect the client to it.
+            if (process.env.AUTH_SUCCESS_RELATIVE_URL) {
+                res.redirect(url.format({
+                    hostname: process.env.LAZY_SERVICE_URL,
+                    path: process.env.AUTH_SUCCESS_RELATIVE_URL
+                }));
+                return;
+            }
+
             res.sendStatus(200);
         });
 
         app.get('/auth/failure', (req, res) => {
-            //  TODO: Implement this.
+            //  If failure path is defined redirect the client to it.
+            if (process.env.AUTH_FAILURE_PATH) {
+                res.redirect(url.format({
+                    hostname: process.env.LAZY_SERVICE_URL,
+                    path: process.env.AUTH_FAILURE_PATH
+                }));
+                return;
+            }
+
             res.sendStatus(200);
         });
     }
