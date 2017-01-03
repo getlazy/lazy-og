@@ -227,11 +227,9 @@ class Engine
     }
 
     _getMeta() {
-        const self = this;
-
         const requestParams = {
             method: 'GET',
-            url: `${self._containerUrl}/meta`,
+            url: `${this._containerUrl}/meta`,
             json: true,
             headers: {
                 Accept: 'application/json'
