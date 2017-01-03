@@ -158,7 +158,8 @@ class EngineHttpServer
      */
     _middleware503IfNotReady(req, res, next) {
         if (this._isReady) {
-            return next();
+            next();
+            return;
         }
 
         //  Send service unavailable with an arbitrary length of Retry-After header.
