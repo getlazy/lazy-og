@@ -50,10 +50,16 @@ class Engine
         return this._containerUrl;
     }
 
+    /**
+     * @return {Object} Engine metadata object as returned by the engine or set in lazy.yaml.
+     */
     get meta() {
         return this._meta;
     }
 
+    /**
+     * @return {Object} Engine's configuration object.
+     */
     get config() {
         return this._config;
     }

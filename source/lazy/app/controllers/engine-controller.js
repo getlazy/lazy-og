@@ -75,6 +75,20 @@ const addEndpoints = (app, options) => {
         }, {}));
     });
 
+    //  TODO: See https://github.com/SoftwareMarbles/lazy/issues/44 for proposal to change
+    //  this endpoint.
+    app.get('/config', (req, res) => {
+        const engineName = _.toLower(_.get(req, 'query.engine'));
+        const engine = namesToEnginesMap[engineName];
+
+        if (_.isNil(engine)) {
+            res.sendStatus(404);
+            return;
+        }
+
+        res.send(engine.config);
+    });
+
     app.post('/file', (req, res) => {
         const language = selectn('body.language', req);
         if (_.isEmpty(language)) {
