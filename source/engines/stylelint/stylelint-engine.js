@@ -3,8 +3,6 @@
 
 /* global logger */
 
-global.logger = require('@lazyass/engine-helpers').Logger.getEngineLogger();
-
 const _ = require('lodash');
 
 const EngineHelpers = require('@lazyass/engine-helpers');
