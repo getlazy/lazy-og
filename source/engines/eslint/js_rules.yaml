@@ -8,7 +8,7 @@ rule-sets:
 
 # Anatomy of the rule set:
 - rule-set: 'Name of RS'    # Some descriptive name
-  ignore: true      # if true the complete rule-set will be ignored (like this one)                         
+  ignore: true      # if true the complete rule-set will be ignored (like this one)
   package: eslint-plugin-lodash   # Name of the NPM module that implements rules
   package-version: 'latest'       # Specific version of the NPM module to install
   plugin: lodash                  # Name of the plugin - if module exports a plugin
@@ -34,7 +34,7 @@ rule-sets:
         FunctionExpression:
           parameters: 1
           body: 1
-    max-len: 
+    max-len:
       - error
       - 120
       - 4
@@ -724,4 +724,3 @@ rule-sets:
   package: eslint-plugin-jquery
   plugin: jquery
   rules-import: configs.slim.rules
-

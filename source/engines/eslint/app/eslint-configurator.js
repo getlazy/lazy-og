@@ -103,16 +103,6 @@ class EslintConfigurator {
     }
 
     /**
-     * Set the environment variables from the passed in set.
-     * @param {set} envs Env. variable to set.
-     */
-    static _setEnvVars(envs) {
-        _.forIn(envs, (value, variable) => {
-            process.env[variable] = value;
-        });
-    }
-
-    /**
      * Read the YAML config file and create ESLint configuration based on it.
      * Also, download and install required external NPM modules.
      * @param {string} yamlFilePath YAML file path
@@ -120,76 +110,77 @@ class EslintConfigurator {
      *                   and all required module downloaded & installed
      */
     static configureFromYaml(yamlFilePath) {
+        return EslintConfigurator
+            .loadYaml(yamlFilePath)
+            .then(EslintConfigurator.configure);
+    }
+
+    /**
+     * Configure ESLint based on the given configuration.
+     * Download and install required external NPM modules.
+     * @param {Object} eslintConfiguration ESLint configuration.
+     * @return {Promise} Promise that is resolved once the configuration is ready,
+     *                   and all required module downloaded & installed
+     */
+    static configure(eslintConfiguration) {
         return new Promise((resolve, reject) => {
-            EslintConfigurator
-                .loadYaml(yamlFilePath)
-                .then((eslintConfiguration) => {
-                    let rules = {};
-                    const plugins = [];
+            let rules = {};
+            const plugins = [];
 
-                    // Function to be called after each package is successfully processed.
-                    // This function should further configure packages after the installation
-                    const onSuccessF = function _onSuccessF(ruleSet) {
-                        if (_.isNil(ruleSet)) {
-                            return;
+            // Function to be called after each package is successfully processed.
+            // This function should further configure packages after the installation
+            const onSuccessF = function _onSuccessF(ruleSet) {
+                if (_.isNil(ruleSet)) {
+                    return;
+                }
+
+                // We need to add plugin to configuration, only if the package
+                // is successfully installed AND if it declares plugin (some packages contain just rules,
+                // like the Google configuration and don't have plugins)
+                if (ruleSet.installed) {
+                    if (_.isString(ruleSet.plugin)) {
+                        plugins.push(ruleSet.plugin);
+                    }
+
+                    // Some packages declare pre-defined set of rules to be included
+                    // either as a recommendation or as a full list.
+                    // In such cases, we can use this instead of manually listing every rule
+                    // defined in a package.
+                    const rulesImportStatement = _.get(ruleSet, 'rules-import');
+
+                    try {
+                        if (_.isString(rulesImportStatement)) {
+                            rules = _.assignIn(rules,
+                                /* eslint import/no-dynamic-require: off */
+                                /* eslint global-require: off */
+                                _.get(require(ruleSet.package), rulesImportStatement)
+                            );
                         }
+                    } catch (err) {
+                        logger.warn('Cannot install package: ', ruleSet.package, err);
+                    }
 
-                        // We need to add plugin to configuration, only if the package
-                        // is successfully installed AND if it declares plugin (some packages contain just rules,
-                        // like the Google configuration and don't have plugins)
-                        if (ruleSet.installed) {
-                            if (_.isString(ruleSet.plugin)) {
-                                plugins.push(ruleSet.plugin);
-                            }
+                    // Process rules that may be configured manually
+                    if (!_.isNil(ruleSet.rules)) {
+                        rules = _.assignIn(rules, ruleSet.rules);
+                    }
+                }
+            };
 
-                            // Some packages declare pre-defined set of rules to be included
-                            // either as a recommendation or as a full list.
-                            // In such cases, we can use this instead of manually listing every rule
-                            // defined in a package.
-                            const rulesImportStatement = _.get(ruleSet, 'rules-import');
+            // Process all declared rule sets. A rule set may involve installing
+            // remote NPM packages
+            const packs = _.get(eslintConfiguration, 'rule-sets');
 
-                            try {
-                                if (_.isString(rulesImportStatement)) {
-                                    rules = _.assignIn(rules,
-                                        /* eslint import/no-dynamic-require: off */
-                                        /* eslint global-require: off */
-                                        _.get(require(ruleSet.package), rulesImportStatement)
-                                    );
-                                }
-                            } catch (err) {
-                                logger.warn('Cannot install package: ', ruleSet.package, err);
-                            }
-
-                            // Process rules that may be configured manually
-                            if (!_.isNil(ruleSet.rules)) {
-                                rules = _.assignIn(rules, ruleSet.rules);
-                            }
-                        }
-                    };
-
-                    // Set env vars defined in yaml configuration
-                    // In future, add other configuration options, if needed.
-                    const envs = _.get(eslintConfiguration, 'env-vars');
-
-                    EslintConfigurator._setEnvVars(envs);
-
-                    // Process all declared rule sets. A rule set may involve installing
-                    // remote NPM packages
-                    const packs = _.get(eslintConfiguration, 'rule-sets');
-
-                    EslintConfigurator._installAllRuleSets(packs, onSuccessF)
-                        .then((lastRuleSet) => {
-                            onSuccessF(lastRuleSet);
-                            logger.info('Finished installation of packages.');
-                            resolve({
-                                rules,
-                                plugins
-                            });
-                        });
+            EslintConfigurator._installAllRuleSets(packs, onSuccessF)
+                .then((lastRuleSet) => {
+                    onSuccessF(lastRuleSet);
+                    logger.info('Finished installation of packages.');
+                    resolve({
+                        rules,
+                        plugins
+                    });
                 })
-                .catch((err) => {
-                    reject(err);
-                });
+                .catch(reject);
         });
     }
 }

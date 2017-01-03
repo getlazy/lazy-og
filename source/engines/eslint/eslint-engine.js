@@ -8,12 +8,13 @@ const CLIEngine = require('eslint').CLIEngine;
 const EngineHelpers = require('@lazyass/engine-helpers');
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
+const EngineUtil = EngineHelpers.EngineUtil;
 
 const EslintConfigurator = require('./app/eslint-configurator.js');
 
 class EslintEngineHttpServer extends EngineHttpServer {
     beforeListening() {
-        return this.configure(null);
+        return this.configure();
     }
 
     /**
@@ -23,31 +24,31 @@ class EslintEngineHttpServer extends EngineHttpServer {
      * @return {Promise} Promise which is resolved when the config is processed
      *                   and CLI instatiated.
      */
-    configure(configFilePath) {
+    configure() {
         const self = this;
 
-        return new Promise((resolve) => {
-            EslintConfigurator
-                .configureFromYaml(configFilePath || (__dirname + '/js_rules.yaml'))
-                .then((configuration) => {
-                    self._cli = new CLIEngine({
-                        envs: ['node', 'es6'],
-                        parser: 'babel-eslint',
-                        plugins: configuration.plugins,
-                        rules: configuration.rules,
-                        fix: false,
-                        parserOptions: {
-                            ecmaVersion: 7
-                        }
-                    });
-                    logger.info('Configured ESLint CLI.');
-                    resolve(this);
-                })
-                .catch((err) => {
-                    logger.error('Failed to configure ESLint CLI.', err);
-                    process.exit(-1);
+        return EngineUtil.getEngineConfig()
+            .then((engineConfig) => {
+                console.log(typeof(engineConfig));
+                return EslintConfigurator.configure(engineConfig.config);
+            })
+            .then((configuration) => {
+                self._cli = new CLIEngine({
+                    envs: ['node', 'es6'],
+                    parser: 'babel-eslint',
+                    plugins: configuration.plugins,
+                    rules: configuration.rules,
+                    fix: false,
+                    parserOptions: {
+                        ecmaVersion: 7
+                    }
                 });
-        });
+                logger.info('Configured ESLint CLI.');
+            })
+            .catch((err) => {
+                logger.error('Failed to configure ESLint CLI.', err);
+                process.exit(-1);
+            });
     }
 
     /**
