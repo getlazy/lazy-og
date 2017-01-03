@@ -13,16 +13,12 @@ class Util
      * Queries lazy for engine's configuration. Uses process.env as defined by lazy to query it.
      * @return {Promise} Promise resolved with the engine configuration as returned by lazy.
      */
-    static getEngineConfig(hostname = process.env.LAZY_HOSTNAME,
+    static getEngineConfig(internalUrl = process.env.LAZY_INTERNAL_URL,
         engineName = process.env.LAZY_ENGINE_NAME) {
 
         const requestParams = {
             method: 'GET',
-            url: url.format({
-                protocol: 'http',
-                hostname,
-                pathname: '/config'
-            }),
+            url: url.resolve(internalUrl, 'config'),
             json: true,
             headers: {
                 Accept: 'application/json'
