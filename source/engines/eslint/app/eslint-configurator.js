@@ -9,6 +9,14 @@ const yaml = require('js-yaml');
 const npmi = require('npmi');
 const process = require('process');
 
+//  Since we might dynamically install npm packages we need to ensure that NPM_TOKEN is set in the
+//  environment (see .npmrc in engine's root - this allows dynamic installing private packages)
+//  However NPM_TOKEN is and should be optional so if it's not defined we set it to `public` as
+//  that's a special value that only allows install of public packages.
+if (!process.env.NPM_TOKEN) {
+    process.env.NPM_TOKEN = 'public'
+}
+
 class EslintConfigurator {
 
     /**

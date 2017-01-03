@@ -1,10 +1,14 @@
 
 'use strict';
 
+/* global logger */
+
 const EngineHelpers = require('@lazyass/engine-helpers');
+
 global.logger = EngineHelpers.Logger.getEngineLogger();
 
 const Engine = require('./eslint-engine');
+
 const engine = new Engine();
 
 engine.start()
