@@ -23,6 +23,10 @@ describe('EngineUtil', function () {
             td.when(td.replace(EngineUtil, '_makeRequest')({
                 method: 'GET',
                 url: 'http://x/config',
+                json: true,
+                headers: {
+                    Accept: 'application/json'
+                },
                 qs: {
                     engine: 'y'
                 }

@@ -23,6 +23,10 @@ class Util
                 hostname,
                 pathname: '/config'
             }),
+            json: true,
+            headers: {
+                Accept: 'application/json'
+            },
             qs: {
                 engine: engineName
             }
