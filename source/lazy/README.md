@@ -136,6 +136,7 @@ On start lazy loads engine configurations and runs them. The engine configuratio
 ```yaml
 version: 1
 # id: default # optional lazy ID, useful when hacking
+internal_port: 17013 # optional port for lazy's internal HTTP server which is used to serve requests by engines and other processes within lazy's virtual network, defaults to 17013
 repository_auth: # optional, only needed if your engines are in a private Docker repository; alternatively use username, password_env and email_env to specify the names of environment variables in lazy's environment in which these values are kept, similar to `import_env`
     username_env: DOCKER_REPOSITORY_USERNAME_ENVVAR
     password_env: DOCKER_REPOSITORY_PASSWORD_ENVVAR
@@ -151,6 +152,7 @@ engines: # each of these engines can be left out and other custom or official en
         meta: {} # optional metadata for the engine, if not provided lazy queries the engine for it
         env: # optional list of environment variables to set in engine's environment
             - MODE=strict # for example, not real
+        ~include: eslint-rules.yaml # optional clause that includes the specified YAML file and merges its content with engine configuration
     stylelint:
         image: ierceg/lazy-stylelint-engine:latest
     tidy-html:
@@ -166,9 +168,11 @@ Note:
 
 * `version` must be equal to `1`
 * `id` is optional and if not provided it's set to `default`
+* `internal_port` is optional but it must be different from external port
 * `repository_auth` can also be provided with tokens or by directly providing values in lazy.yaml (not recommended)
 * `boot_timeout` is optional and its default is 30 seconds
 * `import_env` clause is useful in avoiding specifying secret values like application client ID or secret in lazy.yaml
+* `~include` is a meta-clause that allows splitting up configuration into multiple YAML files; this is very useful for large engine configurations
 
 To allow easier hacking lazy can run engines mounted from local host filesystem. For example if we wanted to hack on `lazy-eslint-engine` we could specify it like this:
 
