@@ -12,7 +12,7 @@ class PREngineHttpServer extends EngineHttpServer {
      * @param {string} hostPath Path of the source file requesting lazy to analyze.
      * @param {string} language Language of the source file.
      * @param {string} content Content of the source file requesting lazy to analyze.
-     * @param {string} context Context information included with the request.
+     * @param {Object} context Context information included with the request.
      * @return {Promise} Promise resolving with results of the both file and PR analysis.
      */
     analyzeFile(hostPath, language, content, context) {

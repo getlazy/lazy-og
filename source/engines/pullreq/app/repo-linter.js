@@ -1,4 +1,7 @@
+
 'use strict';
+
+/* global logger */
 
 const _ = require('lodash');
 const low = require('lowdb');
@@ -9,7 +12,6 @@ const Octokat = require('octokat');
 const LAZY_ENGINE_GUTHUB_ACCESS_SANDBOX_DIR = '/lazy/sandbox/github-access';
 
 class RepoLinter {
-
     constructor() {
         // Get github login gredentials
         try {
@@ -70,6 +72,8 @@ class RepoLinter {
                         repo: sshFetch[2]
                     };
                 }
+
+                logger.warn('Cannot extract owner and repo from remote', remote);
 
                 return null;
             })
