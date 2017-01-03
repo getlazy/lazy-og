@@ -15,7 +15,7 @@ const LAZY_VOLUME_NAME = process.env.LAZY_VOLUME_NAME;
 
 const HELPER_CONTAINER_IMAGE_NAME = 'php:7.0.13-cli';
 
-//  We are implicitly using `this` in overriden methods but eslint keep telling us not to.
+//  We are implicitly using `this` in overriden methods but lazy keep telling us not to.
 /* eslint class-methods-use-this: off */
 class PhpLHelperContainer extends HelperContainer
 {
