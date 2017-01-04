@@ -14,9 +14,9 @@ Main.main()
         process.exit(-1);
     });
 
-//  Setup graceful termination on SIGTERM.
-process.on('SIGTERM', () => {
-    logger.info('Received SIGTERM, stopping lazy.');
+//  Setup graceful termination on SIGINT.
+process.on('SIGINT', () => {
+    logger.info('Received SIGINT, stopping lazy.');
     Main.stop()
         .then(() => {
             logger.info('lazy stopped.');

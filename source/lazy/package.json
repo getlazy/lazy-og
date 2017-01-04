@@ -1,6 +1,6 @@
 {
   "name": "@lazyass/lazy",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "Hackable coding assistant",
   "main": "index.js",
   "scripts": {
@@ -32,7 +32,7 @@
     "js-yaml": "^3.7.0",
     "lodash": "^4.17.2",
     "request": "^2.79.0",
-    "selectn": "^1.1.1",
+    "request-promise-native": "^1.0.3",
     "winston": "^2.3.0",
     "winston-logstash-udp": "^0.1.1"
   },

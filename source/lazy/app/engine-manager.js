@@ -4,16 +4,17 @@
 /* global logger */
 
 const _ = require('lodash');
+const url = require('url');
 const H = require('higher');
 const selectn = require('selectn');
 const HigherDockerManager = require('@lazyass/higher-docker-manager');
 const Engine = require('./engine');
 
 const Label = {
-    IoLazyassLazyEngineManagerOwned: 'io.lazyass.lazy.engine-manager.owned',
-    IoLazyassLazyEngineManagerVersion: 'io.lazyass.lazy.engine-manager.version',
-    IoLazyassLazyEngineLanguages: 'io.lazyass.lazy.engine.languages'
+    IoLazyassLazyEngineManagerOwned: 'io.lazyass.lazy.engine-manager.owned'
 };
+
+const DEFAULT_INTERNAL_PORT = 17013;
 
 /**
  * Manages the engines running in lazy.
@@ -98,7 +99,7 @@ class EngineManager
             repositoryAuth = self._config.repository_auth;
         }
         //  Resolve the repository auth if its values are kept in the lazy's process environment.
-        const resolvedRepositoryAuth = self._resolveRepositoryAuthValues(repositoryAuth);
+        const resolvedRepositoryAuth = EngineManager._resolveRepositoryAuthValues(repositoryAuth);
 
         logger.info('Pulling image', imageName, 'for engine', engineName);
         return HigherDockerManager.pullImage(resolvedRepositoryAuth, imageName)
@@ -117,6 +118,11 @@ class EngineManager
                             `LAZY_HOSTNAME=${_.get(self._container, 'Config.Hostname')}`,
                             `LAZY_ENGINE_NAME=${engineName}`,
                             `LAZY_SERVICE_URL=${selectn('_config.service_url', self)}`,
+                            `LAZY_INTERNAL_URL=${url.format({
+                                protocol: 'http',
+                                hostname: _.get(self._container, 'Config.Hostname'),
+                                port: _.get(self, '_config.internal_port', DEFAULT_INTERNAL_PORT)
+                            })}`,
                             //  TODO: Fix this as special engines don't follow this URL pattern.
                             `LAZY_ENGINE_URL=${selectn('_config.service_url', self)}/engine/${engineName}`,
                             `LAZY_VOLUME_NAME=${self._volume.Name}`,
@@ -141,16 +147,8 @@ class EngineManager
                         }
                     },
                     WorkingDir: engineConfig.working_dir,
-                    Labels: engineConfig.labels || {}
+                    Labels: {}
                 };
-                //  Add labels.
-                createEngineParams.Labels[Label.IoLazyassLazyEngineManagerOwned] = 'true';
-                //  Copy the languages label from the image into container so that we can use
-                //  the metadata.
-                if (engineImage.Config.Labels[Label.IoLazyassLazyEngineLanguages]) {
-                    createEngineParams.Labels[Label.IoLazyassLazyEngineLanguages] =
-                        engineImage.Config.Labels[Label.IoLazyassLazyEngineLanguages];
-                }
 
                 logger.info('Creating engine', {
                     engine: engineName,
@@ -161,17 +159,9 @@ class EngineManager
             })
             .then(engineContainer =>
                 engineContainer.start()
-                    .then(() => engineContainer.status())
-                    .then((engineContainerStatus) => {
-                        const languagesLabel =
-                            engineContainerStatus.Config.Labels[Label.IoLazyassLazyEngineLanguages];
-                        const languages = H.isNonEmptyString(languagesLabel) ?
-                            languagesLabel.split(',') : [];
-
-                        return new Engine(engineName, languages, engineContainer, engineConfig);
-                    })
+                    .then(() => new Engine(engineName, engineContainer, engineConfig))
             )
-            .then(engine => engine.boot().then(() => engine));
+            .then(engine => engine.start().then(() => engine));
     }
 
     _findLazyVolumeOrCreateIt() {
@@ -259,7 +249,7 @@ class EngineManager
         });
     }
 
-    _resolveRepositoryAuthValues(repositoryAuth) {
+    static _resolveRepositoryAuthValues(repositoryAuth) {
         const resolvedRepositoryAuth = {};
         //  Resolve the values of properties defined with _env suffix. Those properties instruct
         //  lazy to read their values from its own environment.

@@ -6,18 +6,24 @@
 //  Initialize all global variables.
 global.logger = require('./logger');
 
+const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
-const controllers = require('./controllers');
+const internalControllers = require('./controllers/internal');
+const externalControllers = require('./controllers/external');
 const EngineManager = require('./engine-manager');
+const LazyYamlFile = require('./lazy-yaml-file');
 
 //  Engine manager object managing all the engine containers.
 let engineManager = null;
+//  Configuration object loaded from the configuration file.
 let config = null;
+//  ExpressJS app responsible for responding to internal requests.
+let internalExpressApp;
+//  ExpressJS app responsible for responding to external requests.
+let externalExpressApp;
 
-let app;
-
-const LazyYamlFile = require('./lazy-yaml-file');
+const DEFAULT_INTERNAL_PORT = 17013;
 
 /**
  * Main lazy process class.
@@ -31,10 +37,15 @@ class Main
      * @return {Promise} Promise which is resolved when the application has started.
      */
     static main(lazyYamlFilePath) {
-        logger.info('Booting lazy');
+        logger.info('Starting lazy');
 
-        return Main._recreateAllEngines(lazyYamlFilePath || (`${__dirname}/../lazy.yaml`))
-            .then(Main._initializeExpressApp)
+        return Main._loadLazyYaml()
+            .then((lazyConfig) => {
+                config = lazyConfig;
+            })
+            .then(() => Main._initializeInternalExpressApp(config))
+            .then(() => Main._recreateAllEngines(config))
+            .then(() => Main._initializeExternalExpressApp(config))
             .catch((err) => {
                 logger.error('Failed to boot lazy', err);
                 return Main.stop()
@@ -62,41 +73,75 @@ class Main
     }
 
     /**
-     * Initialize Express app.
+     * Initialize external Express app that will service requests made to lazy from the inside of
+     * lazy network (e.g. engines)
      * @return {Promise} Promise which is resolved when Express app has been initialized.
      * @private
      */
-    static _initializeExpressApp() {
-        app = express();
-        app.use(bodyParser.json());
+    static _initializeInternalExpressApp() {
+        internalExpressApp = express();
+        internalExpressApp.use(bodyParser.json());
 
-        return controllers.initialize(app, { engineManager, config })
-            .then(() => new Promise((resolve) => {
-                const port = process.env.PORT || 80;
-                app.listen(port, () => {
-                    logger.info('lazy listening on', port);
+        return internalControllers.initialize(internalExpressApp, { config })
+            .then(() => new Promise((resolve, reject) => {
+                const port = _.get(config, 'internal_port', DEFAULT_INTERNAL_PORT);
+                internalExpressApp.listen(port, (err) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+
+                    logger.info('lazy listening to internal requests on', port);
                     resolve();
                 });
 
-                app.on('error', (err) => {
-                    logger.error('Express error', err);
+                internalExpressApp.on('error', (err) => {
+                    logger.error('Internal ExpressJS app error', err);
                 });
             }));
     }
 
     /**
-     * Recreate all engines based on the given configuration file.
-     * @param {string} lazyYamlFilePath Path to lazy YAML configuration file.
-     * @return {Promise} Promise which is resolved when the engines have been recreated.
+     * Initialize external Express app that will service requests made to lazy from the outside
+     * world.
+     * @return {Promise} Promise which is resolved when the Express app has been initialized.
      * @private
      */
-    static _recreateAllEngines(lazyYamlFilePath) {
-        return LazyYamlFile.load(lazyYamlFilePath)
-            .then((lazyConfig) => {
-                engineManager = new EngineManager(lazyConfig);
-                config = lazyConfig.config;
-                return engineManager.start();
-            });
+    static _initializeExternalExpressApp() {
+        externalExpressApp = express();
+        externalExpressApp.use(bodyParser.json());
+
+        return externalControllers.initialize(externalExpressApp, { engineManager, config })
+            .then(() => new Promise((resolve) => {
+                const port = process.env.PORT || process.env.LAZY_EXTERNAL_PORT || 80;
+                externalExpressApp.listen(port, (err) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+
+                    logger.info('lazy listening on', port);
+                    resolve();
+                });
+
+                externalExpressApp.on('error', (err) => {
+                    logger.error('Extenal ExpressJS app error', err);
+                });
+            }));
+    }
+
+    /**
+     * Recreate all engines based on the given configuration.
+     * @private
+     */
+    static _recreateAllEngines(lazyConfig) {
+        engineManager = new EngineManager(lazyConfig);
+        config = lazyConfig.config;
+        return engineManager.start();
+    }
+
+    static _loadLazyYaml(lazyYamlFilePath) {
+        return LazyYamlFile.load(lazyYamlFilePath || `${__dirname}/../lazy.yaml`);
     }
 }
 

@@ -5,9 +5,8 @@
 
 const _ = require('lodash');
 const url = require('url');
-const request = require('request');
+const request = require('request-promise-native');
 const async = require('async');
-const selectn = require('selectn');
 const HigherDockerManager = require('@lazyass/higher-docker-manager');
 
 const DEFAULT_ARBITRARY_BOOT_TIMEOUT_S = 30;
@@ -21,16 +20,13 @@ class Engine
     /**
      * Constructs a new instance of Engine with the given name and languages.
      * @param {string} name Name of the engine
-     * @param {Array} languages Array of language strings which this engine can process.
      * @param {Container} container Container in which this engine is running.
      * @param {Object} config Defined configuration of this engine.
      */
-    constructor(name, languages, container, config) {
+    constructor(name, container, config) {
         this._name = name;
-        this._languages = languages;
         this._container = container;
         this._config = config;
-        this._meta = {};
     }
 
     /**
@@ -44,7 +40,7 @@ class Engine
      * @return {Array} Array of strings with languages that this engine can analyze.
      */
     get languages() {
-        return this._languages;
+        return _.get(this._meta, 'languages');
     }
 
     /**
@@ -54,22 +50,28 @@ class Engine
         return this._containerUrl;
     }
 
+    /**
+     * @return {Object} Engine metadata object as returned by the engine or set in lazy.yaml.
+     */
     get meta() {
         return this._meta;
     }
 
+    /**
+     * @return {Object} Engine's configuration object.
+     */
     get config() {
         return this._config;
     }
 
     /**
-     * Boots the engine.
-     * @return {Promise} Promise resolved when boot operation has finished.
+     * Starts the engine.
+     * @return {Promise} Promise resolved when start operation has finished.
      */
-    boot() {
+    start() {
         const self = this;
 
-        logger.info('Booting', self.name, 'engine');
+        logger.info('Starting', self.name, 'engine');
         return self._redirectContainerLogsToLogger()
             .then(() => self._container.status())
             .then((containerStatus) => {
@@ -101,24 +103,7 @@ class Engine
             }
         };
 
-        return new Promise((resolve, reject) => {
-            request(requestParams, (err, response, body) => {
-                if (err) {
-                    return reject(err);
-                }
-
-                if (response.statusCode !== 200) {
-                    let message = `HTTP engine failed with ${response.statusCode} status code`;
-                    if (body && body.error) {
-                        message += ` (${body.error})`;
-                    }
-
-                    return reject(new Error(message));
-                }
-
-                return resolve(body);
-            });
-        });
+        return request(requestParams);
     }
 
     /**
@@ -148,24 +133,7 @@ class Engine
             }
         };
 
-        return new Promise((resolve, reject) => {
-            request(requestParams, (err, response, body) => {
-                if (err) {
-                    return reject(err);
-                }
-
-                if (response.statusCode !== 200) {
-                    let message = `HTTP engine failed with ${response.statusCode} status code`;
-                    if (body && body.error) {
-                        message += ` (${body.error})`;
-                    }
-
-                    return reject(new Error(message));
-                }
-
-                return resolve(body);
-            });
-        })
+        return request(requestParams)
             .then((results) => {
                 const processedWarnings = {};
                 if (_.isArray(results.warnings)) {
@@ -219,7 +187,7 @@ class Engine
 
         //  Calculate the max number of status requests based on the configured timeout or
         //  if timeout hasn't been configured, then use the default.
-        const bootTimeoutInMs = 1000 * (selectn('_config.boot_timeout', self) ||
+        const bootTimeoutInMs = 1000 * (_.get(self, '_config.boot_timeout') ||
             DEFAULT_ARBITRARY_BOOT_TIMEOUT_S);
         const maxNumberOfStatusRequests = bootTimeoutInMs / ARBITRARY_ENGINE_BOOT_CHECK_DELAY_MS;
 
@@ -259,36 +227,16 @@ class Engine
     }
 
     _getMeta() {
-        const self = this;
-
         const requestParams = {
             method: 'GET',
-            url: `${self._containerUrl}/meta`,
+            url: `${this._containerUrl}/meta`,
             json: true,
             headers: {
                 Accept: 'application/json'
             }
         };
 
-        return new Promise((resolve, reject) => {
-            request(requestParams, (err, response, body) => {
-                if (err) {
-                    return reject(err);
-                }
-
-                if (response.statusCode !== 200) {
-                    let message =
-                        `Engine ${self.name} failed with ${response.statusCode} status code`;
-                    if (body && body.error) {
-                        message += ` (${body.error})`;
-                    }
-
-                    return reject(new Error(message));
-                }
-
-                return resolve(body);
-            });
-        });
+        return request(requestParams);
     }
 }
 
