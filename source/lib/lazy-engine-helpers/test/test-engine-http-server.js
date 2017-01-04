@@ -190,7 +190,7 @@ describe('EngineHttpServer', function () {
             };
 
             server = new TestEngineHttpServer(123);
-            server._endpointPostFile(req, res)
+            return server._endpointPostFile(req, res)
                 .then(() => {
                     assert(analyzeFileInvoked);
                     assert(sendInvoked);
@@ -226,6 +226,7 @@ describe('EngineHttpServer', function () {
                 status: (statusCode) => {
                     assert.equal(statusCode, 500);
                     statusInvoked = true;
+                    return res;
                 },
                 send: (err) => {
                     assert.equal(err.error, 'test-error');
@@ -233,9 +234,8 @@ describe('EngineHttpServer', function () {
                 }
             };
 
-
             server = new TestEngineHttpServer(123);
-            server._endpointPostFile(req, res)
+            return server._endpointPostFile(req, res)
                 .then(() => {
                     assert(statusInvoked);
                     assert(sendInvoked);
