@@ -4,12 +4,12 @@
 /* global logger */
 
 const _ = require('lodash');
-const tmp = require('tmp');
 const fs = require('fs');
+const tmp = require('tmp');
 const path = require('path');
 const mkdirp = require('mkdirp-then');
 
-const HigherDockerManager = require('@lazyass/higher-docker-manager');
+const LazyPrivateApiClient = require('./lazy-private-api-client');
 
 //  HACK: We hard-code the path instead of using sandbox path which "belongs"
 const TEMPORARY_DIR_LAZY_PATH = '/lazy/tmp';
@@ -37,57 +37,21 @@ class HelperContainer
      * @return {Promise} Promise resolving with a new instance of HelperContainer.
      */
     static createContainer(auth, imageName, lazyVolumeName) {
-        return HelperContainer._pullImage(auth, imageName)
-            .then(() => HelperContainer._getOwnContainer())
-            .then((engineContainer) => {
-                //  Get the engine network name assuming that it's the first of all the networks
-                //  that engine container has access to. This is a safe assumption as engines should
-                //  be attached only to stack networks.
-                const engineNetworkName = _.head(_.keys(_.get(
-                    engineContainer, 'NetworkSettings.Networks')));
-
-                //  Create the helper container.
-                const createHelperParams = {
-                    Image: imageName,
-                    //  HACK: We keep the helper image running so that we can execute our jobs in it
-                    //  without starting/stopping or creating/starting/stopping temporary containers
-                    Entrypoint: 'tail',
-                    Cmd: '-f /dev/null'.split(' '),
-                    HostConfig: {
-                        //  When networking mode is a name of another network it's
-                        //  automatically attached.
-                        NetworkMode: engineNetworkName,
-                        Binds: [
-                            //  HACK: We hard-code the volume mount path to /lazy which is
-                            //  known to all containers.
-                            `${lazyVolumeName}:/lazy`
-                        ],
-                        RestartPolicy: {
-                            Name: 'unless-stopped'
-                        }
-                    },
-                    //  HACK: We hard-code the volume mount path to /lazy which is known to
-                    //  all containers.
-                    WorkingDir: '/lazy'
-                };
-
-                return HelperContainer._createContainer(createHelperParams);
-            })
-            .then(container => container.start());
+        const client = new LazyPrivateApiClient();
+        return client.createHelperContainer(auth, imageName, lazyVolumeName);
     }
 
-    static deleteContainer(container) {
-        return container.stop()
-            .then(() => container.wait())
-            .then(() => container.delete());
+    static deleteContainer(containerId) {
+        const client = new LazyPrivateApiClient();
+        return client.deleteHelperContainer(containerId);
     }
 
     /**
      * Constructs a new instance of HelperContainer.
-     * @param {Container} container Container on which to execute analysis.
+     * @param {string} containerId ID of the helper container on which to execute analysis.
      */
-    constructor(container) {
-        this._container = container;
+    constructor(containerId) {
+        this._containerId = containerId;
     }
 
     /**
@@ -200,7 +164,7 @@ class HelperContainer
                 execParams.Cmd = execParams.Cmd
                     .concat(`${TEMPORARY_DIR_LAZY_PATH}/${path.basename(temporaryFileInfo.path)}`);
 
-                return HelperContainer._execInContainer(self._container, execParams);
+                return HelperContainer._execInContainer(self._containerId, execParams);
             })
             //  Delegate the processing of the output to inheriting classes.
             .then((containerOutput) => {
@@ -245,39 +209,12 @@ class HelperContainer
     }
 
     /**
-     * Wrapper around HigherDockerManager.pullImage for easier unit testing.
-     * @private
-     */
-    static _pullImage(...args) {
-        // istanbul ignore next
-        return HigherDockerManager.pullImage(...args);
-    }
-
-    /**
-     * Wrapper around HigherDockerManager.getOwnContainer for easier unit testing.
-     * @private
-     */
-    static _getOwnContainer(...args) {
-        // istanbul ignore next
-        return HigherDockerManager.getOwnContainer(...args);
-    }
-
-    /**
-     * Wrapper around HigherDockerManager.createContainer for easier unit testing.
-     * @private
-     */
-    static _createContainer(...args) {
-        // istanbul ignore next
-        return HigherDockerManager.createContainer(...args);
-    }
-
-    /**
-     * Wrapper around HigherDockerManager.execInContainer for easier unit testing.
+     * Wrapper around LazyPrivateApiClient.execInContainer for easier unit testing.
      * @private
      */
     static _execInContainer(...args) {
-        // istanbul ignore next
-        return HigherDockerManager.execInContainer(...args);
+        const client = new LazyPrivateApiClient();
+        return client.execInHelperContainer(...args);
     }
 
     /**

@@ -10,57 +10,13 @@ require('./bootstrap');
 
 const td = require('testdouble');
 
-//  We replace HigherDockerManager as it does some things during its module initialization.
-const HigherDockerManager = td.replace('@lazyass/higher-docker-manager');
-
 const _ = require('lodash');
 const assert = require('assert');
 const HelperContainer = require('../lib/helper-container');
 
-//  Use old node-dev image for testing.
-const TEST_IMAGE = 'ierceg/node-dev:1.0.0';
-
 describe('HelperContainer', function () {
     afterEach(() => {
         td.reset();
-    });
-
-    describe('createContainer', function () {
-        it('works', function () {
-            td.when(td.replace(HelperContainer, '_pullImage')({}, TEST_IMAGE)).thenResolve();
-            td.when(td.replace(HelperContainer, '_getOwnContainer')()).thenResolve(td.object({
-                NetworkSettings: {
-                    Networks: {
-                        'test-network': {}
-                    }
-                }
-            }));
-            const container = td.object('start');
-            td.when(container.start()).thenResolve('test-done-signal');
-            td.when(td.replace(HelperContainer, '_createContainer')(td.matchers.argThat((params) => {
-                assert.equal(params.Image, TEST_IMAGE);
-                assert.equal(_.get(params, 'HostConfig.NetworkMode'), 'test-network');
-                return true;
-            }))).thenResolve(container);
-
-            return HelperContainer.createContainer({}, TEST_IMAGE)
-                .then((testDoneSignal) => {
-                    assert.equal(testDoneSignal, 'test-done-signal');
-                });
-        });
-    });
-
-    describe('deleteContainer', function () {
-        it('works', function () {
-            const container = td.object(['stop', 'wait', 'delete']);
-            td.when(container.stop()).thenResolve();
-            td.when(container.wait()).thenResolve();
-            td.when(container.delete()).thenResolve('test-done-signal');
-            return HelperContainer.deleteContainer(container)
-                .then((testDoneSignal) => {
-                    assert.equal(testDoneSignal, 'test-done-signal');
-                });
-        });
     });
 
     describe('Object methods', function () {
