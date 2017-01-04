@@ -7,5 +7,5 @@ module.exports = {
     Logger: require('./lib/logger'),
     HelperContainer: require('./lib/helper-container'),
     EngineHttpServer: require('./lib/engine-http-server'),
-    EngineUtil: require('./lib/engine-util')
+    LazyPrivateApiClient: require('./lib/lazy-private-api-client')
 };
