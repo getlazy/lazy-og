@@ -37,12 +37,16 @@ class HelperContainer
      * @return {Promise} Promise resolving with a new instance of HelperContainer.
      */
     static createContainer(auth, imageName, lazyVolumeName) {
+        // istanbul ignore next
         const client = new LazyPrivateApiClient();
+        // istanbul ignore next
         return client.createHelperContainer(auth, imageName, lazyVolumeName);
     }
 
     static deleteContainer(containerId) {
+        // istanbul ignore next
         const client = new LazyPrivateApiClient();
+        // istanbul ignore next
         return client.deleteHelperContainer(containerId);
     }
 
@@ -213,7 +217,9 @@ class HelperContainer
      * @private
      */
     static _execInContainer(...args) {
+        // istanbul ignore next
         const client = new LazyPrivateApiClient();
+        // istanbul ignore next
         return client.execInHelperContainer(...args);
     }
 
