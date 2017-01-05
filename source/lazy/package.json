@@ -24,10 +24,12 @@
   "homepage": "https://github.com/SoftwareMarbles/lazy#readme",
   "dependencies": {
     "@lazyass/higher-docker-manager": "^1.4.0",
+    "ajv": "^5.0.0-beta.1",
     "async": "^2.1.4",
     "body-parser": "^1.15.2",
     "common-errors": "^1.0.0",
     "express": "^4.14.0",
+    "fs-promise": "^1.0.0",
     "higher": "^1.0.5",
     "http-proxy-middleware": "^0.17.3",
     "js-yaml": "^3.7.0",

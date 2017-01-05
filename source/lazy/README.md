@@ -151,7 +151,7 @@ engines: # each of these engines can be left out and other custom or official en
         meta: {} # optional metadata for the engine, if not provided lazy queries the engine for it
         env: # optional list of environment variables to set in engine's environment
             - MODE=strict # for example, not real
-        ~include: eslint-rules.yaml # optional clause that includes the specified YAML file and merges its content with engine configuration
+        ~include: eslint-rules.yaml # optional metaclause that includes the specified YAML file and merges its content with engine configuration
     stylelint:
         image: ierceg/lazy-stylelint-engine:latest
     tidy-html:
