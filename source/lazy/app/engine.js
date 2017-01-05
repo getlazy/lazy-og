@@ -185,10 +185,12 @@ class Engine
     _waitEngine() {
         const self = this;
 
-        //  Calculate the max number of status requests based on the configured timeout or
-        //  if timeout hasn't been configured, then use the default.
-        const bootTimeoutInMs = 1000 * (_.get(self, '_config.boot_timeout') ||
-            DEFAULT_ARBITRARY_BOOT_TIMEOUT_S);
+        //  Calculate the max number of status requests based on the longest timeout among meta,
+        //  configured and default timeouts.
+        const metaBootTimeout = _.get(self, '_meta.boot_timeout') || 0;
+        const configBootTimeout = _.get(self, '_config.boot_timeout') || 0;
+        const bootTimeoutInMs = 1000 * _.max(
+            [metaBootTimeout, configBootTimeout, DEFAULT_ARBITRARY_BOOT_TIMEOUT_S]);
         const maxNumberOfStatusRequests = bootTimeoutInMs / ARBITRARY_ENGINE_BOOT_CHECK_DELAY_MS;
 
         //  Request engine status until it starts working or times out.
