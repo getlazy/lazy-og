@@ -136,7 +136,6 @@ On start lazy loads engine configurations and runs them. The engine configuratio
 ```yaml
 version: 1
 # id: default # optional lazy ID, useful when hacking
-internal_port: 17013 # optional port for lazy's internal HTTP server which is used to serve requests by engines and other processes within lazy's virtual network, defaults to 17013
 repository_auth: # optional, only needed if your engines are in a private Docker repository; alternatively use username, password_env and email_env to specify the names of environment variables in lazy's environment in which these values are kept, similar to `import_env`
     username_env: DOCKER_REPOSITORY_USERNAME_ENVVAR
     password_env: DOCKER_REPOSITORY_PASSWORD_ENVVAR

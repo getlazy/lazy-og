@@ -6,7 +6,6 @@
 //  Initialize all global variables.
 global.logger = require('./logger');
 
-const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const internalControllers = require('./controllers/internal');
@@ -23,7 +22,7 @@ let internalExpressApp;
 //  ExpressJS app responsible for responding to external requests.
 let externalExpressApp;
 
-const DEFAULT_INTERNAL_PORT = 17013;
+const PRIVATE_API_PORT = 17013;
 
 /**
  * Main lazy process class.
@@ -39,7 +38,7 @@ class Main
     static main(lazyYamlFilePath) {
         logger.info('Starting lazy');
 
-        return Main._loadLazyYaml()
+        return Main._loadLazyYaml(lazyYamlFilePath)
             .then((lazyConfig) => {
                 config = lazyConfig;
                 engineManager = new EngineManager(lazyConfig);
@@ -85,14 +84,13 @@ class Main
 
         return internalControllers.initialize(internalExpressApp, { config, engineManager })
             .then(() => new Promise((resolve, reject) => {
-                const port = _.get(config, 'internal_port', DEFAULT_INTERNAL_PORT);
-                internalExpressApp.listen(port, (err) => {
+                internalExpressApp.listen(PRIVATE_API_PORT, (err) => {
                     if (err) {
                         reject(err);
                         return;
                     }
 
-                    logger.info('lazy listening to internal requests on', port);
+                    logger.info('lazy listening to internal requests on', PRIVATE_API_PORT);
                     resolve();
                 });
 
@@ -113,7 +111,7 @@ class Main
         externalExpressApp.use(bodyParser.json());
 
         return externalControllers.initialize(externalExpressApp, { engineManager, config })
-            .then(() => new Promise((resolve) => {
+            .then(() => new Promise((resolve, reject) => {
                 const port = process.env.PORT || process.env.LAZY_EXTERNAL_PORT || 80;
                 externalExpressApp.listen(port, (err) => {
                     if (err) {

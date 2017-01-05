@@ -14,7 +14,7 @@ const Label = {
     IoLazyassLazyEngineManagerOwned: 'io.lazyass.lazy.engine-manager.owned'
 };
 
-const DEFAULT_INTERNAL_PORT = 17013;
+const PRIVATE_API_PORT = 17013;
 
 /**
  * Manages the engines running in lazy.
@@ -118,12 +118,12 @@ class EngineManager
                             `LAZY_HOSTNAME=${_.get(self._container, 'Config.Hostname')}`,
                             `LAZY_ENGINE_NAME=${engineName}`,
                             `LAZY_SERVICE_URL=${selectn('_config.service_url', self)}`,
-                            `LAZY_INTERNAL_URL=${url.format({
+                            `LAZY_PRIVATE_API_URL=${url.format({
                                 protocol: 'http',
                                 hostname: _.get(self._container, 'Config.Hostname'),
-                                port: _.get(self, '_config.internal_port', DEFAULT_INTERNAL_PORT)
+                                port: PRIVATE_API_PORT
                             })}`,
-                            //  TODO: Fix this as special engines don't follow this URL pattern.
+                            //  TODO: Fix this as special engines like UI don't follow this URL pattern.
                             `LAZY_ENGINE_URL=${selectn('_config.service_url', self)}/engine/${engineName}`,
                             `LAZY_VOLUME_NAME=${self._volume.Name}`,
                             'LAZY_VOLUME_MOUNT=/lazy',
