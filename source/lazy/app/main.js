@@ -42,6 +42,7 @@ class Main
         return Main._loadLazyYaml()
             .then((lazyConfig) => {
                 config = lazyConfig;
+                engineManager = new EngineManager(lazyConfig);
             })
             .then(() => Main._initializeInternalExpressApp(config))
             .then(() => Main._recreateAllEngines(config))
@@ -82,7 +83,7 @@ class Main
         internalExpressApp = express();
         internalExpressApp.use(bodyParser.json());
 
-        return internalControllers.initialize(internalExpressApp, { config })
+        return internalControllers.initialize(internalExpressApp, { config, engineManager })
             .then(() => new Promise((resolve, reject) => {
                 const port = _.get(config, 'internal_port', DEFAULT_INTERNAL_PORT);
                 internalExpressApp.listen(port, (err) => {
@@ -135,8 +136,6 @@ class Main
      * @private
      */
     static _recreateAllEngines(lazyConfig) {
-        engineManager = new EngineManager(lazyConfig);
-        config = lazyConfig.config;
         return engineManager.start();
     }
 

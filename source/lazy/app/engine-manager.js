@@ -186,6 +186,21 @@ class EngineManager
             });
     }
 
+    /**
+     * @return {Promise} Promise resolving with the network object or null.
+     */
+    getLazyNetwork() {
+        return HigherDockerManager
+            .getNetworksForLabel(Label.IoLazyassLazyEngineManagerOwned, this._id)
+            .then((networks) => {
+                if (!_.isEmpty(networks)) {
+                    return _.head(networks);
+                }
+
+                return null;
+            });
+    }
+
     _findLazyNetworkOrCreateIt() {
         const self = this;
 
