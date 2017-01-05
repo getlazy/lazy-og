@@ -135,9 +135,6 @@ class EngineManager
                         NetworkMode: self._network.Name,
                         //  We only allow volumes to be bound to host.
                         Binds: _.union(engineConfig.volumes, [
-                            //  Bind the docker socket so that we can access host Docker
-                            //  from the engine and launch helper containers.
-                            '/var/run/docker.sock:/var/run/docker.sock',
                             //  HACK: We hard-code the volume mount path to /lazy which is
                             //  known to all containers.
                             `${self._volume.Name}:/lazy`
