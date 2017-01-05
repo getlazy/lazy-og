@@ -15,6 +15,7 @@ const namesToEnginesMap = new Map();
 const languagesToEnginesMap = new Map();
 const allLanguagesEngines = [];
 
+let enginePipeline = {};
 let maxWarningsPerRule = null;
 let maxWarnings = null;
 
@@ -206,7 +207,8 @@ const initialize = (app, options) => {
     populateLanguagesToEnginesStructures(options.engineManager);
     maxWarningsPerRule = _.get(options, 'config.max_warnings_per_rule');
     maxWarnings = _.get(options, 'config.max_warnings');
-    addEndpoints(app, options);
+    enginePipeline = _.get(options, 'config.engine_pipeline');
+    addEndpoints(app, options);    
     return Promise.resolve();
 };
 
