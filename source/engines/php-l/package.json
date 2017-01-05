@@ -4,7 +4,7 @@
   "description": "lazy engine serving requests to lint PHP",
   "main": "index.js",
   "dependencies": {
-    "@lazyass/engine-helpers": "^2.0.0",
+    "@lazyass/engine-helpers": "^3.0.0",
     "higher": "^1.0.5",
     "lodash": "^4.17.2"
   },
