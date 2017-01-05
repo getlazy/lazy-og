@@ -78,10 +78,10 @@ class PmdJavaEngineHttpServer extends EngineHttpServer
     beforeListening() {
         return HelperContainer
             .createContainer(REPOSITORY_AUTH, HELPER_CONTAINER_IMAGE_NAME, LAZY_VOLUME_NAME)
-            .then((container) => {
+            .then((containerId) => {
                 //  Assume that the container has started correctly.
-                this._container = container;
-                this._engine = new PmdJavaHelperContainer(container);
+                this._containerId = containerId;
+                this._helperContainer = new PmdJavaHelperContainer(containerId);
             });
     }
 
@@ -91,16 +91,22 @@ class PmdJavaEngineHttpServer extends EngineHttpServer
         };
     }
 
-    analyzeFile() {
+    analyzeFile(...args) {
         //  Pass forward the arguments to the engine.
-        return this._engine.analyzeFile.apply(this._engine, arguments);
+        return this._helperContainer.analyzeFile(...args);
     }
 
     afterListening() {
+        this._helperContainer = null;
+
         //  Prevent trying to stop the same container twice.
-        const container = this._container;
-        this._container = null;
-        return HelperContainer.deleteContainer(container);
+        if (this._containerId) {
+            const containerId = this._containerId;
+            this._containerId = null;
+            return HelperContainer.deleteContainer(containerId);
+        }
+
+        return Promise.resolve();
     }
 }
 
