@@ -125,6 +125,10 @@ LAZY_CONFIG_SCHEMA = {
         service_url: {
             type: 'string'
         },
+        id: {
+            type: 'string',
+            minLength: 1
+        },
         repository_auth: {
             type: 'object',
             oneOf: [
