@@ -10,7 +10,8 @@ const yaml = require('js-yaml');
 const async = require('async');
 const Ajv = require('ajv');
 
-//  LAZY_CONFIG_SCHEMA is defined at the end of the file.
+//  LAZY_CONFIG_SCHEMA is defined at the end of the file but set during module loading.
+let LAZY_CONFIG_SCHEMA;
 
 class LazyYamlFile {
     static load(filePath) {
@@ -110,7 +111,8 @@ class LazyYamlFile {
 
 module.exports = LazyYamlFile;
 
-const LAZY_CONFIG_SCHEMA = {
+//  This is executed during module loading.
+LAZY_CONFIG_SCHEMA = {
     $schema: 'http://json-schema.org/draft-04/schema#',
     title: 'lazy.yaml schema',
     type: 'object',
@@ -129,6 +131,10 @@ const LAZY_CONFIG_SCHEMA = {
                 { $ref: '#/definitions/repository_auth' },
                 { $ref: '#/definitions/repository_auth_env' }
             ]
+        },
+        port: {
+            type: 'integer',
+            minimum: 1
         },
         config: {
             type: 'object',
