@@ -8,7 +8,7 @@ const CLIEngine = require('eslint').CLIEngine;
 const EngineHelpers = require('@lazyass/engine-helpers');
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
-const EngineUtil = EngineHelpers.EngineUtil;
+const LazyPrivateApiClient = EngineHelpers.LazyPrivateApiClient;
 
 const EslintConfigurator = require('./app/eslint-configurator.js');
 
@@ -27,11 +27,10 @@ class EslintEngineHttpServer extends EngineHttpServer {
     configure() {
         const self = this;
 
-        return EngineUtil.getEngineConfig()
-            .then((engineConfig) => {
-                console.log(typeof(engineConfig));
-                return EslintConfigurator.configure(engineConfig.config);
-            })
+        const client = new LazyPrivateApiClient();
+
+        return client.getEngineConfig()
+            .then(engineConfig => EslintConfigurator.configure(engineConfig.config))
             .then((configuration) => {
                 self._cli = new CLIEngine({
                     envs: ['node', 'es6'],

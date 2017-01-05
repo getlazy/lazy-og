@@ -15,7 +15,6 @@ push:
 run:
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
-	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -v "/tmp:/lazy" \
 		-e "LAZY_VOLUME_NAME=/tmp" \
 	    -w /app \
@@ -25,7 +24,6 @@ run:
 test:
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
-	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -v "/tmp:/lazy" \
 		-e "LAZY_VOLUME_NAME=/tmp" \
 	    -w /app \
@@ -35,7 +33,6 @@ test:
 coverage:
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
-	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -v "/tmp:/lazy" \
 	    -e "LAZY_VOLUME_NAME=/tmp" \
 	    -w /app \
@@ -43,7 +40,6 @@ coverage:
 	    istanbul cover _mocha -- --recursive
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
-	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -v "/tmp:/lazy" \
 	    -e "LAZY_VOLUME_NAME=/tmp" \
 	    -w /app \
