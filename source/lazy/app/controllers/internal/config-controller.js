@@ -21,7 +21,7 @@ const initialize = (app, options) => {
     });
 
     return Promise.resolve();
-}
+};
 
 module.exports = {
     initialize

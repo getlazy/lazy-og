@@ -1,6 +1,6 @@
 {
   "name": "@lazyass/lazy",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "Hackable coding assistant",
   "main": "index.js",
   "scripts": {
@@ -26,6 +26,7 @@
     "@lazyass/higher-docker-manager": "^1.4.0",
     "async": "^2.1.4",
     "body-parser": "^1.15.2",
+    "common-errors": "^1.0.0",
     "express": "^4.14.0",
     "higher": "^1.0.5",
     "http-proxy-middleware": "^0.17.3",
@@ -37,6 +38,7 @@
     "winston-logstash-udp": "^0.1.1"
   },
   "devDependencies": {
-    "@lazyass/node-lazy-client": "^1.2.1"
+    "@lazyass/node-lazy-client": "^1.2.1",
+    "testdouble": "^1.10.2"
   }
 }
