@@ -16,7 +16,7 @@ const languagesToEnginesMap = new Map();
 const allLanguagesEngines = [];
 
 let maxWarningsPerRule = null;
-let maxWarnings = null;
+let maxWarningsPerFile = null;
 
 const populateLanguagesToEnginesStructures = (engineManager) => {
     const engines = engineManager.engines;
@@ -161,7 +161,8 @@ const addEndpoints = (app, options) => {
                     })
                     .flatMap()
                     //  If max warnings is defined then limit the number of warnings.
-                    .take(_.isNumber(maxWarnings) ? maxWarnings : allEnginesResults.warnings.length)
+                    .take(_.isNumber(maxWarningsPerFile) ?
+                        maxWarningsPerFile : allEnginesResults.warnings.length)
                     .value();
                 allEnginesResults.warnings = reducedWarnings;
 
@@ -205,7 +206,7 @@ const addEndpoints = (app, options) => {
 const initialize = (app, options) => {
     populateLanguagesToEnginesStructures(options.engineManager);
     maxWarningsPerRule = _.get(options, 'config.max_warnings_per_rule');
-    maxWarnings = _.get(options, 'config.max_warnings');
+    maxWarningsPerFile = _.get(options, 'config.max_warnings_per_file');
     addEndpoints(app, options);
     return Promise.resolve();
 };
