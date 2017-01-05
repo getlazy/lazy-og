@@ -3,7 +3,6 @@
 
 const _ = require('lodash');
 const H = require('higher');
-
 const EngineHelpers = require('@lazyass/engine-helpers');
 
 const HelperContainer = EngineHelpers.HelperContainer;
@@ -19,6 +18,7 @@ const HELPER_CONTAINER_IMAGE_NAME = 'apiaryio/emcc:1.36';
 
 //  As seen in https://github.com/keplersj/linter-emscripten/blob/master/lib/main.js (MIT license)
 
+/* eslint class-methods-use-this: off */
 class EmccHelperContainer extends HelperContainer
 {
     _getContainerCmd() {
@@ -26,7 +26,6 @@ class EmccHelperContainer extends HelperContainer
             '-fdiagnostics-print-source-range-info', '-fexceptions'];
     }
 
-    /* eslint class-methods-use-this: off */
     _processContainerOutput(buffers) {
         //  Convert all the resulting buffers into string and join them as
         //  our parser works on a single string will all the output lines.
@@ -60,10 +59,10 @@ class EmccEngineHttpServer extends EngineHttpServer
     beforeListening() {
         return HelperContainer
             .createContainer(REPOSITORY_AUTH, HELPER_CONTAINER_IMAGE_NAME, LAZY_VOLUME_NAME)
-            .then((container) => {
+            .then((containerId) => {
                 //  Assume that the container has started correctly.
-                this._container = container;
-                this._engine = new EmccHelperContainer(container);
+                this._containerId = containerId;
+                this._helperContainer = new EmccHelperContainer(containerId);
             });
     }
 
@@ -73,17 +72,19 @@ class EmccEngineHttpServer extends EngineHttpServer
         };
     }
 
-    analyzeFile() {
-        //  Pass forward the arguments to the engine.
-        return this._engine.analyzeFile.apply(this._engine, arguments);
+    analyzeFile(...args) {
+        //  Pass forward the arguments to the helper container.
+        return this._helperContainer.analyzeFile(...args);
     }
 
     afterListening() {
-        if (this._container) {
-            //  Prevent trying to stop the same container twice.
-            const container = this._container;
-            this._container = null;
-            return HelperContainer.deleteContainer(container);
+        this._helperContainer = null;
+
+        //  Prevent trying to stop the same container twice.
+        if (this._containerId) {
+            const containerId = this._containerId;
+            this._containerId = null;
+            return HelperContainer.deleteContainer(containerId);
         }
 
         return Promise.resolve();

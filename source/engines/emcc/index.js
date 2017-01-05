@@ -1,10 +1,13 @@
 
 'use strict';
 
+/* global logger */
+
 const EngineHelpers = require('@lazyass/engine-helpers');
+const Engine = require('./emcc-engine');
+
 global.logger = EngineHelpers.Logger.getEngineLogger();
 
-const Engine = require('./emcc-engine');
 const engine = new Engine();
 
 engine.start()
