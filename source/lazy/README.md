@@ -143,6 +143,27 @@ repository_auth: # optional, only needed if your engines are in a private Docker
 config:
     max_warnings_per_rule: 5 # optional value instructing lazy to replace too many per rule warnings with a single warning plus additional details
     max_warnings: 20 # optional value instructing lazy to never send more than this number of warnings, applied after max_warnings_per_rule
+
+# Each file is run through this pipeline. 
+engine_pipeline:  
+  batch:                      # batch: - run engines asynchronously (in paralel)
+    - run: file-stats
+    - sequence:               # pullreq engine depends on github-access, so we run them sequentially
+      - run: github-access
+      - run: pullreq
+    - sequence:               # Linters. Run any and all linters
+      - batch:                # in parallel,
+        - run: emcc
+        - run: css
+        - run: html
+        - run: eslint
+        - run: yaml
+        - run: stylelint
+        - run: php-l
+        - run: pmd-java
+        - run: tidy-html
+      - run: postp           # and apply postprocessor to their output
+
 engines: # each of these engines can be left out and other custom or official engines may be added
     eslint:
         image: ierceg/lazy-eslint-engine:latest
@@ -156,6 +177,8 @@ engines: # each of these engines can be left out and other custom or official en
         image: ierceg/lazy-stylelint-engine:latest
     tidy-html:
         image: ierceg/lazy-tidy-html-engine:latest
+    postp:
+        image: ierceg/lazy-postproc-engine:latest
     github-access:
         image: ierceg/lazy-github-access-engine:latest
         import_env: # optional list of environment variables to import from lazy environment into engine environment
@@ -219,6 +242,8 @@ At this moment most of our tests are of integration variety - we run a full lazy
 #### Additional engines
 
 * [lazy-file-stats-engine](https://github.com/getlazy/lazy-file-stats-engine)
+* [lazy-postproc-engine](https://github.com/SoftwareMarbles/lazy-postproc-engine)
+
 
 #### UI engine
 
