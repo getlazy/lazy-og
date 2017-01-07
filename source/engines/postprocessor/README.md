@@ -1,2 +1,28 @@
 # lazy-postproc-engine
 Postprocessor for lazy engines pipeline
+
+This is the engine that should be placed at the end of processing pipeline in the `lazy.yaml`.
+
+The purpose of this engine is to:
+- analyze the source code of a file looking for special directives, 
+- modify the output of engines that are earlier in the pipeline 
+
+Lazy directives are defined as comments in the source code, and always start with `lazy` keyword. For example:
+
+`// lazy ignore no-plusplus`
+
+or,
+
+`/* lazy ignore no-plusplus`
+
+or,
+
+`# lazy ignore no-plusplus`
+
+In HTML files, that don't support any of the above comment syntax, you can use:
+
+`<!-- // lazy ignore no-plusplus -->`
+
+The above `lazy ignore` directive will cause this engine to remove all warnings or erros produced by `no-plusplus` ESLint rule.
+
+Currently, only `lazy ignore <rule-id>` directive is supported by this engine.
