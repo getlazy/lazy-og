@@ -108,7 +108,8 @@ class EngineHttpServer
 
         //  Setup Express application.
         const app = this._createExpressApp();
-        app.use(bodyParser.json());
+        app.use(bodyParser.json({limit: '50mb'}));
+        app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
 
         //  Middleware that returns 503 if the engine isn't ready to accept requests yet.
         app.use(this._middleware503IfNotReady.bind(this));
