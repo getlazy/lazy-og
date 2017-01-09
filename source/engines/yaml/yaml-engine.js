@@ -7,7 +7,7 @@ const EngineHelpers = require('@lazyass/engine-helpers');
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
-//  We are implicitly using `this` in overriden methods but lazy keep telling us not to.
+//  We are implicitly using `this` in overridden methods but lazy keep telling us not to.
 /* eslint class-methods-use-this: off */
 class YamlEngineHttpServer extends EngineHttpServer {
     _processMsg(type, message) {
@@ -50,7 +50,7 @@ class YamlEngineHttpServer extends EngineHttpServer {
 
     getMeta() {
         return {
-            languages: ['yaml']
+            languages: ['yaml', 'json']
         };
     }
 }
