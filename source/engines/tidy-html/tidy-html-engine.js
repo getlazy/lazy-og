@@ -21,9 +21,9 @@ const REPOSITORY_AUTH = JSON.parse(
 
 const LAZY_VOLUME_NAME = process.env.LAZY_VOLUME_NAME;
 
-const HELPER_CONTAINER_IMAGE_NAME = 'ierceg/tidy-html:5.2.0';
+const HELPER_CONTAINER_IMAGE_NAME = 'getlazy/tidy-html:5.2.0';
 
-//  We are implicitly using `this` in overriden methods but eslint keep telling us not to.
+//  We are implicitly using `this` in overridden methods but eslint keep telling us not to.
 /* eslint class-methods-use-this: off */
 class TidyHtmlHelperContainer extends HelperContainer
 {
