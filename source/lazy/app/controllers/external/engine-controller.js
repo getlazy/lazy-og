@@ -32,6 +32,7 @@ const runSingleEngine = (engineName, hostPath, language, content, context) => {
         logger.warn(`Skipping engine "${engineName}"`);
         return Promise.resolve();
     }
+  
     if ((_.isEmpty(engine.languages)) || (_.findIndex(engine.languages, (lang) => {
         return _.eq(_.toLower(_.trim(lang)), lowerLang);
     }) > -1)) {
@@ -45,6 +46,7 @@ const runSingleEngine = (engineName, hostPath, language, content, context) => {
                 });
         });
     }
+  
     return Promise.resolve();
 };
 

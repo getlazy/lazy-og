@@ -142,8 +142,7 @@ repository_auth: # optional, only needed if your engines are in a private Docker
     email_env: DOCKER_REPOSITORY_EMAIL_ENVVAR
 config:
     max_warnings_per_rule: 5 # optional value instructing lazy to replace too many per rule warnings with a single warning plus additional details
-    max_warnings: 20 # optional value instructing lazy to never send more than this number of warnings, applied after max_warnings_per_rule
-
+    max_warnings_per_file: 20 # optional value instructing lazy to never send more than this number of warnings per file, applied after max_warnings_per_rule
 # Each file is run through this pipeline. 
 engine_pipeline:
   batch:                      # batch: - run engines asynchronously (in paralel)
@@ -166,7 +165,7 @@ engine_pipeline:
       - reducer:              # and, finally, limit the number of reported errors
           maxWarningsPerRule: 5     # allow up to 5 warnings for same rule-id
           maxWarningsPerFile: 300   # allow up to 150 warnings per file
-
+          
 engines: # each of these engines can be left out and other custom or official engines may be added
     eslint:
         image: ierceg/lazy-eslint-engine:latest
@@ -175,7 +174,7 @@ engines: # each of these engines can be left out and other custom or official en
         meta: {} # optional metadata for the engine, if not provided lazy queries the engine for it
         env: # optional list of environment variables to set in engine's environment
             - MODE=strict # for example, not real
-        ~include: eslint-rules.yaml # optional clause that includes the specified YAML file and merges its content with engine configuration
+        ~include: eslint-rules.yaml # optional metaclause that includes the specified YAML file and merges its content with engine configuration
     stylelint:
         image: ierceg/lazy-stylelint-engine:latest
     tidy-html:
