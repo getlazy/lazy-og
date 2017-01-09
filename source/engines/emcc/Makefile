@@ -4,13 +4,13 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t ierceg/lazy-emcc-engine:$(PACKAGE_VERSION) \
-		-t ierceg/lazy-emcc-engine:latest \
+		-t getlazy/lazy-emcc-engine:$(PACKAGE_VERSION) \
+		-t getlazy/lazy-emcc-engine:latest \
 		.
 
 push:
-	docker push ierceg/lazy-emcc-engine:$(PACKAGE_VERSION)
-	docker push ierceg/lazy-emcc-engine:latest
+	docker push getlazy/emcc-engine:$(PACKAGE_VERSION)
+	docker push getlazy/emcc-engine:latest
 
 run:
 	docker run -it --rm \
