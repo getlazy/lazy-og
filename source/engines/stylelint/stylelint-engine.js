@@ -11,7 +11,7 @@ const stylelintConfigStandard = require('stylelint-config-standard');
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
-//  We are implicitly using `this` in overriden methods but eslint keep telling us not to.
+//  We are implicitly using `this` in overridden methods but eslint keep telling us not to.
 /* eslint class-methods-use-this: off */
 class StylelintEngineHttpServer extends EngineHttpServer
 {

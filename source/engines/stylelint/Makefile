@@ -4,13 +4,13 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t ierceg/lazy-stylelint-engine:$(PACKAGE_VERSION) \
-		-t ierceg/lazy-stylelint-engine:latest \
+		-t getlazy/lazy-stylelint-engine:$(PACKAGE_VERSION) \
+		-t getlazy/lazy-stylelint-engine:latest \
 		.
 
 push:
-	docker push ierceg/lazy-stylelint-engine:$(PACKAGE_VERSION)
-	docker push ierceg/lazy-stylelint-engine:latest
+	docker push getlazy/stylelint-engine:$(PACKAGE_VERSION)
+	docker push getlazy/stylelint-engine:latest
 
 run:
 	docker run -it --rm \
