@@ -145,24 +145,27 @@ config:
     max_warnings: 20 # optional value instructing lazy to never send more than this number of warnings, applied after max_warnings_per_rule
 
 # Each file is run through this pipeline. 
-engine_pipeline:  
+engine_pipeline:
   batch:                      # batch: - run engines asynchronously (in paralel)
-    - run: file-stats
+    - file-stats: 
     - sequence:               # pullreq engine depends on github-access, so we run them sequentially
-      - run: github-access
-      - run: pullreq
+      - github-access: 
+      - pullreq: 
     - sequence:               # Linters. Run any and all linters
       - batch:                # in parallel,
-        - run: emcc
-        - run: css
-        - run: html
-        - run: eslint
-        - run: yaml
-        - run: stylelint
-        - run: php-l
-        - run: pmd-java
-        - run: tidy-html
-      - run: postp           # and apply postprocessor to their output
+        - emcc: 
+        - css: 
+        - html: 
+        - eslint: 
+        - yaml: 
+        - stylelint: 
+        - php-l: 
+        - pmd-java: 
+        - tidy-html: 
+      - postp:                # apply postprocessor to their output
+      - reducer:              # and, finally, limit the number of reported errors
+          maxWarningsPerRule: 5     # allow up to 5 warnings for same rule-id
+          maxWarningsPerFile: 300   # allow up to 150 warnings per file
 
 engines: # each of these engines can be left out and other custom or official engines may be added
     eslint:
@@ -243,7 +246,7 @@ At this moment most of our tests are of integration variety - we run a full lazy
 
 * [lazy-file-stats-engine](https://github.com/getlazy/lazy-file-stats-engine)
 * [lazy-postproc-engine](https://github.com/SoftwareMarbles/lazy-postproc-engine)
-
+* [lazy-reduce-engine](https://github.com/SoftwareMarbles/lazy-reducer-engine)
 
 #### UI engine
 

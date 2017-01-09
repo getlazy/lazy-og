@@ -1,7 +1,6 @@
 'use strict';
 
 /* global logger */
-// lazy ignore lodash/chaining ; We actually love using chaining...
 // lazy ignore arrow-body-style ; What's wrong with arrow body style, anyway?
 
 const _ = require('lodash');
@@ -13,8 +12,6 @@ const PACKAGE_VERSION = require('../../../package.json').version;
 const namesToEnginesMap = new Map();
 
 let enginePipeline = {};
-let maxWarningsPerRule = null;
-let maxWarnings = null;
 
 const populateLanguagesToEnginesStructures = (engineManager) => {
     const engines = engineManager.engines;
@@ -22,37 +19,6 @@ const populateLanguagesToEnginesStructures = (engineManager) => {
     _.forEach(engines, (engine) => {
         namesToEnginesMap[_.toLower(engine.name)] = engine;
     });
-};
-
-const reduceWarnings = (allWarnings) => {
-    const allEnginesResults = {
-        warnings: []
-    };
-    //  Reduce the number of warnings per max warnings per rule and max warnings
-    //  settings.
-    const reducedWarnings = _(allWarnings.warnings)
-        .groupBy('ruleId')
-        .mapValues((warnings, ruleId) => {
-            if (!_.isNumber(maxWarningsPerRule) ||
-                warnings.length <= maxWarningsPerRule ||
-                ruleId === 'undefined') {
-                return warnings;
-            }
-            const firstWarning = _.head(_.sortBy(warnings, 'line'));
-
-            //  Use the first warning plus an info on the same line with the number
-            //  of warnings left for the same rule.
-            return [firstWarning, _.assignIn(_.clone(firstWarning), {
-                type: 'Info',
-                message: `+ ${warnings.length - 1} other warnings of [${ruleId}] rule`
-            })];
-        })
-        .flatMap()
-        //  If max warnings is defined then limit the number of warnings.
-        .take(_.isNumber(maxWarnings) ? maxWarnings : allEnginesResults.warnings.length)
-        .value();
-    allEnginesResults.warnings = reducedWarnings;
-    return allEnginesResults;
 };
 
 const runSingleEngine = (engineName, hostPath, language, content, context) => {
@@ -63,13 +29,14 @@ const runSingleEngine = (engineName, hostPath, language, content, context) => {
         // Engine is present in pipeline,
         // but no definition exists.
         // Should this be reported? For now, just carry on...
+        logger.warn(`Skipping engine "${engineName}"`);
         return Promise.resolve();
     }
     if ((_.isEmpty(engine.languages)) || (_.findIndex(engine.languages, (lang) => {
         return _.eq(_.toLower(_.trim(lang)), lowerLang);
     }) > -1)) {
         return engine.analyzeFile(hostPath, language, content, context).then((singleEngineResults) => {
-            return Promise.resolve(reduceWarnings(singleEngineResults));
+            return Promise.resolve(singleEngineResults);
         }).catch((err) => {
             logger.error(
                 'File analysis failed', {
@@ -81,20 +48,36 @@ const runSingleEngine = (engineName, hostPath, language, content, context) => {
     return Promise.resolve();
 };
 
+const getSingleEngine = (engineDef) => {
+    const engineName = _.head(_.keys(engineDef));
+
+    if (_.includes(['batch', 'sequence'], engineName)) {
+        return null;
+    }
+    return {
+        engineName,
+        engineParams: _.get(engineDef, engineName, {})
+    };
+};
+
 const runEnginePipeline = (pipeLine, hostPath, language, content, context) => {
     const batch = _.get(pipeLine, 'batch');
     const seq = _.get(pipeLine, 'sequence');
 
     try {
+        const newContext = _.cloneDeep(context);
+
         if (!_.isNil(batch)) {
             // Process engines asynchronously
             return Promise.all(
                 _.map(batch, (value) => {
-                    const oneEngine = _.get(value, 'run');
-                    if (!_.isNil(oneEngine)) {
-                        return runSingleEngine(oneEngine, hostPath, language, content, context);
+                    const singleEntry = getSingleEngine(value);
+
+                    if (_.isNil(singleEntry)) {
+                        return runEnginePipeline(value, hostPath, language, content, newContext);
                     }
-                    return runEnginePipeline(value, hostPath, language, content, context);
+                    newContext.engineParams = singleEntry.engineParams;
+                    return runSingleEngine(singleEntry.engineName, hostPath, language, content, newContext);
                 })
             ).then((res) => {
                 const results = _.compact(res);
@@ -117,14 +100,14 @@ const runEnginePipeline = (pipeLine, hostPath, language, content, context) => {
                 return engineRunner.then((results) => {
                     // Pass the results of this step
                     // to the next engine in sequence via context param
-                    const newContext = _.cloneDeep(context);
-                    const oneEngine = _.get(value, 'run');
+                    const singleEntry = getSingleEngine(value);
 
                     newContext.previousStepResults = results;
-                    if (!_.isNil(oneEngine)) {
-                        return runSingleEngine(oneEngine, hostPath, language, content, newContext);
+                    if (_.isNil(singleEntry)) {
+                        return runEnginePipeline(value, hostPath, language, content, newContext);
                     }
-                    return runEnginePipeline(value, hostPath, language, content, newContext);
+                    newContext.engineParams = singleEntry.engineParams;
+                    return runSingleEngine(singleEntry.engineName, hostPath, language, content, newContext);
                 });
             }, Promise.resolve());
         }
@@ -166,12 +149,6 @@ const addEndpoints = (app, options) => {
         try {
             return runEnginePipeline(enginePipeline, hostPath, language, content, context)
                 .then((warnings) => {
-                    // We don't want to summarize warnings at the end,
-                    // as it may cause warnings from some engines to be
-                    // pushed out by some other engine that generated lot of warnings.
-                    // Instead, we will just limit the number of warning each engine
-                    // can produce.
-                    // return res.send(reduceWarnings(warnings));
                     return res.send(warnings);
                 }).catch((err) => {
                     return res.status(500).send({
@@ -215,8 +192,6 @@ const addEndpoints = (app, options) => {
 
 const initialize = (app, options) => {
     populateLanguagesToEnginesStructures(options.engineManager);
-    maxWarningsPerRule = _.get(options, 'config.config.max_warnings_per_rule', 4);
-    maxWarnings = _.get(options, 'config.config.max_warnings', 50);
     enginePipeline = _.get(options, 'config.engine_pipeline');
     addEndpoints(app, options);
     return Promise.resolve();
