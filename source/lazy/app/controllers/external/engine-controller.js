@@ -14,7 +14,7 @@ const namesToEnginesMap = new Map();
 
 let enginePipeline = {};
 let maxWarningsPerRule = null;
-let maxWarnings = null;
+let maxWarningsPerFile = null;
 
 const populateLanguagesToEnginesStructures = (engineManager) => {
     const engines = engineManager.engines;
@@ -48,8 +48,8 @@ const reduceWarnings = (allWarnings) => {
             })];
         })
         .flatMap()
-        //  If max warnings is defined then limit the number of warnings.
-        .take(_.isNumber(maxWarnings) ? maxWarnings : allEnginesResults.warnings.length)
+        //  If max warnings per file is defined then limit the number of warnings.
+        .take(_.isNumber(maxWarningsPerFile) ? maxWarningsPerFile : allEnginesResults.warnings.length)
         .value();
     allEnginesResults.warnings = reducedWarnings;
     return allEnginesResults;
@@ -65,6 +65,7 @@ const runSingleEngine = (engineName, hostPath, language, content, context) => {
         // Should this be reported? For now, just carry on...
         return Promise.resolve();
     }
+  
     if ((_.isEmpty(engine.languages)) || (_.findIndex(engine.languages, (lang) => {
         return _.eq(_.toLower(_.trim(lang)), lowerLang);
     }) > -1)) {
@@ -78,6 +79,7 @@ const runSingleEngine = (engineName, hostPath, language, content, context) => {
                 });
         });
     }
+  
     return Promise.resolve();
 };
 
@@ -216,7 +218,7 @@ const addEndpoints = (app, options) => {
 const initialize = (app, options) => {
     populateLanguagesToEnginesStructures(options.engineManager);
     maxWarningsPerRule = _.get(options, 'config.config.max_warnings_per_rule', 4);
-    maxWarnings = _.get(options, 'config.config.max_warnings', 50);
+    maxWarningsPerFile = _.get(options, 'config.max_warnings_per_file');
     enginePipeline = _.get(options, 'config.engine_pipeline');
     addEndpoints(app, options);
     return Promise.resolve();
