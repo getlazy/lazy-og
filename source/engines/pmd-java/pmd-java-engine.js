@@ -18,7 +18,7 @@ const LAZY_VOLUME_NAME = process.env.LAZY_VOLUME_NAME;
 
 const HELPER_CONTAINER_IMAGE_NAME = 'codacy/codacy-pmdjava:1.0.114';
 
-//  We are implicitly using `this` in overriden methods but eslint keep telling us not to.
+//  We are implicitly using `this` in overridden methods but eslint keep telling us not to.
 /* eslint class-methods-use-this: off */
 class PmdJavaHelperContainer extends HelperContainer
 {
