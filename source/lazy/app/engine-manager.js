@@ -103,7 +103,7 @@ class EngineManager
 
         logger.info('Pulling image', imageName, 'for engine', engineName);
         return HigherDockerManager.pullImage(resolvedRepositoryAuth, imageName)
-            .then((engineImage) => {
+            .then(() => {
                 const createEngineParams = {
                     Image: imageName,
                     Cmd: engineConfig.command ? engineConfig.command.split(' ') : undefined,
