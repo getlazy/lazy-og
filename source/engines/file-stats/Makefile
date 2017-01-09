@@ -4,13 +4,13 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t ierceg/lazy-file-stats-engine:$(PACKAGE_VERSION) \
-		-t ierceg/lazy-file-stats-engine:latest \
+		-t getlazy/lazy-file-stats-engine:$(PACKAGE_VERSION) \
+		-t getlazy/lazy-file-stats-engine:latest \
 		.
 
 push:
-	docker push ierceg/lazy-file-stats-engine:$(PACKAGE_VERSION)
-	docker push ierceg/lazy-file-stats-engine:latest
+	docker push getlazy/file-stats-engine:$(PACKAGE_VERSION)
+	docker push getlazy/file-stats-engine:latest
 
 run:
 	docker run -it --rm \
