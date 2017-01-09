@@ -4,13 +4,13 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t ierceg/lazy-github-access-engine:$(PACKAGE_VERSION) \
-		-t ierceg/lazy-github-access-engine:latest \
+		-t getlazy/lazy-github-access-engine:$(PACKAGE_VERSION) \
+		-t getlazy/lazy-github-access-engine:latest \
 		.
 
 push:
-	docker push ierceg/lazy-github-access-engine:$(PACKAGE_VERSION)
-	docker push ierceg/lazy-github-access-engine:latest
+	docker push getlazy/github-access-engine:$(PACKAGE_VERSION)
+	docker push getlazy/github-access-engine:latest
 
 run:
 	docker run -it --rm \
