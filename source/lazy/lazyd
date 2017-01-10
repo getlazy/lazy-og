@@ -5,4 +5,4 @@ docker run -it --rm \
     -p "16827:80" \
     --stop-signal SIGTERM \
     -d \
-    ierceg/lazy:latest
+    getlazy/lazy:latest

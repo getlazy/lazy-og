@@ -1,16 +1,16 @@
 version: 1
 dashboard:
-    image: ierceg/lazy-dashboard:latest
+    image: getlazy/dashboard:latest
 engines:
     eslint:
-        image: ierceg/lazy-eslint-engine:latest
+        image: getlazy/eslint-engine:latest
     stylelint:
-        image: ierceg/lazy-stylelint-engine:latest
+        image: getlazy/stylelint-engine:latest
     tidy-html:
-        image: ierceg/lazy-tidy-html-engine:latest
+        image: getlazy/tidy-html-engine:latest
     emcc:
-        image: ierceg/lazy-emcc-engine:latest
+        image: getlazy/emcc-engine:latest
     php-l:
-        image: ierceg/lazy-php-l-engine:latest
+        image: getlazy/php-l-engine:latest
     pmd-java:
-        image: ierceg/lazy-pmd-java-engine:latest
+        image: getlazy/pmd-java-engine:latest
