@@ -177,7 +177,7 @@ rule-sets:
     "lazy",
     "linter"
   ],
-  "repository": "https://github.com/SoftwareMarbles/atom-lazy-linter",
+  "repository": "https://github.com/getlazy/atom-lazy-linter",
   "license": "MIT",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
