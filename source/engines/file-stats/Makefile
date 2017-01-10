@@ -4,8 +4,8 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t getlazy/lazy-file-stats-engine:$(PACKAGE_VERSION) \
-		-t getlazy/lazy-file-stats-engine:latest \
+		-t getlazy/file-stats-engine:$(PACKAGE_VERSION) \
+		-t getlazy/file-stats-engine:latest \
 		.
 
 push:
