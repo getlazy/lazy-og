@@ -4,13 +4,13 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t ierceg/lazy-yaml-engine:$(PACKAGE_VERSION) \
-		-t ierceg/lazy-yaml-engine:latest \
+		-t getlazy/reducer-engine:$(PACKAGE_VERSION) \
+		-t getlazy/reducer-engine:latest \
 		.
 
 push:
-	docker push ierceg/lazy-yaml-engine:$(PACKAGE_VERSION)
-	docker push ierceg/lazy-yaml-engine:latest
+	docker push getlazy/reducer-engine:$(PACKAGE_VERSION)
+	docker push getlazy/reducer-engine:latest
 
 run:
 	docker run -it --rm \
