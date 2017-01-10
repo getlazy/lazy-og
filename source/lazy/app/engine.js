@@ -7,7 +7,7 @@ const _ = require('lodash');
 const url = require('url');
 const request = require('request-promise-native');
 const async = require('async');
-const HigherDockerManager = require('@lazyass/higher-docker-manager');
+const HigherDockerManager = require('higher-docker-manager');
 
 const DEFAULT_ARBITRARY_BOOT_TIMEOUT_S = 30;
 const ARBITRARY_ENGINE_BOOT_CHECK_DELAY_MS = 100;

@@ -143,32 +143,32 @@ repository_auth: # optional, only needed if your engines are in a private Docker
 config:
     max_warnings_per_rule: 5 # optional value instructing lazy to replace too many per rule warnings with a single warning plus additional details
     max_warnings_per_file: 20 # optional value instructing lazy to never send more than this number of warnings per file, applied after max_warnings_per_rule
-# Each file is run through this pipeline. 
+# Each file is run through this pipeline.
 engine_pipeline:
   bundle:                     # bundle: - run engines asynchronously (in paralel)
-    - file-stats: 
+    - file-stats:
     - sequence:               # pullreq engine depends on github-access, so we run them sequentially
-      - github-access: 
-      - pullreq: 
+      - github-access:
+      - pullreq:
     - sequence:               # Linters. Run any and all linters
       - bundle:               # in parallel,
-        - emcc: 
-        - css: 
-        - html: 
-        - eslint: 
-        - yaml: 
-        - stylelint: 
-        - php-l: 
-        - pmd-java: 
-        - tidy-html: 
+        - emcc:
+        - css:
+        - html:
+        - eslint:
+        - yaml:
+        - stylelint:
+        - php-l:
+        - pmd-java:
+        - tidy-html:
       - postp:                # apply postprocessor to their output
       - reducer:              # and, finally, limit the number of reported errors
           maxWarningsPerRule: 5     # allow up to 5 warnings for same rule-id
           maxWarningsPerFile: 300   # allow up to 150 warnings per file
-          
+
 engines: # each of these engines can be left out and other custom or official engines may be added
     eslint:
-        image: ierceg/lazy-eslint-engine:latest
+        image: getlazy/eslint-engine:latest
         boot_wait: true # optional, defaults to true, flag instructing lazy to wait for engine's boot process to finish
         boot_timeout: 120 # optional timeout to wait for engine to boot
         meta: {} # optional metadata for the engine, if not provided lazy queries the engine for it
@@ -176,13 +176,13 @@ engines: # each of these engines can be left out and other custom or official en
             - MODE=strict # for example, not real
         ~include: eslint-rules.yaml # optional metaclause that includes the specified YAML file and merges its content with engine configuration
     stylelint:
-        image: ierceg/lazy-stylelint-engine:latest
+        image: getlazy/stylelint-engine:latest
     tidy-html:
-        image: ierceg/lazy-tidy-html-engine:latest
+        image: getlazy/tidy-html-engine:latest
     postp:
-        image: ierceg/lazy-postproc-engine:latest
+        image: getlazy/postproc-engine:latest
     github-access:
-        image: ierceg/lazy-github-access-engine:latest
+        image: getlazy/github-access-engine:latest
         import_env: # optional list of environment variables to import from lazy environment into engine environment
             - GITHUB_CLIENT_ID
             - GITHUB_CLIENT_SECRET

@@ -5,7 +5,9 @@
 
 const Main = require('./app/main.js');
 
-Main.main()
+//  We always try to load /config/lazy.yaml. Since lazy runs in a docker container the only way to
+//  "pass" it is by either building on top of its image or mounting a local directory as /config
+Main.main('/config/lazy.yaml')
     .then(() => {
         logger.info('lazy initialized');
     })

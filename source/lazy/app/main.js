@@ -44,7 +44,7 @@ class Main
                 engineManager = new EngineManager(lazyConfig);
             })
             .then(() => Main._initializeInternalExpressApp(config))
-            .then(() => Main._recreateAllEngines(config))
+            .then(() => Main._recreateAllEngines())
             .then(() => Main._initializeExternalExpressApp(config))
             .catch((err) => {
                 logger.error('Failed to boot lazy', err);
@@ -133,12 +133,12 @@ class Main
      * Recreate all engines based on the given configuration.
      * @private
      */
-    static _recreateAllEngines(lazyConfig) {
+    static _recreateAllEngines() {
         return engineManager.start();
     }
 
     static _loadLazyYaml(lazyYamlFilePath) {
-        return LazyYamlFile.load(lazyYamlFilePath || `${__dirname}/../lazy.yaml`);
+        return LazyYamlFile.load(lazyYamlFilePath);
     }
 }
 

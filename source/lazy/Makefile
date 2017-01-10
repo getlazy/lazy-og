@@ -3,14 +3,13 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 
 build:
 	docker build \
-		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t ierceg/lazy:$(PACKAGE_VERSION) \
-		-t ierceg/lazy:latest \
+		-t getlazy/lazy:$(PACKAGE_VERSION) \
+		-t getlazy/lazy:latest \
 		.
 
 push:
-	docker push ierceg/lazy:$(PACKAGE_VERSION)
-	docker push ierceg/lazy:latest
+	docker push getlazy/lazy:$(PACKAGE_VERSION)
+	docker push getlazy/lazy:latest
 
 test:
 	docker run -it --rm \

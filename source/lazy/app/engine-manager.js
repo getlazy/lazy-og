@@ -7,7 +7,7 @@ const _ = require('lodash');
 const url = require('url');
 const H = require('higher');
 const selectn = require('selectn');
-const HigherDockerManager = require('@lazyass/higher-docker-manager');
+const HigherDockerManager = require('higher-docker-manager');
 const Engine = require('./engine');
 
 const Label = {
@@ -103,7 +103,7 @@ class EngineManager
 
         logger.info('Pulling image', imageName, 'for engine', engineName);
         return HigherDockerManager.pullImage(resolvedRepositoryAuth, imageName)
-            .then((engineImage) => {
+            .then(() => {
                 const createEngineParams = {
                     Image: imageName,
                     Cmd: engineConfig.command ? engineConfig.command.split(' ') : undefined,

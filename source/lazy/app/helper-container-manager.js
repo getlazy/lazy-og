@@ -6,7 +6,7 @@
 const _ = require('lodash');
 const errors = require('common-errors');
 
-const HigherDockerManager = require('@lazyass/higher-docker-manager');
+const HigherDockerManager = require('higher-docker-manager');
 
 const Label = {
     IoLazyassHelperContainerManagerOwned: 'io.lazyass.lazy.helper-container-manager.owned'
