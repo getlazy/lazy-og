@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SoftwareMarbles/lazy-emcc-engine.git"
+    "url": "git+https://github.com/getlazy/lazy-emcc-engine.git"
   },
   "keywords": [
     "lazy",
@@ -22,9 +22,9 @@
   "author": "Ivan Erceg",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SoftwareMarbles/lazy-emcc-engine/issues"
+    "url": "https://github.com/getlazy/lazy-emcc-engine/issues"
   },
-  "homepage": "https://github.com/SoftwareMarbles/lazy-emcc-engine#readme",
+  "homepage": "https://github.com/getlazy/lazy-emcc-engine#readme",
   "dependencies": {
     "@lazyass/engine-helpers": "^3.0.0",
     "higher": "^1.0.5",
