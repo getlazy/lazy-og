@@ -4,8 +4,8 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t getlazy/lazy-yaml-engine:$(PACKAGE_VERSION) \
-		-t getlazy/lazy-yaml-engine:latest \
+		-t getlazy/yaml-engine:$(PACKAGE_VERSION) \
+		-t getlazy/yaml-engine:latest \
 		.
 
 push:
