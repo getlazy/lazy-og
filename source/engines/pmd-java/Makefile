@@ -4,8 +4,8 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t getlazy/lazy-pmd-java-engine:$(PACKAGE_VERSION) \
-		-t getlazy/lazy-pmd-java-engine:latest \
+		-t getlazy/pmd-java-engine:$(PACKAGE_VERSION) \
+		-t getlazy/pmd-java-engine:latest \
 		.
 
 push:
