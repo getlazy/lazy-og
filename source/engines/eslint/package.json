@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SoftwareMarbles/lazy-eslint-engine.git"
+    "url": "git+https://github.com/getlazy/lazy-eslint-engine.git"
   },
   "keywords": [
     "lazy",
@@ -21,9 +21,9 @@
   "author": "Ivan Erceg",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SoftwareMarbles/lazy-eslint-engine/issues"
+    "url": "https://github.com/getlazy/lazy-eslint-engine/issues"
   },
-  "homepage": "https://github.com/SoftwareMarbles/lazy-eslint-engine#readme",
+  "homepage": "https://github.com/getlazy/lazy-eslint-engine#readme",
   "dependencies": {
     "@lazyass/engine-helpers": "^3.0.0",
     "babel-eslint": "6.1.2",
