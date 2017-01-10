@@ -1,6 +1,6 @@
 {
   "name": "lazy-tidy-html-engine",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "lazy engine serving requests to lint HTML with TidyHtml",
   "main": "lazy-tidy-html-engine.js",
   "scripts": {
