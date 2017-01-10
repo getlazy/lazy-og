@@ -143,6 +143,29 @@ repository_auth: # optional, only needed if your engines are in a private Docker
 config:
     max_warnings_per_rule: 5 # optional value instructing lazy to replace too many per rule warnings with a single warning plus additional details
     max_warnings_per_file: 20 # optional value instructing lazy to never send more than this number of warnings per file, applied after max_warnings_per_rule
+# Each file is run through this pipeline. 
+engine_pipeline:
+  bundle:                     # bundle: - run engines asynchronously (in paralel)
+    - file-stats: 
+    - sequence:               # pullreq engine depends on github-access, so we run them sequentially
+      - github-access: 
+      - pullreq: 
+    - sequence:               # Linters. Run any and all linters
+      - bundle:               # in parallel,
+        - emcc: 
+        - css: 
+        - html: 
+        - eslint: 
+        - yaml: 
+        - stylelint: 
+        - php-l: 
+        - pmd-java: 
+        - tidy-html: 
+      - postp:                # apply postprocessor to their output
+      - reducer:              # and, finally, limit the number of reported errors
+          maxWarningsPerRule: 5     # allow up to 5 warnings for same rule-id
+          maxWarningsPerFile: 300   # allow up to 150 warnings per file
+          
 engines: # each of these engines can be left out and other custom or official engines may be added
     eslint:
         image: ierceg/lazy-eslint-engine:latest
@@ -156,6 +179,8 @@ engines: # each of these engines can be left out and other custom or official en
         image: ierceg/lazy-stylelint-engine:latest
     tidy-html:
         image: ierceg/lazy-tidy-html-engine:latest
+    postp:
+        image: ierceg/lazy-postproc-engine:latest
     github-access:
         image: ierceg/lazy-github-access-engine:latest
         import_env: # optional list of environment variables to import from lazy environment into engine environment
@@ -219,6 +244,8 @@ At this moment most of our tests are of integration variety - we run a full lazy
 #### Additional engines
 
 * [lazy-file-stats-engine](https://github.com/getlazy/lazy-file-stats-engine)
+* [lazy-postproc-engine](https://github.com/SoftwareMarbles/lazy-postproc-engine)
+* [lazy-reduce-engine](https://github.com/SoftwareMarbles/lazy-reducer-engine)
 
 #### UI engine
 

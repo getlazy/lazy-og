@@ -157,6 +157,10 @@ LAZY_CONFIG_SCHEMA = {
         ui: {
             $ref: '#/definitions/engine'
         },
+        engine_pipeline: {
+            type: 'object',
+            minProperties: 1
+        },
         engines: {
             type: 'object',
             minProperties: 1,
@@ -170,7 +174,7 @@ LAZY_CONFIG_SCHEMA = {
             }
         }
     },
-    required: ['version', 'service_url'],
+    required: ['version', 'service_url','engines','engine_pipeline'],
     additionalProperties: false,
     definitions: {
         repository_auth: {
