@@ -10,7 +10,7 @@ const ASSERT_FALSE = (data) => {
 };
 
 const ANALYZE_FILE_FIXTURE = [{
-    name: '200 - max 2 warnings',
+    name: '200 - max 3 warnings',
     params: {
         path: '/src/test.js',
         language: 'JavaScript',

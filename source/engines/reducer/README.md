@@ -9,13 +9,13 @@ This engine can be placed anywhere in engine pipeline, usually as the last one i
 The two parameters should be configured in engine_pipeline section of lazy.yaml. For example:
 ````
 engine_pipeline:
-  batch:
+  bundle:
     - file-stats: 
     - sequence:
       - github-access: 
       - pullreq: 
     - sequence:
-      - batch:
+      - bundle:
         - emcc: 
         - css: 
         - html: 
