@@ -4,8 +4,8 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t getlazy/lazy-php-l-engine:$(PACKAGE_VERSION) \
-		-t getlazy/lazy-php-l-engine:latest \
+		-t getlazy/php-l-engine:$(PACKAGE_VERSION) \
+		-t getlazy/php-l-engine:latest \
 		.
 
 push:
