@@ -4,18 +4,17 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t ierceg/lazy-pullreq-engine:$(PACKAGE_VERSION) \
-		-t ierceg/lazy-pullreq-engine:latest \
+		-t getlazy/pullreq-engine:$(PACKAGE_VERSION) \
+		-t getlazy/pullreq-engine:latest \
 		.
 
 push:
-	docker push ierceg/lazy-pullreq-engine:$(PACKAGE_VERSION)
-	docker push ierceg/lazy-pullreq-engine:latest
+	docker push getlazy/pullreq-engine:$(PACKAGE_VERSION)
+	docker push getlazy/pullreq-engine:latest
 
 run:
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
-	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -v "/tmp:/lazy" \
 		-e "LAZY_VOLUME_NAME=/tmp" \
 	    -w /app \
@@ -25,7 +24,6 @@ run:
 test:
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
-	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -v "/tmp:/lazy" \
 		-e "LAZY_VOLUME_NAME=/tmp" \
 	    -w /app \
@@ -35,7 +33,6 @@ test:
 coverage:
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
-	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -v "/tmp:/lazy" \
 	    -e "LAZY_VOLUME_NAME=/tmp" \
 	    -w /app \
@@ -43,7 +40,6 @@ coverage:
 	    istanbul cover _mocha -- --recursive
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
-	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -v "/tmp:/lazy" \
 	    -e "LAZY_VOLUME_NAME=/tmp" \
 	    -w /app \
