@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SoftwareMarbles/lazy-yaml-engine.git"
+    "url": "git+https://github.com/getlazy/lazy-yaml-engine.git"
   },
   "keywords": [
     "lazy",
@@ -21,9 +21,9 @@
   "author": "Nebojsa Lazic",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SoftwareMarbles/lazy-yaml-engine/issues"
+    "url": "https://github.com/getlazy/lazy-yaml-engine/issues"
   },
-  "homepage": "https://github.com/SoftwareMarbles/lazy-yaml-engine#readme",
+  "homepage": "https://github.com/getlazy/lazy-yaml-engine#readme",
   "dependencies": {
     "@lazyass/engine-helpers": "^2.0.0",
     "js-yaml": "^3.7.0",
