@@ -4,8 +4,8 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t getlazy/lazy-emcc-engine:$(PACKAGE_VERSION) \
-		-t getlazy/lazy-emcc-engine:latest \
+		-t getlazy/emcc-engine:$(PACKAGE_VERSION) \
+		-t getlazy/emcc-engine:latest \
 		.
 
 push:
