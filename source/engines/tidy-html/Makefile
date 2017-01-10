@@ -4,8 +4,8 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t getlazy/lazy-tidy-html-engine:$(PACKAGE_VERSION) \
-		-t getlazy/lazy-tidy-html-engine:latest \
+		-t getlazy/tidy-html-engine:$(PACKAGE_VERSION) \
+		-t getlazy/tidy-html-engine:latest \
 		.
 
 push:
