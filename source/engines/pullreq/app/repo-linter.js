@@ -56,7 +56,7 @@ class RepoLinter {
         return _.chain(repos)
             .map((remote) => {
                 const httpProtocolRegex = /^https:\/\/github.com\/(.+)\/(.+)\.git/g;
-                const httpFetch = httpProtocolRegex.exec(remote.refs.httpFetch);
+                const httpFetch = httpProtocolRegex.exec(remote.refs.fetch);
                 if (httpFetch) {
                     return {
                         owner: httpFetch[1],
