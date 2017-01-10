@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SoftwareMarbles/lazy-reducer-engine.git"
+    "url": "git+https://github.com/getlazy/lazy-reducer-engine.git"
   },
   "keywords": [
     "lazy",
@@ -18,9 +18,9 @@
   "author": "Nebojsa Lazic",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SoftwareMarbles/lazy-reducer-engine/issues"
+    "url": "https://github.com/getlazy/lazy-reducer-engine/issues"
   },
-  "homepage": "https://github.com/SoftwareMarbles/lazy-reducer-engine#readme",
+  "homepage": "https://github.com/getlazy/lazy-reducer-engine#readme",
   "dependencies": {
     "@lazyass/engine-helpers": "^3.0.1",
     "lodash": "^4.17.4"
