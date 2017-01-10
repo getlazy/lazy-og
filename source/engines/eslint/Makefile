@@ -4,8 +4,8 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t getlazy/lazy-eslint-engine:$(PACKAGE_VERSION) \
-		-t getlazy/lazy-eslint-engine:latest \
+		-t getlazy/eslint-engine:$(PACKAGE_VERSION) \
+		-t getlazy/eslint-engine:latest \
 		.
 
 push:
