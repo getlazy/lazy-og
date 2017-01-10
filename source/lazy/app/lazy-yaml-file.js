@@ -15,12 +15,14 @@ let LAZY_CONFIG_SCHEMA;
 
 class LazyYamlFile {
     static load(filePath) {
+        const fileDirname = path.dirname(path.resolve(filePath));
+
         return LazyYamlFile._readFile(filePath)
             .then((content) => {
                 const config = yaml.safeLoad(content);
 
                 //  Now resolve the config clauses and include the content in them.
-                return LazyYamlFile._resolveIncludeClauses(config);
+                return LazyYamlFile._resolveIncludeClauses(fileDirname, config);
             })
             .then((resolvedConfig) => {
                 const configErrors = LazyYamlFile._getConfigErrors(resolvedConfig);
@@ -34,7 +36,7 @@ class LazyYamlFile {
             });
     }
 
-    static _resolveIncludeClauses(config) {
+    static _resolveIncludeClauses(fileDirname, config) {
         const resolvedConfig = _.cloneDeep(config);
 
         if (!_.isObject(resolvedConfig)) {
@@ -49,7 +51,7 @@ class LazyYamlFile {
                 if (clause === '~include') {
                     let includeFilePath = clauseContent;
                     if (!path.isAbsolute(includeFilePath)) {
-                        includeFilePath = path.resolve(includeFilePath);
+                        includeFilePath = path.resolve(fileDirname, includeFilePath);
                     }
 
                     LazyYamlFile._readFile(includeFilePath)
@@ -59,7 +61,7 @@ class LazyYamlFile {
                             //  included config.
                             //  Currently we don't support deeper resolution of included configs so
                             //  we don't follow this down any further path.
-                            LazyYamlFile._resolveIncludeClauses(includedConfig)
+                            LazyYamlFile._resolveIncludeClauses(fileDirname, includedConfig)
                                 .then((resolvedClauseConfig) => {
                                     delete resolvedConfig[clause];
                                     _.assignIn(resolvedConfig, resolvedClauseConfig);
@@ -70,7 +72,7 @@ class LazyYamlFile {
                     return;
                 }
 
-                LazyYamlFile._resolveIncludeClauses(clauseContent)
+                LazyYamlFile._resolveIncludeClauses(fileDirname, clauseContent)
                     .then((resolvedClauseConfig) => {
                         resolvedConfig[clause] = resolvedClauseConfig;
                         nextClause();
