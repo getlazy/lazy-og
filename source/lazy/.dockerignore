@@ -4,6 +4,7 @@
 .DS_Store
 .vscode
 
+docs
 test
 coverage
 node_modules
@@ -18,5 +19,6 @@ lazy
 lazyd
 lazy-dev
 
-# Ignore local lazy.yaml - we will copy the production one when building the image.
+# Ignore lazy.yaml and related - image shouldn't contain them as they need to be specified at runtime.
 lazy.yaml
+eslint-rules.yaml
