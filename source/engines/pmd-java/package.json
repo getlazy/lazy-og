@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SoftwareMarbles/lazy-pmd-java-engine.git"
+    "url": "git+https://github.com/getlazy/lazy-pmd-java-engine.git"
   },
   "keywords": [
     "lazy",
@@ -19,9 +19,9 @@
   "author": "Ivan Erceg",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SoftwareMarbles/lazy-pmd-java-engine/issues"
+    "url": "https://github.com/getlazy/lazy-pmd-java-engine/issues"
   },
-  "homepage": "https://github.com/SoftwareMarbles/lazy-pmd-java-engine#readme",
+  "homepage": "https://github.com/getlazy/lazy-pmd-java-engine#readme",
   "dependencies": {
     "@lazyass/engine-helpers": "^3.0.0",
     "higher": "^1.0.5",
