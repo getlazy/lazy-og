@@ -4,8 +4,8 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t getlazy/lazy-github-access-engine:$(PACKAGE_VERSION) \
-		-t getlazy/lazy-github-access-engine:latest \
+		-t getlazy/github-access-engine:$(PACKAGE_VERSION) \
+		-t getlazy/github-access-engine:latest \
 		.
 
 push:
