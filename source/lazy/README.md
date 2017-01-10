@@ -145,13 +145,13 @@ config:
     max_warnings_per_file: 20 # optional value instructing lazy to never send more than this number of warnings per file, applied after max_warnings_per_rule
 # Each file is run through this pipeline. 
 engine_pipeline:
-  batch:                      # batch: - run engines asynchronously (in paralel)
+  bundle:                     # bundle: - run engines asynchronously (in paralel)
     - file-stats: 
     - sequence:               # pullreq engine depends on github-access, so we run them sequentially
       - github-access: 
       - pullreq: 
     - sequence:               # Linters. Run any and all linters
-      - batch:                # in parallel,
+      - bundle:               # in parallel,
         - emcc: 
         - css: 
         - html: 

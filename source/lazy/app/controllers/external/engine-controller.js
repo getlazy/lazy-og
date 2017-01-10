@@ -32,7 +32,7 @@ const runSingleEngine = (engineName, hostPath, language, content, context) => {
         logger.warn(`Skipping engine "${engineName}"`);
         return Promise.resolve();
     }
-  
+
     if ((_.isEmpty(engine.languages)) || (_.findIndex(engine.languages, (lang) => {
         return _.eq(_.toLower(_.trim(lang)), lowerLang);
     }) > -1)) {
@@ -46,14 +46,14 @@ const runSingleEngine = (engineName, hostPath, language, content, context) => {
                 });
         });
     }
-  
+
     return Promise.resolve();
 };
 
 const getSingleEngine = (engineDef) => {
     const engineName = _.head(_.keys(engineDef));
 
-    if (_.includes(['batch', 'sequence'], engineName)) {
+    if (_.includes(['bundle', 'sequence'], engineName)) {
         return null;
     }
     return {
@@ -63,16 +63,16 @@ const getSingleEngine = (engineDef) => {
 };
 
 const runEnginePipeline = (pipeLine, hostPath, language, content, context) => {
-    const batch = _.get(pipeLine, 'batch');
+    const bundle = _.get(pipeLine, 'bundle');
     const seq = _.get(pipeLine, 'sequence');
 
     try {
         const newContext = _.cloneDeep(context);
 
-        if (!_.isNil(batch)) {
+        if (!_.isNil(bundle)) {
             // Process engines asynchronously
             return Promise.all(
-                _.map(batch, (value) => {
+                _.map(bundle, (value) => {
                     const singleEntry = getSingleEngine(value);
 
                     if (_.isNil(singleEntry)) {
@@ -83,7 +83,7 @@ const runEnginePipeline = (pipeLine, hostPath, language, content, context) => {
                 })
             ).then((res) => {
                 const results = _.compact(res);
-                const batchResults = _.reduce(results, (accum, oneResult) => {
+                const bundleResults = _.reduce(results, (accum, oneResult) => {
                     const warnings = _.get(oneResult, 'warnings');
                     if (!_.isNil(warnings)) {
                         accum.warnings = _.union(accum.warnings, warnings);
@@ -92,7 +92,7 @@ const runEnginePipeline = (pipeLine, hostPath, language, content, context) => {
                 }, {
                     warnings: []
                 });
-                return Promise.resolve(batchResults);
+                return Promise.resolve(bundleResults);
             });
         }
 
