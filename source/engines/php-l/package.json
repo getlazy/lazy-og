@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SoftwareMarbles/lazy-php-l-engine.git"
+    "url": "git+https://github.com/getlazy/lazy-php-l-engine.git"
   },
   "keywords": [
     "lazy",
@@ -26,7 +26,7 @@
   "author": "Ivan Erceg",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SoftwareMarbles/lazy-php-l-engine/issues"
+    "url": "https://github.com/getlazy/lazy-php-l-engine/issues"
   },
-  "homepage": "https://github.com/SoftwareMarbles/lazy-php-l-engine#readme"
+  "homepage": "https://github.com/getlazy/lazy-php-l-engine#readme"
 }
