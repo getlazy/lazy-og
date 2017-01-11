@@ -73,17 +73,19 @@ class EslintEngineHttpServer extends EngineHttpServer {
             const warnings = _
                 .chain(messages)
                 .map((warning) => {
-                    const ruleDocs = getRuleURI(warning.ruleId);
-                    const moreInfoUrl = (ruleDocs.found) ? ruleDocs.url : `https://www.google.com/search?q=${warning.ruleId}`;
-
-                    return {
+                    const rWarning = {
                         type: _.eq(warning.severity, 2) ? 'Error' : 'Warning',
                         message: `[${warning.ruleId}]: ${warning.message}`,
                         ruleId: warning.ruleId,
-                        moreInfo: moreInfoUrl,
                         line: warning.line,
                         column: warning.column
                     };
+                    if (!_.isNull(warning.ruleId)) {
+                        const ruleDocs =getRuleURI(warning.ruleId);
+                        const moreInfoUrl = (ruleDocs.found) ? ruleDocs.url : `https://www.google.com/search?q=${warning.ruleId}`;
+                        rWarning.moreInfo = moreInfoUrl;
+                    }
+                    return  rWarning;
                 })
                 .filter()
                 .value();
