@@ -23,7 +23,7 @@ Hackable Coding Assistant
 
 ## Engines
 
-Engines are Docker containers running an HTTP server which follows the API specification. Reference implementation of such server for NodeJS can be found in [lazy-engine-reference-node](https://github.com/SoftwareMarbles/lazy-engine-reference-node) repository.
+Engines are Docker containers running an HTTP server which follows the API specification. Reference implementation of such server for NodeJS can be found in [lazy-engine-reference-node](https://github.com/getlazy/lazy-engine-reference-node) repository.
 
 ### Lifecycle
 
@@ -127,7 +127,7 @@ And in the engine code we then monitor for `SIGTERM` signal and try to gracefull
 
 lazy binds Docker socket to all engines it is running so all engines have full access to Docker daemon on the process. This is clearly a security concern but considering that lazy on its own is meant to be run only locally and that all engines running on it are fully controlled by the user, this lessens the concerns.
 
-To create helper containers (which we often do in our official engines), you can use [@lazyass/engine-helpers](https://github.com/SoftwareMarbles/lazy-engine-helpers) Node module.
+To create helper containers (which we often do in our official engines), you can use [@lazyass/engine-helpers](https://github.com/getlazy/lazy-engine-helpers) Node module.
 
 ## lazy.yaml
 
@@ -140,12 +140,9 @@ repository_auth: # optional, only needed if your engines are in a private Docker
     username_env: DOCKER_REPOSITORY_USERNAME_ENVVAR
     password_env: DOCKER_REPOSITORY_PASSWORD_ENVVAR
     email_env: DOCKER_REPOSITORY_EMAIL_ENVVAR
-config:
-    max_warnings_per_rule: 5 # optional value instructing lazy to replace too many per rule warnings with a single warning plus additional details
-    max_warnings_per_file: 20 # optional value instructing lazy to never send more than this number of warnings per file, applied after max_warnings_per_rule
 # Each file is run through this pipeline.
 engine_pipeline:
-  bundle:                     # bundle: - run engines asynchronously (in paralel)
+  bundle:                     # bundle: - run engines asynchronously (in parallel)
     - file-stats:
     - sequence:               # pullreq engine depends on github-access, so we run them sequentially
       - github-access:
@@ -193,7 +190,7 @@ Note:
 * `version` must be equal to `1`
 * `id` is optional and if not provided it's set to `default`
 * `internal_port` is optional but it must be different from external port
-* `repository_auth` can also be provided with tokens or by directly providing values in lazy.yaml (not recommended)
+* `repository_auth` can also be specified with a token
 * `boot_timeout` is optional and its default is 30 seconds
 * `import_env` clause is useful in avoiding specifying secret values like application client ID or secret in lazy.yaml
 * `~include` is a meta-clause that allows splitting up configuration into multiple YAML files; this is very useful for large engine configurations
@@ -210,8 +207,6 @@ engines:
         working_dir: /app
         volumes:
             - "/<your path to lazy-eslint-engine source code>:/app"
-        labels:
-            "io.lazyass.lazy.engine.languages": "JavaScript"
 ```
 
 If you furthermore run lazy with `./lazy-dev` then both lazy and the engine above will be run under `nodemon` and restarted on their respective source code changes.
@@ -244,8 +239,8 @@ At this moment most of our tests are of integration variety - we run a full lazy
 #### Additional engines
 
 * [lazy-file-stats-engine](https://github.com/getlazy/lazy-file-stats-engine)
-* [lazy-postproc-engine](https://github.com/SoftwareMarbles/lazy-postproc-engine)
-* [lazy-reduce-engine](https://github.com/SoftwareMarbles/lazy-reducer-engine)
+* [lazy-postproc-engine](https://github.com/getlazy/lazy-postproc-engine)
+* [lazy-reduce-engine](https://github.com/getlazy/lazy-reducer-engine)
 
 #### UI engine
 

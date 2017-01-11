@@ -14,7 +14,7 @@ const _ = require('lodash');
 const assert = require('assert');
 const HelperContainerManager = require('../app/helper-container-manager');
 
-describe.only('HelperContainerManager', function () {
+describe('HelperContainerManager', function () {
     afterEach(() => {
         td.reset();
     });

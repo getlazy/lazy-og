@@ -1,4 +1,4 @@
-FROM node:6.9.1-alpine
+FROM node:6.9-alpine
 MAINTAINER Ivan Erceg <ivan@softwaremarbles.com>
 WORKDIR /app
 STOPSIGNAL SIGINT
