@@ -140,9 +140,6 @@ repository_auth: # optional, only needed if your engines are in a private Docker
     username_env: DOCKER_REPOSITORY_USERNAME_ENVVAR
     password_env: DOCKER_REPOSITORY_PASSWORD_ENVVAR
     email_env: DOCKER_REPOSITORY_EMAIL_ENVVAR
-config:
-    max_warnings_per_rule: 5 # optional value instructing lazy to replace too many per rule warnings with a single warning plus additional details
-    max_warnings_per_file: 20 # optional value instructing lazy to never send more than this number of warnings per file, applied after max_warnings_per_rule
 # Each file is run through this pipeline.
 engine_pipeline:
   bundle:                     # bundle: - run engines asynchronously (in parallel)
@@ -210,8 +207,6 @@ engines:
         working_dir: /app
         volumes:
             - "/<your path to lazy-eslint-engine source code>:/app"
-        labels:
-            "io.lazyass.lazy.engine.languages": "JavaScript"
 ```
 
 If you furthermore run lazy with `./lazy-dev` then both lazy and the engine above will be run under `nodemon` and restarted on their respective source code changes.
