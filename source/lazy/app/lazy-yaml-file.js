@@ -99,11 +99,7 @@ class LazyYamlFile {
     }
 
     static _issueWarnings(config) {
-        const repositoryAuth = config.repository_auth;
-        if (repositoryAuth.username) {
-            logger.warn(
-                'Use of hard-coded repository username and password in lazy configuration is strongly discouraged. Prefer username_env and password_env instead.');
-        }
+        //  Nothing to do yet.
     }
 
     static _readFile(filePath) {
@@ -125,7 +121,9 @@ LAZY_CONFIG_SCHEMA = {
             maximum: 1
         },
         service_url: {
-            type: 'string'
+            type: 'string',
+            minLength: 8, // e.g. 'http://a'
+            pattern: '^https?:.*'
         },
         id: {
             type: 'string',
@@ -134,69 +132,41 @@ LAZY_CONFIG_SCHEMA = {
         repository_auth: {
             type: 'object',
             oneOf: [
-                { $ref: '#/definitions/repository_auth' },
-                { $ref: '#/definitions/repository_auth_env' }
+                { $ref: '#/definitions/repository_auth_env' },
+                { $ref: '#/definitions/repository_auth_token' }
             ]
         },
         port: {
             type: 'integer',
             minimum: 1
         },
-        config: {
-            type: 'object',
-            properties: {
-                max_warnings_per_rule: {
-                    type: 'integer',
-                    minimim: 1
-                },
-                max_warnings_per_file: {
-                    type: 'integer',
-                    minimum: 1
-                }
-            },
-            additionalProperties: false
-        },
         ui: {
             $ref: '#/definitions/engine'
         },
         engine_pipeline: {
             type: 'object',
-            minProperties: 1
+            minProperties: 1,
+            maxProperties: 1,
+            properties: {
+                bundle: { $ref: '#/definitions/engine_pipeline_array' },
+                sequence: { $ref: '#/definitions/engine_pipeline_array' }
+            },
+            additionalProperties: false
         },
         engines: {
             type: 'object',
             minProperties: 1,
-            elements: {
-                type: 'object',
-                patternProperties: {
-                    '...': {
-                        $ref: '#/definitions/engine'
-                    }
-                }
-            }
-        }
-    },
-    required: ['version', 'service_url','engines','engine_pipeline'],
-    additionalProperties: false,
-    definitions: {
-        repository_auth: {
-            type: 'object',
-            properties: {
-                username: {
-                    type: 'string',
-                    minLength: 1
-                },
-                password: {
-                    type: 'string'
-                },
-                email: {
-                    type: 'string',
-                    format: 'email'
+            patternProperties: {
+                '^.+$': {
+                    $ref: '#/definitions/engine'
                 }
             },
-            required: ['username', 'password'],
             additionalProperties: false
-        },
+        }
+    },
+    required: ['version', 'service_url', 'engines', 'engine_pipeline'],
+    additionalProperties: false,
+    definitions: {
         repository_auth_env: {
             type: 'object',
             properties: {
@@ -205,8 +175,7 @@ LAZY_CONFIG_SCHEMA = {
                     minLength: 1
                 },
                 password_env: {
-                    type: 'string',
-                    minLength: 1
+                    type: 'string'
                 },
                 email_env: {
                     type: 'string',
@@ -216,11 +185,24 @@ LAZY_CONFIG_SCHEMA = {
             required: ['username_env', 'password_env'],
             additionalProperties: false
         },
+        repository_auth_token: {
+            type: 'object',
+            properties: {
+                token: {
+                    type: 'string',
+                    minLength: 1
+                }
+            },
+            required: ['token'],
+            additionalProperties: false
+        },
         engine: {
+            type: 'object',
             properties: {
                 image: {
                     type: 'string',
-                    minLength: 3
+                    minLength: 3,
+                    pattern: '^.+:.+$'
                 },
                 command: {
                     type: 'string',
@@ -233,7 +215,7 @@ LAZY_CONFIG_SCHEMA = {
                 volumes: {
                     type: 'array',
                     items: {
-                        $ref: '#/definitions/string_pair'
+                        $ref: '#/definitions/volumes_item'
                     },
                     minItems: 1,
                     uniqueItems: true
@@ -254,7 +236,11 @@ LAZY_CONFIG_SCHEMA = {
                     properties: {
                         languages: {
                             type: 'array',
-                            minLength: 0
+                            minLength: 0,
+                            items: {
+                                type: 'string',
+                                minLength: 1
+                            }
                         }
                     },
                     additionalProperties: true
@@ -262,7 +248,7 @@ LAZY_CONFIG_SCHEMA = {
                 env: {
                     type: 'array',
                     items: {
-                        $ref: '#/definitions/string_pair'
+                        $ref: '#/definitions/env_item'
                     },
                     minItems: 1,
                     uniqueItems: true
@@ -275,15 +261,49 @@ LAZY_CONFIG_SCHEMA = {
                     },
                     minItems: 1,
                     uniqueItems: true
+                },
+                config: {
+                    type: 'object'
                 }
             },
             required: ['image'],
             additionalProperties: false
         },
-        string_pair: {
+        env_item: {
             type: 'string',
             minLength: 2, // "x=" is a valid definition
             pattern: '^.+=.*$'
+        },
+        volumes_item: {
+            type: 'string',
+            minLength: 3, // "/:/" is a valid definition
+            pattern: '^.*:.*$'
+        },
+        engine_pipeline_array: {
+            type: 'array',
+            minItems: 1,
+            items: {
+                $ref: '#/definitions/engine_pipeline_item'
+            },
+            uniqueItems: true
+        },
+        engine_pipeline_item: {
+            type: 'object',
+            minProperties: 1,
+            maxProperties: 1,
+            properties: {
+                bundle: { $ref: '#/definitions/engine_pipeline_array' },
+                sequence: { $ref: '#/definitions/engine_pipeline_array' }
+            },
+            patternProperties: {
+                '^((?!(bundle|sequence)).)+$': {
+                    oneOf: [
+                        { type: 'object' },
+                        { type: 'null' }
+                    ]
+                }
+            },
+            additionalProperties: false
         }
     }
 };
