@@ -25,4 +25,7 @@ In HTML files, that don't support any of the above comment syntax, you can use:
 
 The above `lazy ignore` directive will cause this engine to remove all warnings or erros produced by `no-plusplus` ESLint rule.
 
-Currently, only `lazy ignore <rule-id>` directive is supported by this engine.
+Following directives are currently supported:
+
+* `lazy ignore <rule-id>` disables all occurences of `<rule-id>`
+* `lazy ignore-once <rule-id>` disable only the first occurrence of `rule-id` after the directive

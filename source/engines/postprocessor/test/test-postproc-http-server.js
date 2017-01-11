@@ -25,7 +25,6 @@ const ANALYZE_FILE_FIXTURE = [{
         assert.equal(warningsPerType['Error'].length, 11);
         assert.equal(warningsPerType['Info'].length, 8);
         assert.equal(warningsPerType['Warning'].length, 1);
-        //assert(warnings[0].message.endsWith('unexpected end of the stream within a double quoted scalar'));
     },
     catch: ASSERT_FALSE
 },
@@ -44,7 +43,6 @@ const ANALYZE_FILE_FIXTURE = [{
         assert.equal(warningsPerType['Error'].length, 11);
         assert.equal(warningsPerType['Info'].length, 7);
         assert(_.isNil(warningsPerType['Warning']));
-        //assert(warnings[0].message.endsWith('unexpected end of the stream within a double quoted scalar'));
     },
     catch: ASSERT_FALSE
 },
@@ -63,7 +61,6 @@ const ANALYZE_FILE_FIXTURE = [{
         assert.equal(warningsPerType['Error'].length, 11);
         assert.equal(warningsPerType['Info'].length, 7);
         assert(_.isNil(warningsPerType['Warning']));
-        //assert(warnings[0].message.endsWith('unexpected end of the stream within a double quoted scalar'));
     },
     catch: ASSERT_FALSE
 },
@@ -133,113 +130,23 @@ const ANALYZE_FILE_FIXTURE = [{
     },
     catch: ASSERT_FALSE
 }, 
-
-/*
 {
-    name: '200 - YAML',
+    name: '200 - Ignore once',
     params: {
-        path: '/src/test.yaml',
+        path: '/src/test.js',
         language: 'JavaScript',
-        content: `
-# If you wish to access your private NPM repository of ESLint plugins, enter you NPM token below.
-# Otherwise, set NPM_TOKEN to 'public' and you'll be able to install only public NPM repositories
-env-vars:
- NPM_TOKEN: 'public'
-
-# All of the rule sets should be descendents of the rule-sets: object
-rule-sets:
-  - error: below
-  error
-
-`
+        content: '/* lazy ignore-once no-tabs */',
+        context: require('./testdata1.json')
     },
     then: (results) => {
         const warnings = results.warnings;
-        assert.equal(warnings.length, 1);
-        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
-
-        assert.equal(warningsPerType['Error'].length, 1);
-        assert(warnings[0].message.endsWith('bad indentation of a mapping entry'));
-    },
-    catch: ASSERT_FALSE
-}, {
-    name: '200 - JSON',
-    params: {
-        path: '/src/test.json',
-        language: 'JSON',
-        content: `
-{
-  "name": "atom-lazy-linter",
-  "main": "./lib/atom-lazy-linter",
-  "version": "0.2.2",
-  "description": "lazy plugin for Atom Linter",
-  "keywords": [
-    "lazy",
-    "linter"
-  ],
-  "repository": "https://github.com/SoftwareMarbles/atom-lazy-linter",
-  "license": "MIT",
-  "engines": {
-    "atom": ">=1.0.0 <2.0.0"
-  },
-  "dependencies": {
-    "async": "^2.1.4",
-    "atom-package-deps": "^4.3.1",
-    "escape-html": "^1.0.3",
-    "lodash": "^4.17.2",
-    "request": "^2.78.0",
-    "simple-git": "^1.65.0"
-  },
-  "providedServices": {
-    "linter": {
-      "versions": {
-        "1.0.0": "provideLinter"
-      }
-    }
-  },
-  "package-deps": [
-    "linter"
-  ]
-}
-
-`
-    },
-    then: (results) => {
-        const warnings = results.warnings;
-        assert.equal(warnings.length, 0);
-    },
-    catch: ASSERT_FALSE
-}, {
-    name: '200 - JSON (error)',
-    params: {
-        path: '/src/test.json',
-        language: 'JSON',
-        content: `
-{
-  "providedServices": {
-    "linter": {
-      "versions" {
-        "1.0.0": "provideLinter"
-      }
-    }
-  },
-  "package-deps": [
-    "linter"
-  ]
-}
-
-`
-    },
-    then: (results) => {
-        const warnings = results.warnings;
-        assert.equal(warnings.length, 1);
+        assert.equal(warnings.length, 2);
         const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
         assert.equal(warningsPerType['Error'].length, 1);
-        assert(warnings[0].message.endsWith('missed comma between flow collection entries'));
+        assert.equal(warningsPerType['Info'].length, 1);
     },
     catch: ASSERT_FALSE
 }
-*/
 ];
 
 describe('PostProcEngineHttpServer', function () {

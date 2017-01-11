@@ -1,8 +1,6 @@
 'use strict';
 
 // lazy ignore class-methods-use-this
-// lazy ignore no-cond-assign
-// lazy ignore no-plusplus
 
 const _ = require('lodash');
 const EngineHelpers = require('@lazyass/engine-helpers');
@@ -36,9 +34,11 @@ class PostProcEngineHttpServer extends EngineHttpServer {
         };
 
         let m;
+// lazy ignore-once no-cond-assign  ; This is standard regex pattern code...
         while ((m = regex.exec(line)) !== null) {
             // This is necessary to avoid infinite loops with zero-width matches
             if (m.index === regex.lastIndex) {
+// lazy ignore-once no-plusplus   ; What's wrong with plusplus, anyway?
                 regex.lastIndex++;
             }
             const commandStr = m[2]; // Command
@@ -61,14 +61,25 @@ class PostProcEngineHttpServer extends EngineHttpServer {
         const self = this;
         const lines = _.split(content, '\n');
         const directives = {
-            ignore: []
+            ignore: [],
+            ignore_once: []
         };
 
-        _.forEach(lines, (oneLine) => {
+        _.forEach(lines, (oneLine, lineNo) => {
             const command = self._parseLine(oneLine);
+
             if (_.eq(command.commandStr, 'ignore')) {
                 if (!_.isEmpty(command.argStr)) {
                     directives.ignore.push(_.toLower(command.argStr));
+                }
+            }
+
+            if (_.eq(command.commandStr, 'ignore-once')) {
+                if (!_.isEmpty(command.argStr)) {
+                    directives.ignore_once.push({
+                        line: lineNo + 1,   // lineNo is zero based in forEach
+                        ruleId: _.toLower(command.argStr)
+                    });
                 }
             }
         });
@@ -76,24 +87,51 @@ class PostProcEngineHttpServer extends EngineHttpServer {
     }
 
     /**
-     * Remove all messages that should be removed
+     * Remove all messages that should be globally ignored
      * @param {Object} warningList List of messages from which to remove warnings
      * @param {Object} toRemove List of ruleId's to remove from warningList
      * @return {Object} Filtered list of messages
      */
-    _removeWarnings(warningList, toRemove) {
-        const resultWarnings = _.cloneDeep(warningList);
-
-        _.remove(resultWarnings, (warning) => {
+    _removeIgnoreWarnings(warningList, toRemove) {
+        _.remove(warningList, (warning) => {
             const ruleId = _.get(warning, 'ruleId');
             if (_.isNil(ruleId)) {
                 return false;
             }
             return _.includes(toRemove, _.toLower(ruleId));
         });
-        return resultWarnings;
+        return warningList;
     }
 
+
+    /**
+     * Remove all messages that should be ignored once (only for the first time they occurr)
+     * @param {Object} warningList List of messages from which to remove warnings
+     * @param {Object} toRemove List of ruleId's to remove from warningList
+     * @return {Object} Filtered list of messages
+     */
+    _removeIgnoreOnceWarnings(warningList, toRemove) {
+        const processedDirectives = [];
+
+        _.pullAllWith(warningList, toRemove, (warning, directive) => {
+            // Each ignore-once rule should be executed just once,
+            if (_.includes(processedDirectives, directive)) {
+                return false;
+            }
+            const warningLine = _.parseInt(_.get(warning, 'line', 0), 10);
+            const directiveLine = _.parseInt(_.get(directive, 'line', 0), 10);
+            const warningRule = _.toLower(_.get(warning, 'ruleId'));
+            const directiveRule = _.toLower(_.get(directive, 'ruleId'));
+
+            if ((_.eq(warningRule, directiveRule)) && (_.gte(warningLine, directiveLine))) {
+                // Remember directives we have processed to avoid using them again
+                processedDirectives.push(directive);
+                return true;
+            }
+            return false;
+        });
+        return warningList;
+    }
     /**
      * Analyzes the previous engine's messages that are passed in context,
      * and post process them according to directives found in content
@@ -107,15 +145,17 @@ class PostProcEngineHttpServer extends EngineHttpServer {
 
         //  We use a promise as we get any exceptions wrapped up as failures.
         return new Promise((resolve) => {
-            const prevWarnings = _.get(context, 'previousStepResults.warnings');
-            if (_.isNil(prevWarnings)) { // nothing from the previos engines
+            const filteredWarnings = _.get(context, 'previousStepResults.warnings');
+
+            if (_.isNil(filteredWarnings)) { // nothing from the previos engines
                 resolve({
                     warnings: [wooHoo]
                 });
             }
             const directives = self._getLazyDirectives(content);
 
-            const filteredWarnings = self._removeWarnings(prevWarnings, directives.ignore);
+            self._removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once);
+            self._removeIgnoreWarnings(filteredWarnings, directives.ignore);
 
             if (_.size(filteredWarnings) < 1) {
                 filteredWarnings.push(wooHoo);
