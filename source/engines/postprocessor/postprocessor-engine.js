@@ -130,6 +130,17 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             }
             return false;
         });
+        // If there are some rules that are reported for ignorance,
+        // but they haven't been reported, mark their ignorance as warning
+        _.forEach(_.difference(toRemove, processedDirectives), (warn) => {
+            warningList.push({
+                type: 'Warning',
+                message: `No [${warn.ruleId}] rule violation. `,
+                ruleId: ' lazy-no-ignore-once ',
+                line: warn.line,
+                column: 1
+            });    
+        });
         return warningList;
     }
     /**
