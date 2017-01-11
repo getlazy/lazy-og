@@ -4,13 +4,13 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t ierceg/lazy-yaml-engine:$(PACKAGE_VERSION) \
-		-t ierceg/lazy-yaml-engine:latest \
+		-t getlazy/postproc-engine:$(PACKAGE_VERSION) \
+		-t getlazy/postproc-engine:latest \
 		.
 
 push:
-	docker push ierceg/lazy-yaml-engine:$(PACKAGE_VERSION)
-	docker push ierceg/lazy-yaml-engine:latest
+	docker push getlazy/postproc-engine:$(PACKAGE_VERSION)
+	docker push getlazy/postproc-engine:latest
 
 run:
 	docker run -it --rm \
