@@ -2,10 +2,13 @@
 'use strict';
 
 /* global logger */
+// lazy ignore lodash/chaining
+// lazy ignore lodash/chain-style
 
 const _ = require('lodash');
 const CLIEngine = require('eslint').CLIEngine;
 const EngineHelpers = require('@lazyass/engine-helpers');
+const getRuleURI = require('eslint-rule-documentation');
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 const LazyPrivateApiClient = EngineHelpers.LazyPrivateApiClient;
@@ -58,7 +61,7 @@ class EslintEngineHttpServer extends EngineHttpServer {
      * @param {string} context Context information included with the request.
      * @return {Promise} Promise resolving with results of the file analysis.
      */
-    analyzeFile(hostPath, language, content/*, context*/) {
+    analyzeFile(hostPath, language, content/* , context*/) {
         const self = this;
 
         //  We use a promise as we get any exceptions wrapped up as failures.
@@ -70,10 +73,14 @@ class EslintEngineHttpServer extends EngineHttpServer {
             const warnings = _
                 .chain(messages)
                 .map((warning) => {
+                    const ruleDocs = getRuleURI(warning.ruleId);
+                    const moreInfoUrl = (ruleDocs.found) ? ruleDocs.url : `https://www.google.com/search?q=${warning.ruleId}`;
+
                     return {
                         type: _.eq(warning.severity, 2) ? 'Error' : 'Warning',
                         message: `[${warning.ruleId}]: ${warning.message}`,
                         ruleId: warning.ruleId,
+                        moreInfo: moreInfoUrl,
                         line: warning.line,
                         column: warning.column
                     };

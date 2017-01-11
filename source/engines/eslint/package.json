@@ -25,10 +25,11 @@
   },
   "homepage": "https://github.com/SoftwareMarbles/lazy-eslint-engine#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^3.0.0",
+    "@lazyass/engine-helpers": "^3.0.1",
     "babel-eslint": "6.1.2",
     "eslint": "^3.10.2",
     "eslint-config-google": "^0.7.0",
+    "eslint-rule-documentation": "^1.0.4",
     "js-yaml": "^3.7.0",
     "lodash": "^4.17.2",
     "npmi": "^2.0.1",

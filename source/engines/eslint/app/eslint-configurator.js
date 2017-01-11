@@ -14,7 +14,7 @@ const process = require('process');
 //  However NPM_TOKEN is and should be optional so if it's not defined we set it to `public` as
 //  that's a special value that only allows install of public packages.
 if (!process.env.NPM_TOKEN) {
-    process.env.NPM_TOKEN = 'public'
+    process.env.NPM_TOKEN = 'public';
 }
 
 class EslintConfigurator {
