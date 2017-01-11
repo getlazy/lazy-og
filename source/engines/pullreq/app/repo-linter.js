@@ -127,7 +127,9 @@ class RepoLinter {
                             resolve(reducedPulls);
                         });
                 })
-                .catch((err) => reject);
+                .catch((err) => {
+                    resolve ([]);  // In case of an error, just return nothing
+                });
         });
     }
 
@@ -160,7 +162,9 @@ class RepoLinter {
                             resolve(sortedComments);
                         });
                 })
-                .catch((err) => reject);
+                .catch((err) => {
+                    resolve ([]);  // In case of an error, just return nothing
+                });
         });
     }
 
