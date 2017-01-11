@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SoftwareMarbles/lazy.git"
+    "url": "git+https://github.com/getlazy/lazy.git"
   },
   "keywords": [
     "software development",
@@ -35,9 +35,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SoftwareMarbles/lazy/issues"
+    "url": "https://github.com/getlazy/lazy/issues"
   },
-  "homepage": "https://github.com/SoftwareMarbles/lazy#readme",
+  "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
     "ajv": "^5.0.0-beta.1",
     "async": "^2.1.4",
