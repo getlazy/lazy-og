@@ -285,7 +285,8 @@ var x =
     catch: ASSERT_FALSE
 }];
 
-describe('/file', function postFileEndpointTest() {
+//  This belongs to integration tests. TODO: Move this to lazy-tests repo.
+describe.skip('/file', function postFileEndpointTest() {
     this.timeout(15000);
 
     before(function beforeTests() {
