@@ -11,7 +11,7 @@ const HigherDockerManager = require('higher-docker-manager');
 const Engine = require('./engine');
 
 const Label = {
-    IoLazyassLazyEngineManagerOwned: 'io.lazyass.lazy.engine-manager.owned'
+    OrgGetlazyLazyEngineManagerOwner: 'org.getlazy.lazy.engine-manager.owner'
 };
 
 const PRIVATE_API_PORT = 17013;
@@ -165,7 +165,7 @@ class EngineManager
         const self = this;
 
         return HigherDockerManager.getVolumesForLabel(
-                Label.IoLazyassLazyEngineManagerOwned, self._id)
+                Label.OrgGetlazyLazyEngineManagerOwner, self._id)
             .then((volumes) => {
                 if (!_.isEmpty(volumes)) {
                     return _.head(volumes);
@@ -177,7 +177,7 @@ class EngineManager
                     Labels: {}
                 };
                 //  Add the label to later use it to find this container.
-                volumeCreateParams.Labels[Label.IoLazyassLazyEngineManagerOwned] = self._id;
+                volumeCreateParams.Labels[Label.OrgGetlazyLazyEngineManagerOwner] = self._id;
 
                 return HigherDockerManager.createVolume(volumeCreateParams);
             });
@@ -188,7 +188,7 @@ class EngineManager
      */
     getLazyNetwork() {
         return HigherDockerManager
-            .getNetworksForLabel(Label.IoLazyassLazyEngineManagerOwned, this._id)
+            .getNetworksForLabel(Label.OrgGetlazyLazyEngineManagerOwner, this._id)
             .then((networks) => {
                 if (!_.isEmpty(networks)) {
                     return _.head(networks);
@@ -202,7 +202,7 @@ class EngineManager
         const self = this;
 
         return HigherDockerManager.getNetworksForLabel(
-                Label.IoLazyassLazyEngineManagerOwned, self._id)
+                Label.OrgGetlazyLazyEngineManagerOwner, self._id)
             .then((networks) => {
                 if (!_.isEmpty(networks)) {
                     return _.head(networks);
@@ -214,7 +214,7 @@ class EngineManager
                     Labels: {}
                 };
                 //  Add the label to later use it to find this container.
-                networkCreateParams.Labels[Label.IoLazyassLazyEngineManagerOwned] = self._id;
+                networkCreateParams.Labels[Label.OrgGetlazyLazyEngineManagerOwner] = self._id;
 
                 return HigherDockerManager.createNetwork(networkCreateParams);
             });

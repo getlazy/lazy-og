@@ -9,7 +9,7 @@ const errors = require('common-errors');
 const HigherDockerManager = require('higher-docker-manager');
 
 const Label = {
-    IoLazyassHelperContainerManagerOwned: 'io.lazyass.lazy.helper-container-manager.owned'
+    OrgGetlazyHelperContainerManagerOwned: 'org.getlazy.lazy.helper-container-manager.owner'
 };
 
 /**
@@ -61,7 +61,7 @@ class HelperContainerManager
                 //  Label the container as owned by HelperContainerManager. With this it can
                 //  refuse all the operations that anybody may request on containers
                 //  not owned by HelperContainerManager.
-                createParams.Labels[Label.IoLazyassHelperContainerManagerOwned] = 'true';
+                createParams.Labels[Label.OrgGetlazyHelperContainerManagerOwned] = 'true';
 
                 return HelperContainerManager._createContainer(createParams);
             })
@@ -103,7 +103,7 @@ class HelperContainerManager
                         //  refuse to execute anything on it.
                         const labels = _.get(containerStatus, 'Config.Labels');
                         if (!labels ||
-                            labels[Label.IoLazyassHelperContainerManagerOwned] !== 'true') {
+                            labels[Label.OrgGetlazyHelperContainerManagerOwned] !== 'true') {
                             return Promise.reject(new errors.HttpStatusError(
                                 403, 'container not owned'));
                         }
