@@ -43,6 +43,9 @@ class YamlEngineHttpServer extends EngineHttpServer {
                 warnings.push(self._processMsg('Error', error));
             }
             resolve({
+                status: {
+                    codeChecked: true
+                },
                 warnings
             });
         });
