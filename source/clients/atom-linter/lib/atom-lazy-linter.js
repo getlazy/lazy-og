@@ -304,7 +304,7 @@ module.exports = {
                     .reverse()
                     .value();
 
-                return {
+                const lineWarning = {
                     type: _.head(sortedWarnings).type || 'Warning',
                     html: _.map(sortedWarnings,
                         (warning) => {
@@ -316,14 +316,21 @@ module.exports = {
                         }).join('<br>'),
                         //  We always show all the warnings on the entire line rather than just on
                         //  (line, column).
-                    range: [
-                            [screenLine, 0],
-                            [screenLine, ARBITRARILY_VERY_LARGE_COLUMN_NUMBER]
-                    ],
                     filePath: path
                 };
+
+                //  _.isNumber returns true for NaN!
+                if (!_.isNaN(screenLine)) {
+                    lineWarning.range = [
+                        [screenLine, 0],
+                        [screenLine, ARBITRARILY_VERY_LARGE_COLUMN_NUMBER]
+                    ];
+                }
+
+                return lineWarning;
             })
             .value();
+
         return Promise.resolve(results);
     }
 };
