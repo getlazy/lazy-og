@@ -127,7 +127,7 @@ And in the engine code we then monitor for `SIGTERM` signal and try to gracefull
 
 lazy binds Docker socket to all engines it is running so all engines have full access to Docker daemon on the process. This is clearly a security concern but considering that lazy on its own is meant to be run only locally and that all engines running on it are fully controlled by the user, this lessens the concerns.
 
-To create helper containers (which we often do in our official engines), you can use [@lazyass/engine-helpers](https://github.com/getlazy/lazy-engine-helpers) Node module.
+To create helper containers (which we often do in our official engines), you can use [lazy-engine-helpers](https://github.com/getlazy/lazy-engine-helpers) Node module.
 
 ## lazy.yaml
 
@@ -225,11 +225,7 @@ At this moment most of our tests are of integration variety - we run a full lazy
 * [lazy-stylelint-engine](https://github.com/getlazy/lazy-stylelint-engine)
 * [lazy-yaml-engine](https://github.com/getlazy/lazy-yaml-engine)
 * [lazy-tidy-html-engine](https://github.com/getlazy/lazy-tidy-html-engine)
-
-##### Work in progress
-
-* [lazy-emcc-engine](https://github.com/getlazy/lazy-emcc-engine)
-* [lazy-java-pmd-engine](https://github.com/getlazy/lazy-java-pmd-engine)
+* [lazy-php-l-engine](https://github.com/getlazy/lazy-php-l-engine)
 
 #### GitHub access engines
 
@@ -245,6 +241,11 @@ At this moment most of our tests are of integration variety - we run a full lazy
 #### UI engine
 
 * [lazy-dashboard](https://github.com/getlazy/lazy-dashboard-engine)
+
+#### Work in progress
+
+* [lazy-emcc-engine](https://github.com/getlazy/lazy-emcc-engine)
+* [lazy-java-pmd-engine](https://github.com/getlazy/lazy-java-pmd-engine)
 
 ## License
 

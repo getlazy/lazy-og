@@ -1,5 +1,5 @@
 {
-  "name": "@lazyass/lazy",
+  "name": "lazy",
   "version": "3.4.0",
   "description": "Hackable coding assistant",
   "main": "index.js",

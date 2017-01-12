@@ -11,10 +11,8 @@ const HigherDockerManager = require('higher-docker-manager');
 const Engine = require('./engine');
 
 const Label = {
-    IoLazyassLazyEngineManagerOwned: 'io.lazyass.lazy.engine-manager.owned'
+    OrgGetlazyLazyEngineManagerOwner: 'org.getlazy.lazy.engine-manager.owner'
 };
-
-const PRIVATE_API_PORT = 17013;
 
 /**
  * Manages the engines running in lazy.
@@ -27,12 +25,16 @@ class EngineManager
         this._container = null;
         this._network = null;
         this._volume = null;
+        this._isRunning = false;
     }
 
     stop() {
         const self = this;
 
-        return self._deleteAllEngines();
+        return self._deleteAllEngines()
+            .then(() => {
+                self._isRunning = false;
+            });
     }
 
     start() {
@@ -69,7 +71,14 @@ class EngineManager
                 }
 
                 return Promise.resolve();
+            })
+            .then(() => {
+                self._isRunning = true;
             });
+    }
+
+    get isRunning() {
+        return this._isRunning;
     }
 
     get engines() {
@@ -121,7 +130,7 @@ class EngineManager
                             `LAZY_PRIVATE_API_URL=${url.format({
                                 protocol: 'http',
                                 hostname: _.get(self._container, 'Config.Hostname'),
-                                port: PRIVATE_API_PORT
+                                port: self._config.privateApiPort
                             })}`,
                             //  TODO: Fix this as special engines like UI don't follow this URL pattern.
                             `LAZY_ENGINE_URL=${selectn('_config.service_url', self)}/engine/${engineName}`,
@@ -158,14 +167,14 @@ class EngineManager
                 engineContainer.start()
                     .then(() => new Engine(engineName, engineContainer, engineConfig))
             )
-            .then(engine => engine.start().then(() => engine));
+            .then(engine => engine.start().then(_.constant(engine)));
     }
 
     _findLazyVolumeOrCreateIt() {
         const self = this;
 
         return HigherDockerManager.getVolumesForLabel(
-                Label.IoLazyassLazyEngineManagerOwned, self._id)
+                Label.OrgGetlazyLazyEngineManagerOwner, self._id)
             .then((volumes) => {
                 if (!_.isEmpty(volumes)) {
                     return _.head(volumes);
@@ -177,7 +186,7 @@ class EngineManager
                     Labels: {}
                 };
                 //  Add the label to later use it to find this container.
-                volumeCreateParams.Labels[Label.IoLazyassLazyEngineManagerOwned] = self._id;
+                volumeCreateParams.Labels[Label.OrgGetlazyLazyEngineManagerOwner] = self._id;
 
                 return HigherDockerManager.createVolume(volumeCreateParams);
             });
@@ -188,7 +197,7 @@ class EngineManager
      */
     getLazyNetwork() {
         return HigherDockerManager
-            .getNetworksForLabel(Label.IoLazyassLazyEngineManagerOwned, this._id)
+            .getNetworksForLabel(Label.OrgGetlazyLazyEngineManagerOwner, this._id)
             .then((networks) => {
                 if (!_.isEmpty(networks)) {
                     return _.head(networks);
@@ -202,7 +211,7 @@ class EngineManager
         const self = this;
 
         return HigherDockerManager.getNetworksForLabel(
-                Label.IoLazyassLazyEngineManagerOwned, self._id)
+                Label.OrgGetlazyLazyEngineManagerOwner, self._id)
             .then((networks) => {
                 if (!_.isEmpty(networks)) {
                     return _.head(networks);
@@ -214,14 +223,20 @@ class EngineManager
                     Labels: {}
                 };
                 //  Add the label to later use it to find this container.
-                networkCreateParams.Labels[Label.IoLazyassLazyEngineManagerOwned] = self._id;
+                networkCreateParams.Labels[Label.OrgGetlazyLazyEngineManagerOwner] = self._id;
 
-                return HigherDockerManager.createNetwork(networkCreateParams);
+                return HigherDockerManager.createNetwork(networkCreateParams)
+                    .then(network => network.status());
             });
     }
 
     _deleteAllEngines() {
         const self = this;
+
+        if (!_.isObject(self._network)) {
+            //  We don't have a network so we can't delete the engines in it.
+            return Promise.resolve();
+        }
 
         //  Stop/wait/delete all containers in the lazy network except our own container.
         return HigherDockerManager.getContainersInNetworks([self._network.Name])

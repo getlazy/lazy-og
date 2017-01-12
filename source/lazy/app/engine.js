@@ -156,7 +156,7 @@ class Engine
         const redirectLogStreamIntoLogger = (stream) => {
             stream.on('data', (buffer) => {
                 logger.info(`[${self.name}]`,
-                    HigherDockerManager.containerOutputBuffersToString([buffer]));
+                    _.trim(HigherDockerManager.containerOutputBuffersToString([buffer])));
             });
             stream.on('end', () => {
                 logger.info(

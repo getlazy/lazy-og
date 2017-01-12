@@ -31,7 +31,7 @@ describe('HelperContainerManager', function () {
                 assert.equal(_.get(params, 'HostConfig.NetworkMode'), 'test-network');
                 assert.deepEqual(_.get(params, 'HostConfig.Binds'), ['test-volume:/lazy']);
                 assert.deepEqual(_.get(params, 'Labels'), {
-                    'io.lazyass.lazy.helper-container-manager.owned': 'true'
+                    'org.getlazy.lazy.helper-container-manager.owned': 'true'
                 });
                 return true;
             }))).thenResolve(container);
@@ -53,7 +53,7 @@ describe('HelperContainerManager', function () {
                 assert.equal(_.get(params, 'HostConfig.NetworkMode'), 'test-network');
                 assert.deepEqual(_.get(params, 'HostConfig.Binds'), ['test-volume:/lazy']);
                 assert.deepEqual(_.get(params, 'Labels'), {
-                    'io.lazyass.lazy.helper-container-manager.owned': 'true'
+                    'org.getlazy.lazy.helper-container-manager.owned': 'true'
                 });
                 return true;
             }))).thenResolve(container);
@@ -75,7 +75,7 @@ describe('HelperContainerManager', function () {
             td.when(container.status()).thenResolve({
                 Config: {
                     Labels: {
-                        'io.lazyass.lazy.helper-container-manager.owned': 'true'
+                        'org.getlazy.lazy.helper-container-manager.owned': 'true'
                     }
                 }
             });
@@ -99,7 +99,7 @@ describe('HelperContainerManager', function () {
             td.when(container.status()).thenResolve({
                 Config: {
                     Labels: {
-                        'io.lazyass.lazy.helper-container-manager.owned': 'true'
+                        'org.getlazy.lazy.helper-container-manager.owned': 'true'
                     }
                 }
             });
@@ -128,7 +128,7 @@ describe('HelperContainerManager', function () {
             td.when(container.status()).thenResolve({
                 Config: {
                     Labels: {
-                        'io.lazyass.lazy.helper-container-manager.owned': 'true'
+                        'org.getlazy.lazy.helper-container-manager.owned': 'true'
                     }
                 }
             });
@@ -157,7 +157,7 @@ describe('HelperContainerManager', function () {
             td.when(container.status()).thenResolve({
                 Config: {
                     Labels: {
-                        'io.lazyass.lazy.helper-container-manager.owned': 'true'
+                        'org.getlazy.lazy.helper-container-manager.owned': 'true'
                     }
                 }
             });
@@ -203,7 +203,7 @@ describe('HelperContainerManager', function () {
             td.when(container.status()).thenResolve({
                 Config: {
                     Labels: {
-                        'io.lazyass.lazy.helper-container-manager.owned': 'corrupted'
+                        'org.getlazy.lazy.helper-container-manager.owned': 'corrupted'
                     }
                 }
             });
