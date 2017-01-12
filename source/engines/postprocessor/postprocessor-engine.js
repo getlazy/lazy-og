@@ -9,9 +9,7 @@ const EngineHttpServer = EngineHelpers.EngineHttpServer;
 const wooHoo = {
     type: 'Info',
     message: 'Woo-hoo! No linter warnings - your code looks pretty nice.',
-    ruleId: ' lazy-no-linter-warnings ',
-    line: 1,
-    column: 1
+    ruleId: ' lazy-no-linter-warnings '
 };
 
 class PostProcEngineHttpServer extends EngineHttpServer {
