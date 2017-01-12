@@ -145,7 +145,7 @@ class Engine
                         });
                     });
                 }
-
+                processedWarnings.status = _.get(results,'status',{});
                 return processedWarnings;
             });
     }
