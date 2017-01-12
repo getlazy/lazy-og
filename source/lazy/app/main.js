@@ -6,6 +6,7 @@
 //  Initialize all global variables.
 global.logger = require('./logger');
 
+const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const internalControllers = require('./controllers/internal');
@@ -40,8 +41,13 @@ class Main
 
         return Main._loadLazyYaml(lazyYamlFilePath)
             .then((lazyConfig) => {
-                config = lazyConfig;
-                engineManager = new EngineManager(lazyConfig);
+                //  Config is the combined preset configuration with overrides from user-defined
+                //  configuration.
+                config = _.assignIn({
+                    privateApiPort: PRIVATE_API_PORT
+                }, lazyConfig);
+
+                engineManager = new EngineManager(config);
             })
             .then(() => Main._initializeInternalExpressApp(config))
             .then(() => Main._recreateAllEngines())

@@ -14,8 +14,6 @@ const Label = {
     OrgGetlazyLazyEngineManagerOwner: 'org.getlazy.lazy.engine-manager.owner'
 };
 
-const PRIVATE_API_PORT = 17013;
-
 /**
  * Manages the engines running in lazy.
  */
@@ -121,7 +119,7 @@ class EngineManager
                             `LAZY_PRIVATE_API_URL=${url.format({
                                 protocol: 'http',
                                 hostname: _.get(self._container, 'Config.Hostname'),
-                                port: PRIVATE_API_PORT
+                                port: self._config.privateApiPort
                             })}`,
                             //  TODO: Fix this as special engines like UI don't follow this URL pattern.
                             `LAZY_ENGINE_URL=${selectn('_config.service_url', self)}/engine/${engineName}`,
