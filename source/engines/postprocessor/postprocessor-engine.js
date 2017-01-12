@@ -9,7 +9,7 @@ const EngineHttpServer = EngineHelpers.EngineHttpServer;
 const wooHoo = {
     type: 'Info',
     message: 'Woo-hoo! No linter warnings - your code looks pretty nice.',
-    ruleId: 'Congrats',
+    ruleId: ' lazy-no-linter-warnings ',
     line: 1,
     column: 1
 };
@@ -135,7 +135,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
         _.forEach(_.difference(toRemove, processedDirectives), (warn) => {
             warningList.push({
                 type: 'Warning',
-                message: `No [${warn.ruleId}] rule violation. `,
+                message: `No [${warn.ruleId}] rule violation.`,
                 ruleId: ' lazy-no-ignore-once ',
                 line: warn.line,
                 column: 1
