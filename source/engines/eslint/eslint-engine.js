@@ -91,6 +91,9 @@ class EslintEngineHttpServer extends EngineHttpServer {
                 .value();
 
             resolve({
+                status: {
+                    codeChecked: true
+                },
                 warnings
             });
         });
