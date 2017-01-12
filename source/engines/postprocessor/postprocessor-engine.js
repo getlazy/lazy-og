@@ -266,7 +266,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
 
     /**
      * Analyzes the previous engine's messages that are passed in context,
-     * and post process them according to directives found in content
+     * and post process them according to directives found in content.
      * @param {string} hostPath Path of the source file requesting lazy to analyze.
      * @param {string} language Language of the source file.
      * @param {string} content Content of the source file requesting lazy to analyze.
