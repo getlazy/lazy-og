@@ -139,9 +139,13 @@ class EngineManager
                             `LAZY_ENGINE_SANDBOX_DIR=/lazy/sandbox/${engineName}`
                         ]),
                     HostConfig: {
-                        //  When networking mode is a name of another network it's
-                        //  automatically attached.
-                        NetworkMode: self._network.Name,
+                        //  When networking mode is an ID of a network the container is
+                        //  automatically attached before it's started which frees us from
+                        //  more complex synchronization between lazy and its engines.
+                        //  We could have used network name but since Docker allows multiple
+                        //  networks with the same name, it leads to random assignements of
+                        //  networks and thus connection issues between lazy and engines.
+                        NetworkMode: self._network.id,
                         //  We only allow volumes to be bound to host.
                         Binds: _.union(engineConfig.volumes, [
                             //  HACK: We hard-code the volume mount path to /lazy which is
