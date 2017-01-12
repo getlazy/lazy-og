@@ -91,7 +91,7 @@ module.exports = {
             /* Don't trigger lazy too often when typing */
             lint: async(editor) => {
                 const self = this;
-                const path = editor.getPath();
+                const filePath = editor.getPath();
                 const grammar = editor.getGrammar().name;
                 //  We need to capture the file content at the moment lazy package
                 //  was invoked so that we can later ensure that the results
@@ -99,17 +99,17 @@ module.exports = {
                 const fileContents = editor.getText();
                 const requestHash = crypto
                     .createHash('sha256')
-                    .update([path, grammar, fileContents].join('|'))
+                    .update([filePath, grammar, fileContents].join('|'))
                     .digest('hex');
                 const runningRequestPromise = runningRequests.get(requestHash);
                 if (!_.isUndefined(runningRequestPromise)) {
                     return runningRequestPromise;
                 }
                 //  Create the promise and then add it to the map of running requests.
-                const promise = self.getRepoInfoForPath(path)
+                const promise = self.getRepoInfoForPath(filePath)
                 .then((repoInfo) => {
                     //  TODO: Cache the results for at least a little while to avoid unnecessary slowdowns.
-                    return self.makeRequest(path, grammar, fileContents, repoInfo);
+                    return self.makeRequest(filePath, grammar, fileContents, repoInfo);
                 })
                 .then((requestResults) => {
                     const {
@@ -122,7 +122,7 @@ module.exports = {
                         return Promise.resolve([{
                             type: 'Error',
                             text: err.message,
-                            filePath: editor.getPath()
+                            filePath
                         }]);
                     }
 
@@ -132,22 +132,34 @@ module.exports = {
                     }
 
                     if (response.statusCode !== 200) {
-                        let message = `lazy service failed with ${response.statusCode} status code`;
-                        if (body && body.error) {
-                            message += ` (${body.error})`;
+                        let type;
+                        let text;
+                        switch (response.statusCode) {
+                            case 503:
+                                type = 'Info';
+                                text = 'Hey sorry, lazy service is not yet ready to accept requests. Retry in a bit!';
+                                break;
+                            default:
+                                type = 'Error';
+                                text = `lazy service failed with ${response.statusCode} status code`;
+                                if (body && body.error) {
+                                    text += ` (${body.error})`;
+                                }
+                                break;
                         }
+
                         return Promise.resolve([{
-                            type: 'Error',
-                            text: message,
-                            filePath: editor.getPath()
+                            type,
+                            text,
+                            filePath
                         }]);
                     }
 
-                    const directory = self.getDirectoryForPath(path);
+                    const directory = self.getDirectoryForPath(filePath);
 
                     return atom.project.repositoryForDirectory(directory)
                         .then((repository) => self._processResults(
-                            path, fileContents, body.warnings, repository));
+                            filePath, fileContents, body.warnings, repository));
                 })
                 .then((result) => {
                     //  Delete the request from the map of running requests.
