@@ -167,7 +167,7 @@ class EngineManager
                 engineContainer.start()
                     .then(() => new Engine(engineName, engineContainer, engineConfig))
             )
-            .then(engine => engine.start().then(() => engine));
+            .then(engine => engine.start().then(_.constant(engine)));
     }
 
     _findLazyVolumeOrCreateIt() {
@@ -225,12 +225,18 @@ class EngineManager
                 //  Add the label to later use it to find this container.
                 networkCreateParams.Labels[Label.OrgGetlazyLazyEngineManagerOwner] = self._id;
 
-                return HigherDockerManager.createNetwork(networkCreateParams);
+                return HigherDockerManager.createNetwork(networkCreateParams)
+                    .then(network => network.status());
             });
     }
 
     _deleteAllEngines() {
         const self = this;
+
+        if (!_.isObject(self._network)) {
+            //  We don't have a network so we can't delete the engines in it.
+            return Promise.resolve();
+        }
 
         //  Stop/wait/delete all containers in the lazy network except our own container.
         return HigherDockerManager.getContainersInNetworks([self._network.Name])
