@@ -8,6 +8,7 @@
 // lazy ignore lodash/chain-style
 // lazy ignore lodash/chaining
 // lazy ignore arrow-parens
+// lazy ignore no-console
 
 import _ from 'lodash';
 
@@ -97,9 +98,9 @@ module.exports = {
                 //  correspond to the same content for which the analysis was done.
                 const fileContents = editor.getText();
                 const requestHash = crypto
-                .createHash('sha256')
-                .update([path, grammar, fileContents].join('|'))
-                .digest('hex');
+                    .createHash('sha256')
+                    .update([path, grammar, fileContents].join('|'))
+                    .digest('hex');
                 const runningRequestPromise = runningRequests.get(requestHash);
                 if (!_.isUndefined(runningRequestPromise)) {
                     return runningRequestPromise;
@@ -149,58 +150,60 @@ module.exports = {
                         // For warnings that are comming from Pull Requests
                         // we need to update line number to accomodate for
                         // not commited local edits
-                        const allWarns = _.map(body.warnings, (warn) => {
-                            if ((!_.isNil(repository)) && (_.isEqual(warn.type, 'PR'))) {
-                                warn.line = self.getUpdatedLineNumber(warn.line, fileContents, path, repository);
+                        const updatedWarnings = _.map(body.warnings, (warning) => {
+                            const updatedWarning = warning;
+                            if ((!_.isNil(repository)) && (_.isEqual(warning.type, 'PR'))) {
+                                updatedWarning.line = self.getUpdatedLineNumber(
+                                    warning.line, fileContents, path, repository);
                             }
-                            return warn;
+                            return updatedWarning;
                         });
 
                         //  Group all the warnings per their line and then
                         //  merge all warnings on the same line into a single warning.
                         const results = _
-                        .chain(allWarns)
-                        .groupBy((warning) => warning.line)
-                        .map((warnings, line) => {
-                            //  Screen coordinate system is rooted in (0,0) rather than (1,1)
-                            line = _.toNumber(line) - 1;
+                            .chain(updatedWarnings)
+                            .groupBy('line')
+                            .map((warningsPerLine, line) => {
+                                //  Screen coordinate system is rooted in (0,0) rather than (1,1)
+                                const screenLine = _.toNumber(line) - 1;
 
-                            //  Sort the warnings in descending order of severity.
-                            warnings = _
-                            .chain(warnings)
-                            .sortBy((warning) => {
-                                switch (_.toLower(warning.type)) {
-                                    case 'warning':
-                                        return 1;
-                                    case 'error':
-                                        return 2;
-                                    default:
-                                        return 0;
-                                }
-                            })
-                            .reverse()
-                            .value();
-
-                            return {
-                                type: _.first(warnings).type || 'Warning',
-                                html: _.map(warnings,
-                                    (warning) => {
-                                        let moreInfo = '';
-                                        if (!_.isNil(warning.moreInfo)) {
-                                            moreInfo = ` <a href="${warning.moreInfo}">more &raquo;</a><br>&nbsp;`;
+                                //  Sort the warnings in descending order of severity.
+                                const sortedWarnings = _
+                                    .chain(warningsPerLine)
+                                    .sortBy((warning) => {
+                                        switch (_.toLower(warning.type)) {
+                                            case 'warning':
+                                                return 1;
+                                            case 'error':
+                                                return 2;
+                                            default:
+                                                return 0;
                                         }
-                                        return escape(warning.message) + moreInfo;
-                                    }).join('<br>'),
-                                    //  We always show all the warnings on the entire line rather than just on
-                                    //  (line, column).
-                                range: [
-                                        [line, 0],
-                                        [line, ARBITRARILY_VERY_LARGE_COLUMN_NUMBER]
-                                ],
-                                filePath: editor.getPath()
-                            };
-                        })
-                        .value();
+                                    })
+                                    .reverse()
+                                    .value();
+
+                                return {
+                                    type: _.head(sortedWarnings).type || 'Warning',
+                                    html: _.map(sortedWarnings,
+                                        (warning) => {
+                                            let moreInfo = '';
+                                            if (!_.isNil(warning.moreInfo)) {
+                                                moreInfo = ` <a href="${warning.moreInfo}">more &raquo;</a>`;
+                                            }
+                                            return escape(warning.message) + moreInfo;
+                                        }).join('<br>'),
+                                        //  We always show all the warnings on the entire line rather than just on
+                                        //  (line, column).
+                                    range: [
+                                            [screenLine, 0],
+                                            [screenLine, ARBITRARILY_VERY_LARGE_COLUMN_NUMBER]
+                                    ],
+                                    filePath: editor.getPath()
+                                };
+                            })
+                            .value();
                         return Promise.resolve(results);
                     });
                 })
@@ -253,11 +256,8 @@ module.exports = {
                             console.log('Error getting complete repository info', err);
                         }
                         //  Log all the errors if any but return anything you have collected.
-                        _.each(reflectedResults, (result) => {
-                            if (result.err) {
-                                console.log('Error getting repository info', err);
-                            }
-                        });
+                        _(reflectedResults).filter('err').forEach(result =>
+                            console.log('Error getting repository info', result.err));
 
                         const [reflectedRemotes, reflectedStatus, reflectedBranches] = reflectedResults;
                         const repoInfo = {
