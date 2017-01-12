@@ -146,66 +146,8 @@ module.exports = {
                     const directory = self.getDirectoryForPath(path);
 
                     return atom.project.repositoryForDirectory(directory)
-                    .then((repository) => {
-                        // For warnings that are comming from Pull Requests
-                        // we need to update line number to accomodate for
-                        // not commited local edits
-                        const updatedWarnings = _.map(body.warnings, (warning) => {
-                            const updatedWarning = warning;
-                            if ((!_.isNil(repository)) && (_.isEqual(warning.type, 'PR'))) {
-                                updatedWarning.line = self.getUpdatedLineNumber(
-                                    warning.line, fileContents, path, repository);
-                            }
-                            return updatedWarning;
-                        });
-
-                        //  Group all the warnings per their line and then
-                        //  merge all warnings on the same line into a single warning.
-                        const results = _
-                            .chain(updatedWarnings)
-                            .groupBy('line')
-                            .map((warningsPerLine, line) => {
-                                //  Screen coordinate system is rooted in (0,0) rather than (1,1)
-                                const screenLine = _.toNumber(line) - 1;
-
-                                //  Sort the warnings in descending order of severity.
-                                const sortedWarnings = _
-                                    .chain(warningsPerLine)
-                                    .sortBy((warning) => {
-                                        switch (_.toLower(warning.type)) {
-                                            case 'warning':
-                                                return 1;
-                                            case 'error':
-                                                return 2;
-                                            default:
-                                                return 0;
-                                        }
-                                    })
-                                    .reverse()
-                                    .value();
-
-                                return {
-                                    type: _.head(sortedWarnings).type || 'Warning',
-                                    html: _.map(sortedWarnings,
-                                        (warning) => {
-                                            let moreInfo = '';
-                                            if (!_.isNil(warning.moreInfo)) {
-                                                moreInfo = ` <a href="${warning.moreInfo}">more &raquo;</a>`;
-                                            }
-                                            return escape(warning.message) + moreInfo;
-                                        }).join('<br>'),
-                                        //  We always show all the warnings on the entire line rather than just on
-                                        //  (line, column).
-                                    range: [
-                                            [screenLine, 0],
-                                            [screenLine, ARBITRARILY_VERY_LARGE_COLUMN_NUMBER]
-                                    ],
-                                    filePath: editor.getPath()
-                                };
-                            })
-                            .value();
-                        return Promise.resolve(results);
-                    });
+                        .then((repository) => self._processResults(
+                            path, fileContents, body.warnings, repository));
                 })
                 .then((result) => {
                     //  Delete the request from the map of running requests.
@@ -217,7 +159,9 @@ module.exports = {
                     runningRequests.delete(requestHash);
                     return Promise.reject(err);
                 });
+
                 runningRequests.set(requestHash, promise);
+
                 return promise;
             }
         };
@@ -306,5 +250,68 @@ module.exports = {
                 });
             });
         });
+    },
+
+    _processResults(path, fileContents, warnings, repository) {
+        const self = this;
+
+        // For warnings that are comming from Pull Requests
+        // we need to update line number to accomodate for
+        // not commited local edits
+        const updatedWarnings = _.map(warnings, (warning) => {
+            const updatedWarning = warning;
+            if ((!_.isNil(repository)) && (_.isEqual(warning.type, 'PR'))) {
+                updatedWarning.line = self.getUpdatedLineNumber(
+                    warning.line, fileContents, path, repository);
+            }
+            return updatedWarning;
+        });
+
+        //  Group all the warnings per their line and then
+        //  merge all warnings on the same line into a single warning.
+        const results = _
+            .chain(updatedWarnings)
+            .groupBy('line')
+            .map((warningsPerLine, line) => {
+                //  Screen coordinate system is rooted in (0,0) rather than (1,1)
+                const screenLine = _.toNumber(line) - 1;
+
+                //  Sort the warnings in descending order of severity.
+                const sortedWarnings = _
+                    .chain(warningsPerLine)
+                    .sortBy((warning) => {
+                        switch (_.toLower(warning.type)) {
+                            case 'warning':
+                                return 1;
+                            case 'error':
+                                return 2;
+                            default:
+                                return 0;
+                        }
+                    })
+                    .reverse()
+                    .value();
+
+                return {
+                    type: _.head(sortedWarnings).type || 'Warning',
+                    html: _.map(sortedWarnings,
+                        (warning) => {
+                            let moreInfo = '';
+                            if (!_.isNil(warning.moreInfo)) {
+                                moreInfo = ` <a href="${warning.moreInfo}">more &raquo;</a>`;
+                            }
+                            return escape(warning.message) + moreInfo;
+                        }).join('<br>'),
+                        //  We always show all the warnings on the entire line rather than just on
+                        //  (line, column).
+                    range: [
+                            [screenLine, 0],
+                            [screenLine, ARBITRARILY_VERY_LARGE_COLUMN_NUMBER]
+                    ],
+                    filePath: path
+                };
+            })
+            .value();
+        return Promise.resolve(results);
     }
 };
