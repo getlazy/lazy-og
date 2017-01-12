@@ -174,7 +174,7 @@ const addEndpoints = (app, options) => {
                         warnings.warnings.push({
                             type: 'Info',
                             ruleId: ' lazy-no-linters-defined ',
-                            message: `No engine registered for [${language}]. This file is not checked for language-specific warnings.`,
+                            message: `No engine registered for [${language}]. This file has not been checked for language-specific warnings.`,
                             filePath: hostPath,
                             line: 1,
                             column: 1
