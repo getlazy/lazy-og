@@ -175,9 +175,7 @@ const addEndpoints = (app, options) => {
                             type: 'Info',
                             ruleId: ' lazy-no-linters-defined ',
                             message: `No engine registered for [${language}]. This file has not been checked for language-specific warnings.`,
-                            filePath: hostPath,
-                            line: 1,
-                            column: 1
+                            filePath: hostPath
                         });
                         // Remove the info that all is fine, since we don't really know it
                         // if no engine checked the file. Delete rules ' lazy-no-linter-warnings '
