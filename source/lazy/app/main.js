@@ -39,6 +39,18 @@ class Main
     static main(lazyYamlFilePath) {
         logger.info('Starting lazy');
 
+        //  Start procedure is as follows:
+        //      1.  Load the configuration and verify it.
+        //      2.  Initialize external Express app - it will start listening and returning 503
+        //          until the engine manager has been correctly started.
+        //      3.  Initialize internal Express app - it will provide engines with configuration
+        //          and other services like creating helper containers.
+        //      4.  Recreate all the engines. This will stop and delete all the engines running in
+        //          this lazy's network and then create then create them anew per the loaded
+        //          configuration.
+        //      5.  Load all controllers for the external Express app - this step depends on engine
+        //          manager correctly started and running which is why we have to wait for step #4
+        //          to finish.
         return Main._loadLazyYaml(lazyYamlFilePath)
             .then((lazyConfig) => {
                 //  Config is the combined preset configuration with overrides from user-defined
@@ -49,9 +61,10 @@ class Main
 
                 engineManager = new EngineManager(config);
             })
-            .then(() => Main._initializeInternalExpressApp(config))
+            .then(() => Main._initializeExternalExpressApp())
+            .then(() => Main._initializeInternalExpressApp())
             .then(() => Main._recreateAllEngines())
-            .then(() => Main._initializeExternalExpressApp(config))
+            .then(() => Main._loadExternalExpressAppControllers())
             .catch((err) => {
                 logger.error('Failed to boot lazy', err);
                 return Main.stop()
@@ -107,6 +120,22 @@ class Main
     }
 
     /**
+     * Sends 503 HTTP status if server is not ready.
+     */
+    static _middleware503IfNotReady(req, res, next) {
+        if (engineManager && engineManager.isRunning) {
+            next();
+            return;
+        }
+
+        //  Send service unavailable with an arbitrary length of Retry-After header.
+        //  This allows lazy service running this engine to gracefully handle the case.
+        const ARBITRARY_SERVICE_UNAVAILABLE_RETRY_AFTER = 5/* seconds */;
+        res.setHeader('Retry-After', ARBITRARY_SERVICE_UNAVAILABLE_RETRY_AFTER);
+        res.sendStatus(503);
+    }
+
+    /**
      * Initialize external Express app that will service requests made to lazy from the outside
      * world.
      * @return {Promise} Promise which is resolved when the Express app has been initialized.
@@ -115,24 +144,34 @@ class Main
     static _initializeExternalExpressApp() {
         externalExpressApp = express();
         externalExpressApp.use(bodyParser.json());
+        //  Return 503 until lazy is ready.
+        externalExpressApp.use(Main._middleware503IfNotReady);
 
-        return externalControllers.initialize(externalExpressApp, { engineManager, config })
-            .then(() => new Promise((resolve, reject) => {
-                const port = process.env.PORT || process.env.LAZY_EXTERNAL_PORT || 80;
-                externalExpressApp.listen(port, (err) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
+        //  Start listening on external port. We cannot immediately load external controllers
+        //  as we need engineManager started and running for that.
+        return new Promise((resolve, reject) => {
+            const port = process.env.PORT || process.env.LAZY_EXTERNAL_PORT || 80;
+            externalExpressApp.listen(port, (err) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
 
-                    logger.info('lazy listening on', port);
-                    resolve();
-                });
+                logger.info('lazy listening on', port);
+                resolve();
+            });
 
-                externalExpressApp.on('error', (err) => {
-                    logger.error('Extenal ExpressJS app error', err);
-                });
-            }));
+            externalExpressApp.on('error', (err) => {
+                logger.error('Extenal ExpressJS app error', err);
+            });
+        });
+    }
+
+    /**
+     * @private
+     */
+    static _loadExternalExpressAppControllers() {
+        return externalControllers.initialize(externalExpressApp, { engineManager, config });
     }
 
     /**

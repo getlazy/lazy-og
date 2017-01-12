@@ -25,12 +25,16 @@ class EngineManager
         this._container = null;
         this._network = null;
         this._volume = null;
+        this._isRunning = false;
     }
 
     stop() {
         const self = this;
 
-        return self._deleteAllEngines();
+        return self._deleteAllEngines()
+            .then(() => {
+                self._isRunning = false;
+            });
     }
 
     start() {
@@ -67,7 +71,14 @@ class EngineManager
                 }
 
                 return Promise.resolve();
+            })
+            .then(() => {
+                self._isRunning = true;
             });
+    }
+
+    get isRunning() {
+        return this._isRunning;
     }
 
     get engines() {
