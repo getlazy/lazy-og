@@ -28,7 +28,6 @@ const runSingleEngine = (engineName, hostPath, language, content, context) => {
     if (_.isNil(engine)) {
         // Engine is present in pipeline,
         // but no definition exists.
-        // Should this be reported? For now, just carry on...
         logger.warn(`Skipping engine "${engineName}"`);
         return Promise.resolve();
     }
@@ -62,7 +61,7 @@ const getSingleEngine = (engineDef) => {
     };
 };
 
-const runEnginePipeline = (pipeLine, hostPath, language, content, context) => {
+const runEnginePipeline = (pipeLine, hostPath, language, content, context, engineStatuses) => {
     const bundle = _.get(pipeLine, 'bundle');
     const seq = _.get(pipeLine, 'sequence');
 
@@ -76,7 +75,7 @@ const runEnginePipeline = (pipeLine, hostPath, language, content, context) => {
                     const singleEntry = getSingleEngine(value);
 
                     if (_.isNil(singleEntry)) {
-                        return runEnginePipeline(value, hostPath, language, content, newContext);
+                        return runEnginePipeline(value, hostPath, language, content, newContext, engineStatuses);
                     }
                     newContext.engineParams = singleEntry.engineParams;
                     return runSingleEngine(singleEntry.engineName, hostPath, language, content, newContext);
@@ -84,9 +83,18 @@ const runEnginePipeline = (pipeLine, hostPath, language, content, context) => {
             ).then((res) => {
                 const results = _.compact(res);
                 const bundleResults = _.reduce(results, (accum, oneResult) => {
+                    const status = _.get(oneResult, 'status');
                     const warnings = _.get(oneResult, 'warnings');
+
+                    // Since we are running engines in parallel,
+                    // we need to collect and accumulate output of all engines.
                     if (!_.isNil(warnings)) {
                         accum.warnings = _.union(accum.warnings, warnings);
+                    }
+
+                    // Also, accumulate statuses of each engine
+                    if (!_.isNil(status)) {
+                        engineStatuses.push(status);
                     }
                     return accum;
                 }, {
@@ -105,8 +113,17 @@ const runEnginePipeline = (pipeLine, hostPath, language, content, context) => {
                     const singleEntry = getSingleEngine(value);
 
                     newContext.previousStepResults = results;
+
+                    // Since the engines are run in sequence,
+                    // We do not accumulate their output - we should end up
+                    // with results of last engine in sequence, only.
+                    // However, we DO want to accumulate statuses of each engine
+                    const status = _.get(results, 'status');
+                    if (!_.isNil(status)) {
+                        engineStatuses.push(status);
+                    }
                     if (_.isNil(singleEntry)) {
-                        return runEnginePipeline(value, hostPath, language, content, newContext);
+                        return runEnginePipeline(value, hostPath, language, content, newContext, engineStatuses);
                     }
                     newContext.engineParams = singleEntry.engineParams;
                     return runSingleEngine(singleEntry.engineName, hostPath, language, content, newContext);
@@ -149,8 +166,25 @@ const addEndpoints = (app, options) => {
         const context = selectn('body.context', req);
 
         try {
-            return runEnginePipeline(enginePipeline, hostPath, language, content, context)
+            const statuses = [];
+            return runEnginePipeline(enginePipeline, hostPath, language, content, context, statuses)
                 .then((warnings) => {
+                    // Did any engine reported that is has checked the code?
+                    if (!_.find(statuses, { codeChecked: true })) {
+                        warnings.warnings.push({
+                            type: 'Info',
+                            ruleId: ' lazy-no-linters-defined ',
+                            message: `No engine registered for [${language}]. This file is not checked for language-specific warnings.`,
+                            filePath: hostPath,
+                            line: 1,
+                            column: 1
+                        });
+                        // Remove the info that all is fine, since we don't really know it
+                        // if no engine checked the file. Delete rules ' lazy-no-linter-warnings '
+                        _.remove(warnings.warnings, (warn) => {
+                            return (_.eq(warn.ruleId, ' lazy-no-linter-warnings '));
+                        });
+                    }
                     return res.send(warnings);
                 }).catch((err) => {
                     return res.status(500).send({
