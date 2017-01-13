@@ -4,9 +4,8 @@
 /* global logger, describe, it, before, after, afterEach */
 
 //  To set some properties we need `this` of `describe` and `it` callback functions.
-/* eslint prefer-arrow-callback: off, func-names: off, class-methods-use-this: off, lodash/prefer-constant: off */
-
-require('./bootstrap');
+// lazy ignore prefer-arrow-callback
+// lazy ignore func-names
 
 const td = require('testdouble');
 
