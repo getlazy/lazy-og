@@ -42,7 +42,7 @@ const addEndpoints = (app, options) => {
 
         try {
             const statuses = [];
-            return enginePipeline.run(hostPath, language, content, context, statuses)
+            return enginePipeline.analyzeFile(hostPath, language, content, context, statuses)
                 .then((warnings) => {
                     // Did any engine reported that is has checked the code?
                     if (!_.find(statuses, { codeChecked: true })) {
@@ -101,7 +101,8 @@ const addEndpoints = (app, options) => {
 
 const initialize = (app, options) => {
     engineManager = options.engineManager;
-    enginePipeline = new EnginePipeline(engineManager, _.get(options, 'config.engine_pipeline'));
+    enginePipeline = new EnginePipeline(
+        engineManager.engines, _.get(options, 'config.engine_pipeline'));
     addEndpoints(app, options);
     return Promise.resolve();
 };

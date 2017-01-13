@@ -5,16 +5,21 @@
 
 const _ = require('lodash');
 
+//  Keep running the promises returned by the given action while the given condition returns true.
+const asyncWhile = (condition, action) => {
+    const whilst = () => (condition() ? action().then(whilst) : Promise.resolve());
+
+    return whilst();
+};
+
 class EnginePipeline {
-    constructor(engineManager, enginePipelineDefinition) {
+    constructor(engines, enginePipelineDefinition) {
         this._pipeLineDefinition = enginePipelineDefinition;
-        this._populateLanguagesToEnginesStructures(engineManager);
+        this._populateLanguagesToEnginesStructures(engines);
     }
 
-    _populateLanguagesToEnginesStructures(engineManager) {
+    _populateLanguagesToEnginesStructures(engines) {
         this._namesToEnginesMap = new Map();
-
-        const engines = engineManager.engines;
 
         _.forEach(engines, (engine) => {
             this._namesToEnginesMap[_.toLower(engine.name)] = engine;
@@ -26,10 +31,10 @@ class EnginePipeline {
         const lowerLang = _.toLower(_.trim(language));
 
         if (_.isNil(engine)) {
-            // Engine is present in pipeline,
-            // but no definition exists.
+            //  Engine is present in pipeline, but no definition exists.
             logger.warn(`Skipping engine "${engineName}"`);
-            return Promise.resolve();
+            //  We carry forward the results of the previous engine.
+            return Promise.resolve(context.previousStepResults);
         }
 
         if ((_.isEmpty(engine.languages)) || (_.findIndex(engine.languages, lang =>
@@ -61,16 +66,17 @@ class EnginePipeline {
         };
     }
 
-    run(hostPath, language, content, context, engineStatuses) {
-        return this._runPipeline(this._pipeLineDefinition, hostPath, language, content, context, engineStatuses);
+    analyzeFile(hostPath, language, content, context, refEngineStatuses) {
+        return this._runPipeline(
+            this._pipeLineDefinition, hostPath, language, content, context, refEngineStatuses);
     }
 
-    _runPipeline(pipeLine, hostPath, language, content, context, engineStatuses) {
+    _runPipeline(pipeLine, hostPath, language, content, context, refEngineStatuses) {
         const bundle = _.get(pipeLine, 'bundle');
         const seq = _.get(pipeLine, 'sequence');
 
         try {
-            const newContext = _.cloneDeep(context);
+            const newContext = _.cloneDeep(context) || {};
 
             if (!_.isNil(bundle)) {
                 // Process engines asynchronously
@@ -80,10 +86,11 @@ class EnginePipeline {
 
                         if (_.isNil(singleEntry)) {
                             return this._runPipeline(
-                                value, hostPath, language, content, newContext, engineStatuses);
+                                value, hostPath, language, content, newContext, refEngineStatuses);
                         }
                         newContext.engineParams = singleEntry.engineParams;
-                        return this._runSingleEngine(singleEntry.engineName, hostPath, language, content, newContext);
+                        return this._runSingleEngine(
+                            singleEntry.engineName, hostPath, language, content, newContext);
                     })
                 ).then((res) => {
                     const results = _.compact(res);
@@ -99,8 +106,8 @@ class EnginePipeline {
                         }
 
                         // Also, accumulate statuses of each engine
-                        if (!_.isNil(status)) {
-                            engineStatuses.push(status);
+                        if (!_.isNil(status) && _.isArray(refEngineStatuses)) {
+                            refEngineStatuses.push(status);
                         }
                         return accum;
                     }, {
@@ -111,30 +118,52 @@ class EnginePipeline {
             }
 
             if (!_.isNil(seq)) {
-                // Process engines synchronously
-                return _.reduce(seq, (engineRunner, value) =>
-                    engineRunner.then((results) => {
-                        // Pass the results of this step
-                        // to the next engine in sequence via context param
-                        const singleEntry = EnginePipeline._getSingleEngine(value);
+                let i = 0;
+                let error;
 
-                        newContext.previousStepResults = results;
+                //  Run engines sequentially until we have through all of them or one has returned
+                //  en error.
+                return asyncWhile(
+                    () => i < seq.length && _.isNil(error),
+                    () => {
+                        //  Get the current engine item in sequence.
+                        const sequenceItem = seq[i];
+                        const engineItem = EnginePipeline._getSingleEngine(sequenceItem);
 
-                        // Since the engines are run in sequence,
-                        // We do not accumulate their output - we should end up
-                        // with results of last engine in sequence, only.
-                        // However, we DO want to accumulate statuses of each engine
-                        const status = _.get(results, 'status');
-                        if (!_.isNil(status)) {
-                            engineStatuses.push(status);
-                        }
-                        if (_.isNil(singleEntry)) {
+                        //  If there is no engine item then it's either a sequence or a bundle
+                        //  so continue running there.
+                        if (_.isNil(engineItem)) {
                             return this._runPipeline(
-                                value, hostPath, language, content, newContext, engineStatuses);
+                                sequenceItem, hostPath, language, content, newContext, refEngineStatuses);
                         }
-                        newContext.engineParams = singleEntry.engineParams;
-                        return this._runSingleEngine(singleEntry.engineName, hostPath, language, content, newContext);
-                    }), Promise.resolve());
+
+                        //  Run the engine with its params.
+                        newContext.engineParams = engineItem.engineParams;
+                        return this._runSingleEngine(engineItem.engineName, hostPath, language, content, newContext)
+                            .then(results => {
+                                //  If the engine returned a status, add it to our list of statuses
+                                //  but don't pass it to the next engine (that is remove it from
+                                //  the results). This solves the problem of repeating statuses with
+                                //  skipped engines.
+                                const status = _.get(results, 'status');
+                                if (!_.isNil(status)) {
+                                    if (_.isArray(refEngineStatuses)) {
+                                        refEngineStatuses.push(status);
+                                    }
+
+                                    //  Setting to undefined is faster than deleting property.
+                                    results.status = undefined;
+                                }
+
+                                newContext.previousStepResults = results;
+                            })
+                            //  Capture the error. Note that an engine could reject the promise
+                            //  with a nil error in which case we will continue onto the next engine.
+                            .catch(err => error = err)
+                            //  Error or not increment the index in the sequence to get the next engine.
+                            .then(() => ++i);
+                    })
+                    .then(() => newContext.previousStepResults);
             }
         } catch (err) {
             return Promise.reject(err);
