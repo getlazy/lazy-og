@@ -19,7 +19,7 @@ const ANALYZE_FILE_FIXTURE = [{
     },
     then: (results) => {
         const warnings = results.warnings;
-        
+
         assert.equal(warnings.length, 20);
         const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
         assert.equal(warningsPerType['Error'].length, 11);
@@ -79,7 +79,7 @@ const ANALYZE_FILE_FIXTURE = [{
         assert(_.isNil(warningsPerType['Error']));
         assert.equal(warningsPerType['Info'].length, 1);
         assert(_.isNil(warningsPerType['Warning']));
-        assert.equal(warnings[0].ruleId,'Congrats');
+        assert.equal(warnings[0].ruleId,' lazy-no-linter-warnings ');
     },
     catch: ASSERT_FALSE
 },
@@ -103,10 +103,10 @@ const ANALYZE_FILE_FIXTURE = [{
         assert(_.isNil(warningsPerType['Error']));
         assert.equal(warningsPerType['Info'].length, 1);
         assert(_.isNil(warningsPerType['Warning']));
-        assert.equal(warnings[0].ruleId,'Congrats');
+        assert.equal(warnings[0].ruleId,' lazy-no-linter-warnings ');
     },
     catch: ASSERT_FALSE
-}, 
+},
 {
    name: '200 - handle case w/ no previous messages',
     params: {
@@ -126,10 +126,10 @@ const ANALYZE_FILE_FIXTURE = [{
         assert(_.isNil(warningsPerType['Error']));
         assert.equal(warningsPerType['Info'].length, 1);
         assert(_.isNil(warningsPerType['Warning']));
-        assert.equal(warnings[0].ruleId,'Congrats');
+        assert.equal(warnings[0].ruleId,' lazy-no-linter-warnings ');
     },
     catch: ASSERT_FALSE
-}, 
+},
 {
     name: '200 - Ignore once',
     params: {
@@ -149,6 +149,120 @@ const ANALYZE_FILE_FIXTURE = [{
 }
 ];
 
+const REGEX_FIXTURES = [{
+    name: 'no comments',
+    comment: 'lazy ignore single',
+    expected: { commandStr: '', args: [] }
+},
+{
+    name: 'empty line',
+    comment: '',
+    expected: { commandStr: '', args: [] }
+},
+{
+    name: 'null line',
+    comment: null,
+    expected: { commandStr: '', args: [] }
+},
+{
+    name: 'no arguments',
+    comment: '// lazy ignore ',
+    expected: { commandStr: 'ignore', args: [] }
+},
+{
+    name: '// style, single ignore',
+    comment: '// lazy ignore single',
+    expected: { commandStr: 'ignore', args: [ 'single' ] }
+},
+{
+    name: '# style, single ignore',
+    comment: '# lazy ignore single',
+    expected: { commandStr: 'ignore', args: [ 'single' ] }
+},
+{
+    name: '/* */ style, single ignore',
+    comment: '/* lazy ignore single  */',
+    expected: { commandStr: 'ignore', args: [ 'single' ]}
+},
+{
+    name: '// style, single ignore-once',
+    comment: '// lazy ignore-once single',
+    expected: { commandStr: 'ignore-once', args: [ 'single' ] }
+},
+{
+    name: '# style, single ignore-once',
+    comment: '# lazy ignore-once single',
+    expected: { commandStr: 'ignore-once', args: [ 'single' ] }
+},
+{
+    name: '/* */style, single ignore-once',
+    comment: '/* lazy ignore-once single  */',
+    expected: { commandStr: 'ignore-once', args: [ 'single' ]}
+},
+
+{
+    name: '// style, multiple ingore',
+    comment: '// lazy ignore one two      three  ',
+    expected: { commandStr: 'ignore', args: [ 'one', 'two', 'three' ]}
+},
+{
+    name: '// style, multiple ingore w/ comments',
+    comment: '// lazy ignore one two      three  ; comment ',
+    expected: { commandStr: 'ignore', args: [ 'one', 'two', 'three' ]}
+},
+{
+    name: '# style, multiple ingore',
+    comment: '# lazy ignore one two      three  ',
+    expected: { commandStr: 'ignore', args: [ 'one', 'two', 'three' ]}
+},
+{
+    name: '# style, multiple ingore w/ comments',
+    comment: '# lazy ignore one two      three  ; comment ',
+    expected: { commandStr: 'ignore', args: [ 'one', 'two', 'three' ]}
+},
+{
+    name: '/* style, multiple ingore',
+    comment: '/* lazy ignore one two      three  */',
+    expected: { commandStr: 'ignore', args: [ 'one', 'two', 'three' ]}
+},
+{
+    name: '/* style, multiple ingore w/ comments',
+    comment: '/* lazy ignore one two      three  ; comment */',
+    expected: { commandStr: 'ignore', args: [ 'one', 'two', 'three' ]}
+},
+
+{
+    name: '// style, single ingore w/ comments',
+    comment: '// lazy ignore        three  ; comment ',
+    expected: { commandStr: 'ignore', args: ['three' ]}
+},
+{
+    name: '# style, single ingore w/ comments',
+    comment: '# lazy ignore           three  ; comment ',
+    expected: { commandStr: 'ignore', args: ['three' ]}
+},
+{
+    name: '/* style, single ingore w/ comments',
+    comment: '/* lazy ignore       three  ; comment */',
+    expected: { commandStr: 'ignore', args: ['three' ]}
+},
+];
+
+ describe('Directives RegEx Parser', function () {
+        const rewire = require('rewire');
+        const testModule = rewire('../postprocessor-engine');
+        const PostProcEngineHttpServer = testModule.__get__('PostProcEngineHttpServer');
+        const postProc=new PostProcEngineHttpServer();
+
+        _.each(REGEX_FIXTURES, (fixture) => {
+            it(fixture.name, function () {
+                const response = postProc._parseLine(fixture.comment);
+                assert(_.eq(response.commandStr,fixture.expected.commandStr));
+                assert(_.isEqual(response.args,fixture.expected.args));
+            });
+        });
+    });
+
 describe('PostProcEngineHttpServer', function () {
     this.timeout(20000);
 
@@ -159,6 +273,8 @@ describe('PostProcEngineHttpServer', function () {
     after(function () {
         return require('./bootstrap').stop();
     });
+
+
 
     describe('POST /file', function () {
         let onlyFixtures = _.filter(ANALYZE_FILE_FIXTURE, (fixture) => fixture.only);
