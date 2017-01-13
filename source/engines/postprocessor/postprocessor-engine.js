@@ -8,7 +8,7 @@ const EngineHelpers = require('@lazyass/engine-helpers');
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 const wooHoo = {
     type: 'Info',
-    message: 'Woo-hoo! No linter warnings - your code looks pretty nice.',
+    message: '',
     ruleId: ' lazy-no-linter-warnings '
 };
 
@@ -159,12 +159,16 @@ class PostProcEngineHttpServer extends EngineHttpServer {
         //  We use a promise as we get any exceptions wrapped up as failures.
         return new Promise((resolve) => {
             const filteredWarnings = _.get(context, 'previousStepResults.warnings');
+            const wooHooMsgs = _.get(context, 'engineParams.woohoos', ['Woo-hoo! No linter warnings - your code looks pretty nice.']);
+
+            wooHoo.message = _.sample(wooHooMsgs);
 
             if (_.isNil(filteredWarnings)) { // nothing from the previos engines
                 resolve({
                     warnings: [wooHoo]
                 });
             }
+
             const directives = self._getLazyDirectives(content);
 
             self._removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once);
