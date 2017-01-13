@@ -1,7 +1,10 @@
 
 'use strit';
 
+/* global logger */
+
 const Main = require('../app/main');
+const path = require('path');
 
 let alreadyStarted = false;
 const start = () => {
@@ -10,7 +13,7 @@ const start = () => {
     }
     alreadyStarted = true;
 
-    return Main.main(__dirname + '/lazy-test.yaml')
+    return Main.main(path.join(__dirname, 'lazy-test.yaml'))
         .then(() => {
             logger.info('lazy initialized (TEST)');
         })
@@ -20,11 +23,9 @@ const start = () => {
         });
 };
 
-const stop = () => {
-    return Main.stop();
-};
+const stop = () => Main.stop();
 
 module.exports = {
-    start: start,
-    stop: stop
+    start,
+    stop
 };
