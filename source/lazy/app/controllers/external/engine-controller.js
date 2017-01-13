@@ -1,7 +1,6 @@
 'use strict';
 
 /* global logger */
-// lazy ignore arrow-body-style ; What's wrong with arrow body style, anyway?
 
 const _ = require('lodash');
 const selectn = require('selectn');
@@ -49,19 +48,19 @@ const addEndpoints = (app, options) => {
                     if (!_.find(statuses, { codeChecked: true })) {
                         warnings.warnings.push({
                             type: 'Info',
+                            //  We set spaces around the rule ID so that it cannot be disabled.
                             ruleId: ' lazy-no-linters-defined ',
                             message: `No engine registered for [${language}]. This file has not been checked for language-specific warnings.`,
                             filePath: hostPath
                         });
                         // Remove the info that all is fine, since we don't really know it
                         // if no engine checked the file. Delete rules ' lazy-no-linter-warnings '
-                        _.remove(warnings.warnings, (warn) => {
-                            return (_.eq(warn.ruleId, ' lazy-no-linter-warnings '));
-                        });
+                        _.remove(warnings.warnings, warn =>
+                            (_.eq(warn.ruleId, ' lazy-no-linter-warnings ')));
                     }
                     return res.send(warnings);
                 }).catch((err) => {
-                    return res.status(500).send({
+                    res.status(500).send({
                         error: err && err.message
                     });
                 });
