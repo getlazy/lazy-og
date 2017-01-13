@@ -73,7 +73,7 @@ class EnginePipeline {
 
     _runPipeline(pipeLine, hostPath, language, content, context, refEngineStatuses) {
         const bundle = _.get(pipeLine, 'bundle');
-        const seq = _.get(pipeLine, 'sequence');
+        const sequence = _.get(pipeLine, 'sequence');
 
         try {
             const newContext = _.cloneDeep(context) || {};
@@ -113,21 +113,24 @@ class EnginePipeline {
                     }, {
                         warnings: []
                     });
+
                     return Promise.resolve(bundleResults);
                 });
             }
 
-            if (!_.isNil(seq)) {
+            if (!_.isNil(sequence)) {
                 let i = 0;
                 let error;
 
                 //  Run engines sequentially until we have through all of them or one has returned
                 //  en error.
                 return asyncWhile(
-                    () => i < seq.length && _.isNil(error),
-                    () => {
+                    () => i < sequence.length && _.isNil(error),
+                    //  Execute the actual sequence item and return the promise for the execution.
+                    //  That promise will be handled below this entire function.
+                    () => (() => {
                         //  Get the current engine item in sequence.
-                        const sequenceItem = seq[i];
+                        const sequenceItem = sequence[i];
                         const engineItem = EnginePipeline._getSingleEngine(sequenceItem);
 
                         //  If there is no engine item then it's either a sequence or a bundle
@@ -140,30 +143,38 @@ class EnginePipeline {
                         //  Run the engine with its params.
                         newContext.engineParams = engineItem.engineParams;
                         return this._runSingleEngine(engineItem.engineName, hostPath, language, content, newContext)
-                            .then(results => {
-                                //  If the engine returned a status, add it to our list of statuses
-                                //  but don't pass it to the next engine (that is remove it from
-                                //  the results). This solves the problem of repeating statuses with
-                                //  skipped engines.
-                                const status = _.get(results, 'status');
-                                if (!_.isNil(status)) {
-                                    if (_.isArray(refEngineStatuses)) {
-                                        refEngineStatuses.push(status);
-                                    }
-
-                                    //  Setting to undefined is faster than deleting property.
-                                    results.status = undefined;
+                    })()
+                        //  Process the results no matter if we ran the engine or another pipeline.
+                        .then(results => {
+                            //  If the engine returned a status, add it to our list of statuses
+                            //  but don't pass it to the next engine (that is remove it from
+                            //  the results). This solves the problem of repeating statuses with
+                            //  skipped engines.
+                            const status = _.get(results, 'status');
+                            if (!_.isNil(status)) {
+                                if (_.isArray(refEngineStatuses)) {
+                                    refEngineStatuses.push(status);
                                 }
 
-                                newContext.previousStepResults = results;
-                            })
-                            //  Capture the error. Note that an engine could reject the promise
-                            //  with a nil error in which case we will continue onto the next engine.
-                            .catch(err => error = err)
-                            //  Error or not increment the index in the sequence to get the next engine.
-                            .then(() => ++i);
-                    })
-                    .then(() => newContext.previousStepResults);
+                                //  Setting to undefined is faster than deleting property.
+                                results.status = undefined;
+                            }
+
+                            newContext.previousStepResults = results;
+                        })
+                        //  Capture the error if it happens. Note that an engine could reject the promise
+                        //  with a nil error in which case we will continue onto the next engine.
+                        .catch(err => error = err)
+                        //  Error or not increment the index in the sequence to get the next engine.
+                        .then(() => ++i)
+                )
+                    .then(() => {
+                        if (error) {
+                            return Promise.reject(error);
+                        }
+
+                        return Promise.resolve(newContext.previousStepResults);
+                    });
             }
         } catch (err) {
             return Promise.reject(err);

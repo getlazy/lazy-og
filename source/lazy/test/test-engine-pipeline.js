@@ -127,7 +127,7 @@ const TESTS = [{
         assert.equal(_.get(result, 'warnings[0].test2.warnings[0].test'), 'result');
     }
 }, {
-    id: 'status are returned',
+    id: 'status are returned in sequence',
     engines: [{
         name: 'engine1',
         languages: [],
@@ -163,6 +163,153 @@ const TESTS = [{
     },
     // lazy ignore-once no-unused-vars
     then: (result, engineStatuses) => {
+        assert.equal(_.get(engineStatuses, '[0].test'), 1);
+        assert.equal(_.get(engineStatuses, '[1].test'), 2);
+    }
+}, {
+    id: 'inexisting engine in bundle #1',
+    engines: [{
+        name: 'engine1',
+        languages: [],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result' }]
+            });
+        }
+    }],
+    pipeline: {
+        bundle: [{
+            engine1: {}
+        }, {
+            'inexisting-engine': {}
+        }]
+    },
+    then: (result) => {
+        assert.equal(_.get(result, 'warnings[0].test'), 'result');
+    }
+}, {
+    id: 'inexisting engine in bundle #2',
+    engines: [{
+        name: 'engine1',
+        languages: [],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result' }]
+            });
+        }
+    }, {
+        name: 'engine2',
+        languages: [],
+        analyzeFile(hostPath, language, content, context) {
+            return Promise.resolve({
+                warnings: [{ test: 'result2' }]
+            });
+        }
+    }],
+    pipeline: {
+        bundle: [{
+            engine1: {}
+        }, {
+            'inexisting-engine': {}
+        }, {
+            engine2: {}
+        }]
+    },
+    then: (result) => {
+        assert(_.isArray(result.warnings), 'warnings is an array');
+        assert.equal(result.warnings.length, 2);
+        //  Sort the result as bundle engines return be executed out of order.
+        const sortedWarnings = _.sortBy(result.warnings, 'test');
+        assert.equal(sortedWarnings[0].test, 'result');
+        assert.equal(sortedWarnings[1].test, 'result2');
+    }
+}, {
+    id: 'status are returned in bundle',
+    engines: [{
+        name: 'engine1',
+        languages: [],
+        analyzeFile(hostPath, language, content, context) {
+            return Promise.resolve({
+                warnings: [{ test: 'result' }],
+                status: {
+                    test: 1
+                }
+            });
+        }
+    }, {
+        name: 'engine2',
+        languages: [],
+        analyzeFile(hostPath, language, content, context) {
+            return Promise.resolve({
+                warnings: [{ test: 'result2' }],
+                status: {
+                    test: 2
+                }
+            });
+        }
+    }],
+    pipeline: {
+        bundle: [{
+            engine1: {}
+        }, {
+            'inexisting-engine': {}
+        }, {
+            engine2: {}
+        }]
+    },
+    // lazy ignore-once no-unused-vars
+    then: (result, engineStatuses) => {
+        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
+        assert.equal(engineStatuses.length, 2);
+        //  Sort the statuses as bundle engines return be executed out of order.
+        const sortedStatuses = _.sortBy(engineStatuses, 'test');
+        assert.equal(_.get(sortedStatuses, '[0].test'), 1);
+        assert.equal(_.get(sortedStatuses, '[1].test'), 2);
+    }
+}, {
+    id: 'composition defect #1 fixed',
+    engines: [{
+        name: 'engine1',
+        languages: [],
+        analyzeFile(hostPath, language, content, context) {
+            return Promise.resolve({
+                warnings: [{ test: 'result' }],
+                status: {
+                    test: 1
+                }
+            });
+        }
+    }, {
+        name: 'engine2',
+        languages: [],
+        analyzeFile(hostPath, language, content, context) {
+            assert(!_.isUndefined(context.previousStepResults));
+            return Promise.resolve({
+                warnings: _.union(context.previousStepResults.warnings, [{ test: 'result2' }]),
+                status: {
+                    test: 2
+                }
+            });
+        }
+    }],
+    pipeline: {
+        sequence: [{
+            engine1: {}
+        }, {
+            bundle: [{
+                engine2: {}
+            }]
+        }]
+    },
+    // lazy ignore-once no-unused-vars
+    then: (result, engineStatuses) => {
+        assert(_.isArray(result.warnings), 'warnings is an array');
+        assert.equal(result.warnings.length, 2);
+        assert.equal(_.get(result, 'warnings[0].test'), 'result');
+        assert.equal(_.get(result, 'warnings[1].test'), 'result2');
+
+        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
+        assert.equal(engineStatuses.length, 2);
         assert.equal(_.get(engineStatuses, '[0].test'), 1);
         assert.equal(_.get(engineStatuses, '[1].test'), 2);
     }
