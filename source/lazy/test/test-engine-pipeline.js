@@ -131,7 +131,7 @@ const TESTS = [{
     engines: [{
         name: 'engine1',
         languages: [],
-        analyzeFile(hostPath, language, content, context) {
+        analyzeFile() {
             return Promise.resolve({
                 warnings: [{ test: 'result' }],
                 status: {
@@ -228,7 +228,7 @@ const TESTS = [{
     engines: [{
         name: 'engine1',
         languages: [],
-        analyzeFile(hostPath, language, content, context) {
+        analyzeFile() {
             return Promise.resolve({
                 warnings: [{ test: 'result' }],
                 status: {
@@ -239,7 +239,7 @@ const TESTS = [{
     }, {
         name: 'engine2',
         languages: [],
-        analyzeFile(hostPath, language, content, context) {
+        analyzeFile() {
             return Promise.resolve({
                 warnings: [{ test: 'result2' }],
                 status: {
@@ -301,7 +301,6 @@ const TESTS = [{
             }]
         }]
     },
-    // lazy ignore-once no-unused-vars
     then: (result, engineStatuses) => {
         assert(_.isArray(result.warnings), 'warnings is an array');
         assert.equal(result.warnings.length, 2);
