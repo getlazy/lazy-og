@@ -10,7 +10,8 @@
   "license": "MIT",
   "dependencies": {
     "@lazyass/engine-helpers": "^3.0.0",
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.4",
+    "rewire": "^2.5.2"
   },
   "devDependencies": {
     "request": "^2.79.0"

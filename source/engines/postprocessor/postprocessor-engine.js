@@ -25,26 +25,27 @@ class PostProcEngineHttpServer extends EngineHttpServer {
      * @return {Object} Command object
      */
     _parseLine(line) {
-        const regex = /(#|\/\*|\/\/)\W*lazy\s*(\S*)\s*(\S*).*/g;
+        // lazy ignore-once no-useless-escape ; Linter is confused w/ regex
+        const regex = /(#|\/\*|\/\/)\W*lazy\s+(\S*)\s+([^;\*]*)\s*;*(.*)/g;
+
         const command = {
             commandStr: '',
-            argStr: ''
+            args: [],
+            comment: ''
         };
 
         let m;
-// lazy ignore-once no-cond-assign  ; This is standard regex pattern code...
-        while ((m = regex.exec(line)) !== null) {
+        while ((m = regex.exec(line)) !== null) { // lazy ignore-once no-cond-assign ; This is standard regex usage
             // This is necessary to avoid infinite loops with zero-width matches
             if (m.index === regex.lastIndex) {
-// lazy ignore-once no-plusplus   ; What's wrong with plusplus, anyway?
-                regex.lastIndex++;
+                regex.lastIndex++; // lazy ignore-once no-plusplus ; What's wrong with plusplus, anyway?
             }
-            const commandStr = m[2]; // Command
-            const argStr = m[3]; // Argument
+            const commandStr = _.get(m, '[2]', '');
 
             if (!_.isEmpty(commandStr)) {
                 command.commandStr = commandStr;
-                command.argStr = argStr;
+                command.args = _.words(_.get(m, '[3]', ''), /\S+/g);
+                command.comment = _.get(m, '[4]', ''); // comments (after ;)
             }
         }
         return command;
@@ -67,18 +68,20 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             const command = self._parseLine(oneLine);
 
             if (_.eq(command.commandStr, 'ignore')) {
-                if (!_.isEmpty(command.argStr)) {
-                    directives.ignore.push(_.toLower(command.argStr));
-                }
+                // lazy ignore-once lodash/prefer-map ; _.map with be more complicated in this case
+                _.forEach(command.args, (ruleToIgnore) => {
+                    directives.ignore.push(_.toLower(ruleToIgnore));
+                });
             }
 
             if (_.eq(command.commandStr, 'ignore-once')) {
-                if (!_.isEmpty(command.argStr)) {
+                // lazy ignore-once lodash/prefer-map  ; map with be more complicated in this case
+                _.forEach(command.args, (ruleToIgnore) => {
                     directives.ignore_once.push({
                         line: lineNo + 1,   // lineNo is zero based in forEach
-                        ruleId: _.toLower(command.argStr)
+                        ruleId: _.toLower(ruleToIgnore)
                     });
-                }
+                });
             }
         });
         return directives;
@@ -130,6 +133,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
         });
         // If there are some rules that are reported for ignorance,
         // but they haven't been reported, mark their ignorance as warning
+        // lazy ignore-once lodash/prefer-map ; As we are just adding more warnings, following is more readable.
         _.forEach(_.difference(toRemove, processedDirectives), (warn) => {
             warningList.push({
                 type: 'Warning',
@@ -137,7 +141,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
                 ruleId: ' lazy-no-ignore-once ',
                 line: warn.line,
                 column: 1
-            });    
+            });
         });
         return warningList;
     }
