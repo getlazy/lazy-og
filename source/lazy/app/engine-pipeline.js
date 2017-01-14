@@ -142,10 +142,10 @@ class EnginePipeline {
 
                         //  Run the engine with its params.
                         newContext.engineParams = engineItem.engineParams;
-                        return this._runSingleEngine(engineItem.engineName, hostPath, language, content, newContext)
+                        return this._runSingleEngine(engineItem.engineName, hostPath, language, content, newContext);
                     })()
                         //  Process the results no matter if we ran the engine or another pipeline.
-                        .then(results => {
+                        .then((results) => {
                             //  If the engine returned a status, add it to our list of statuses
                             //  but don't pass it to the next engine (that is remove it from
                             //  the results). This solves the problem of repeating statuses with
@@ -157,6 +157,7 @@ class EnginePipeline {
                                 }
 
                                 //  Setting to undefined is faster than deleting property.
+                                //  lazy ignore-once no-param-reassign
                                 results.status = undefined;
                             }
 
@@ -164,9 +165,9 @@ class EnginePipeline {
                         })
                         //  Capture the error if it happens. Note that an engine could reject the promise
                         //  with a nil error in which case we will continue onto the next engine.
-                        .catch(err => error = err)
+                        .catch((err) => { error = err; })
                         //  Error or not increment the index in the sequence to get the next engine.
-                        .then(() => ++i)
+                        .then(() => { i += 1; })
                 )
                     .then(() => {
                         if (error) {
