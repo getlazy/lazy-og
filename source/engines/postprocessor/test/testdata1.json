@@ -7,7 +7,7 @@
       "type": "Error",
       "message": "[no-tabs]: Unexpected tab character.",
       "ruleId": "no-tabs",
-      "line": 12,
+      "line": 2,
       "column": 2,
       "filePath": "/src/test.js"
     }, {
