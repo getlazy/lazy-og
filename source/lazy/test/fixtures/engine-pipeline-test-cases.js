@@ -551,7 +551,7 @@ module.exports = [{
         assert.equal(_.get(sortedStatuses, '[1].test'), 2);
     }
 }, {
-    id: 'languge test #1',
+    id: 'language test #1',
     engines: [{
         name: 'engine1',
         languages: ['test'],
@@ -594,7 +594,7 @@ module.exports = [{
         assert.equal(engineStatuses[0].test, 1);
     }
 }, {
-    id: 'languge test #2',
+    id: 'language test #2',
     engines: [{
         name: 'engine1',
         languages: ['not-test'],
@@ -635,7 +635,7 @@ module.exports = [{
         assert.equal(engineStatuses.length, 0);
     }
 }, {
-    id: 'languge test #3',
+    id: 'language test #3',
     engines: [{
         name: 'engine1',
         languages: ['test'],
@@ -677,7 +677,7 @@ module.exports = [{
         assert.equal(engineStatuses.length, 2);
     }
 }, {
-    id: 'languge test #4',
+    id: 'language test #4',
     engines: [{
         name: 'engine1',
         languages: ['test', 'test2'],
@@ -719,7 +719,7 @@ module.exports = [{
         assert.equal(engineStatuses.length, 1);
     }
 }, {
-    id: 'languge test #5',
+    id: 'language test #5',
     engines: [{
         name: 'engine1',
         languages: ['test', 1234, ' TEST2 ', null, undefined, { x: 1 }, ['x', '1']],
@@ -761,7 +761,7 @@ module.exports = [{
         assert.equal(engineStatuses.length, 1);
     }
 }, {
-    id: 'languge test #6',
+    id: 'language test #6',
     engines: [{
         name: 'engine1',
         languages: ['JavaScript'],
@@ -776,7 +776,8 @@ module.exports = [{
     }, {
         name: 'engine2',
         languages: ['Babel ES6 JavaScript'],
-        analyzeFile() {
+        analyzeFile(hostPath, language, content, context) {
+            assert.equal(context.lazy.detectedLanguage, 'javascript');
             return Promise.resolve({
                 warnings: [{ test: 'result2' }],
                 status: {
@@ -813,7 +814,7 @@ module.exports = [{
         assert.equal(_.get(sortedStatuses, '[1].test'), 2);
     }
 }, {
-    id: 'languge test #6',
+    id: 'language test #6',
     engines: [{
         name: 'engine1',
         languages: ['JavaScript'],

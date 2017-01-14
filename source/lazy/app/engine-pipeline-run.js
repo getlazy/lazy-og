@@ -5,7 +5,7 @@
 
 const _ = require('lodash');
 
-//  Keep running the promises returned by the given action while the given condition returns true.
+// Keep running the promises returned by the given action while the given condition returns true.
 const asyncWhile = (condition, action) => {
     const whilst = () => (condition() ? action().then(whilst) : Promise.resolve());
 
@@ -44,111 +44,12 @@ class EnginePipelineRun {
         const sequence = _.get(pipeline, 'sequence');
 
         try {
-            const newContext = _.cloneDeep(context) || {};
-
             if (!_.isNil(bundle)) {
-                // Process engines asynchronously but ignore each separate failure.
-                return Promise.all(
-                    _.map(bundle, bundleItem =>
-                        (() => {
-                            const engineItem = EnginePipelineRun._getSingleEngine(bundleItem);
-
-                            if (_.isNil(engineItem)) {
-                                return this._runPipeline(bundleItem, newContext);
-                            }
-
-                            //  Run the engine with its params.
-                            newContext.engineParams = engineItem.engineParams;
-                            return this._runSingleEngine(engineItem.engineName, newContext);
-                        })()
-                            .catch((err) => {
-                                logger.warn('Failure during bundle pipleline run, continuing', err);
-                            })
-                    )
-                ).then((res) => {
-                    const results = _.compact(res);
-                    const bundleResults = _.reduce(results, (accum, oneResult) => {
-                        const status = _.get(oneResult, 'status');
-                        const warnings = _.get(oneResult, 'warnings');
-
-                        // Since we are running engines in parallel,
-                        // we need to collect and accumulate output of all engines.
-                        if (!_.isNil(warnings)) {
-                            // lazy ignore-once no-param-reassign
-                            accum.warnings = _.union(accum.warnings, warnings);
-                        }
-
-                        // Also, accumulate statuses of each engine
-                        if (!_.isNil(status)) {
-                            this._engineStatuses.push(status);
-                        }
-                        return accum;
-                    }, {
-                        warnings: []
-                    });
-
-                    return Promise.resolve(bundleResults);
-                });
+                return this._runBundle(bundle, context);
             }
 
             if (!_.isNil(sequence)) {
-                let i = 0;
-                let error;
-
-                //  Run engines sequentially until we have through all of them or one has returned
-                //  en error.
-                return asyncWhile(
-                    () => i < sequence.length && _.isNil(error),
-                    //  Execute the actual sequence item and return the promise for the execution.
-                    //  That promise will be handled below this entire function.
-                    () => (() => {
-                        //  Get the current engine item in sequence.
-                        const sequenceItem = sequence[i];
-                        const engineItem = EnginePipelineRun._getSingleEngine(sequenceItem);
-
-                        //  If there is no engine item then it's either a sequence or a bundle
-                        //  so continue running there.
-                        if (_.isNil(engineItem)) {
-                            return this._runPipeline(sequenceItem, newContext);
-                        }
-
-                        //  Run the engine with its params.
-                        newContext.engineParams = engineItem.engineParams;
-                        return this._runSingleEngine(engineItem.engineName, newContext);
-                    })()
-                        //  Process the results no matter if we ran the engine or another pipeline.
-                        .then((results) => {
-                            //  If the engine returned a status, add it to our list of statuses
-                            //  but don't pass it to the next engine (that is remove it from
-                            //  the results). This solves the problem of repeating statuses with
-                            //  skipped engines.
-                            const status = _.get(results, 'status');
-                            if (!_.isNil(status)) {
-                                this._engineStatuses.push(status);
-
-                                //  Setting to undefined is faster than deleting property.
-                                //  lazy ignore-once no-param-reassign
-                                results.status = undefined;
-                            }
-
-                            newContext.previousStepResults = results;
-                        })
-                        //  Capture the error if it happens. Note that an engine could reject the promise
-                        //  with a nil error in which case we will continue onto the next engine.
-                        .catch((err) => {
-                            logger.error('Failure during sequence pipleline run, stopping', err);
-                            error = err;
-                        })
-                        //  Error or not increment the index in the sequence to get the next engine.
-                        .then(() => { i += 1; })
-                )
-                    .then(() => {
-                        if (error) {
-                            return Promise.reject(error);
-                        }
-
-                        return Promise.resolve(newContext.previousStepResults);
-                    });
+                return this._runSequence(sequence, context);
             }
         } catch (err) {
             // istanbul ignore next
@@ -161,9 +62,9 @@ class EnginePipelineRun {
         const engine = this._namesToEnginesMap[_.toLower(engineName)];
 
         if (_.isNil(engine)) {
-            //  Engine is present in pipeline, but no definition exists.
+            // Engine is present in pipeline, but no definition exists.
             logger.warn(`Engine ${engineName} defined but doesn't exist, skipping`);
-            //  We carry forward the results of the previous engine.
+            // We carry forward the results of the previous engine.
             return Promise.resolve(context.previousStepResults);
         }
 
@@ -174,7 +75,7 @@ class EnginePipelineRun {
         return Promise.resolve();
     }
 
-    static _getSingleEngine(engineDef) {
+    static _getEngineItem(engineDef) {
         const engineName = _.head(_.keys(engineDef));
 
         if (_.includes(['bundle', 'sequence'], engineName)) {
@@ -185,6 +86,115 @@ class EnginePipelineRun {
             engineName,
             engineParams: _.get(engineDef, engineName, {})
         };
+    }
+
+    _runBundle(bundle, context) {
+        const newContext = _.cloneDeep(context) || {};
+
+        // Process engines asynchronously but ignore each separate failure.
+        return Promise.all(
+            _.map(bundle, bundleItem =>
+                (() => {
+                    const engineItem = EnginePipelineRun._getEngineItem(bundleItem);
+
+                    if (_.isNil(engineItem)) {
+                        return this._runPipeline(bundleItem, newContext);
+                    }
+
+                    // Run the engine with its params.
+                    newContext.engineParams = engineItem.engineParams;
+                    return this._runSingleEngine(engineItem.engineName, newContext);
+                })()
+                    .catch((err) => {
+                        logger.warn('Failure during bundle pipleline run, continuing', err);
+                    })
+            )
+        ).then((res) => {
+            const results = _.compact(res);
+            const bundleResults = _.reduce(results, (accum, oneResult) => {
+                const status = _.get(oneResult, 'status');
+                const warnings = _.get(oneResult, 'warnings');
+
+                // Since we are running engines in parallel,
+                // we need to collect and accumulate output of all engines.
+                if (!_.isNil(warnings)) {
+                    // lazy ignore-once no-param-reassign
+                    accum.warnings = _.union(accum.warnings, warnings);
+                }
+
+                // Also, accumulate statuses of each engine
+                if (!_.isNil(status)) {
+                    this._engineStatuses.push(status);
+                }
+                return accum;
+            }, {
+                warnings: []
+            });
+
+            return Promise.resolve(bundleResults);
+        });
+    }
+
+    _runSequence(sequence, context) {
+        const newContext = _.cloneDeep(context) || {};
+
+        let i = 0;
+        let error;
+
+        // Run engines sequentially until we have through all of them or one has returned
+        // en error.
+        return asyncWhile(
+            () => i < sequence.length && _.isNil(error),
+            // Execute the actual sequence item and return the promise for the execution.
+            // That promise will be handled below this entire function.
+            () => (() => {
+                // Get the current engine item in sequence.
+                const sequenceItem = sequence[i];
+                const engineItem = EnginePipelineRun._getEngineItem(sequenceItem);
+
+                // If there is no engine item then it's either a sequence or a bundle
+                // so continue running there.
+                if (_.isNil(engineItem)) {
+                    return this._runPipeline(sequenceItem, newContext);
+                }
+
+                // Run the engine with its params.
+                newContext.engineParams = engineItem.engineParams;
+                return this._runSingleEngine(engineItem.engineName, newContext);
+            })()
+                // Process the results no matter if we ran the engine or another pipeline.
+                .then((results) => {
+                    // If the engine returned a status, add it to our list of statuses
+                    // but don't pass it to the next engine (that is remove it from
+                    // the results). This solves the problem of repeating statuses with
+                    // skipped engines.
+                    const status = _.get(results, 'status');
+                    if (!_.isNil(status)) {
+                        this._engineStatuses.push(status);
+
+                        // Setting to undefined is faster than deleting property.
+                        // lazy ignore-once no-param-reassign
+                        results.status = undefined;
+                    }
+
+                    newContext.previousStepResults = results;
+                })
+                // Capture the error if it happens. Note that an engine could reject the promise
+                // with a nil error in which case we will continue onto the next engine.
+                .catch((err) => {
+                    logger.error('Failure during sequence pipleline run, stopping', err);
+                    error = err;
+                })
+                // Error or not increment the index in the sequence to get the next engine.
+                .then(() => { i += 1; })
+        )
+            .then(() => {
+                if (error) {
+                    return Promise.reject(error);
+                }
+
+                return Promise.resolve(newContext.previousStepResults);
+            });
     }
 }
 
