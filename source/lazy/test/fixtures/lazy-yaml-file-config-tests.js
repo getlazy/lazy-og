@@ -1349,7 +1349,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     },
@@ -1367,7 +1367,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     },
@@ -1387,7 +1387,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     },
@@ -1407,7 +1407,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     },
@@ -1428,7 +1428,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     },
@@ -1449,7 +1449,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     }
@@ -1470,7 +1470,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     },
@@ -1492,7 +1492,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     },
@@ -1514,7 +1514,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     },
@@ -1536,7 +1536,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     }
@@ -1545,7 +1545,7 @@ module.exports = [{
     config: {
         version: 1,
         repository_auth: {
-            token: {test: 'this'}
+            token: { test: 'this' }
         },
         service_url: 'http://a.co',
         engine_pipeline: {
@@ -1555,7 +1555,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     },
@@ -1575,7 +1575,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     },
@@ -1595,7 +1595,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     }
@@ -1615,7 +1615,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     },
@@ -1636,7 +1636,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     },
@@ -1659,7 +1659,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     }
@@ -1679,7 +1679,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     },
@@ -1700,7 +1700,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     },
@@ -1721,7 +1721,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
+                image: 'a:b'
             }
         }
     }

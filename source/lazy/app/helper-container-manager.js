@@ -9,7 +9,7 @@ const errors = require('common-errors');
 const HigherDockerManager = require('higher-docker-manager');
 
 const Label = {
-    OrgGetlazyHelperContainerManagerOwned: 'org.getlazy.lazy.helper-container-manager.owner'
+    OrgGetlazyHelperContainerManagerOwned: 'org.getlazy.lazy.helper-container-manager.owned'
 };
 
 /**
