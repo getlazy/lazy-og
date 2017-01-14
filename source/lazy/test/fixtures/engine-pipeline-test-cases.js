@@ -342,13 +342,173 @@ module.exports = [{
         assert.equal(sortedWarnings[1].test, 'result2');
 
         assert(_.isArray(engineStatuses), 'engineStatuses is an array');
+        assert.equal(engineStatuses.length, 2);
         //  Sort the statuses as bundle engines return be executed out of order.
         const sortedStatuses = _.sortBy(engineStatuses, 'test');
         assert.equal(_.get(sortedStatuses, '[0].test'), 1);
         assert.equal(_.get(sortedStatuses, '[1].test'), 2);
     }
 }, {
-    id: 'composition test #2',
+    id: 'composition bug #2 fixed - error in a sequence stops execution',
+    engines: [{
+        name: 'engine1',
+        languages: [],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result' }],
+                status: {
+                    test: 1
+                }
+            });
+        }
+    }, {
+        name: 'engine2',
+        languages: [],
+        analyzeFile() {
+            return Promise.reject(new Error('test-error'));
+        }
+    }, {
+        name: 'engine3',
+        languages: [],
+        analyzeFile() {
+            //  This should never be reached but the right way to test it is to return a result
+            //  and then test for the absence of it (otherwise if error aren't stopping execution
+            //  an error on assert won't either)
+            return Promise.resolve({
+                warnings: [{ test: 'result3' }],
+                status: {
+                    test: 3
+                }
+            });
+        }
+    }],
+    pipeline: {
+        sequence: [{
+            engine1: {}
+        }, {
+            engine2: {}
+        }, {
+            engine3: {}
+        }]
+    },
+    catch: (err, engineStatuses) => {
+        assert.equal(err.message, 'test-error');
+        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
+        assert.equal(engineStatuses.length, 1);
+        assert.equal(engineStatuses[0].test, 1);
+    }
+}, {
+    id: 'composition test #4 - error in a bundle does NOT stop execution',
+    engines: [{
+        name: 'engine1',
+        languages: [],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result' }],
+                status: {
+                    test: 1
+                }
+            });
+        }
+    }, {
+        name: 'engine2',
+        languages: [],
+        analyzeFile() {
+            return Promise.reject(new Error('test-error'));
+        }
+    }, {
+        name: 'engine3',
+        languages: [],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result3' }],
+                status: {
+                    test: 3
+                }
+            });
+        }
+    }],
+    pipeline: {
+        bundle: [{
+            engine1: {}
+        }, {
+            engine2: {}
+        }, {
+            engine3: {}
+        }]
+    },
+    then: (results, engineStatuses) => {
+        assert(_.isArray(results.warnings), 'warnings is an array');
+        assert.equal(results.warnings.length, 2);
+        //  Sort the result as bundle engines return be executed out of order.
+        const sortedWarnings = _.sortBy(results.warnings, 'test');
+        assert.equal(sortedWarnings[0].test, 'result');
+        assert.equal(sortedWarnings[1].test, 'result3');
+
+        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
+        assert.equal(engineStatuses.length, 2);
+        //  Sort the statuses as bundle engines return be executed out of order.
+        const sortedStatuses = _.sortBy(engineStatuses, 'test');
+        assert.equal(_.get(sortedStatuses, '[0].test'), 1);
+        assert.equal(_.get(sortedStatuses, '[1].test'), 3);
+    }
+}, {
+    id: 'composition test #5',
+    engines: [{
+        name: 'engine1',
+        languages: [],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result' }],
+                status: {
+                    test: 1
+                }
+            });
+        }
+    }, {
+        name: 'engine2',
+        languages: [],
+        analyzeFile() {
+            return Promise.reject(new Error('test-error'));
+        }
+    }, {
+        name: 'engine3',
+        languages: [],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result3' }],
+                status: {
+                    test: 3
+                }
+            });
+        }
+    }],
+    pipeline: {
+        bundle: [{
+            engine1: {}
+        }, {
+            engine2: {}
+        }, {
+            engine3: {}
+        }]
+    },
+    then: (results, engineStatuses) => {
+        assert(_.isArray(results.warnings), 'warnings is an array');
+        assert.equal(results.warnings.length, 2);
+        //  Sort the result as bundle engines return be executed out of order.
+        const sortedWarnings = _.sortBy(results.warnings, 'test');
+        assert.equal(sortedWarnings[0].test, 'result');
+        assert.equal(sortedWarnings[1].test, 'result3');
+
+        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
+        assert.equal(engineStatuses.length, 2);
+        //  Sort the statuses as bundle engines return be executed out of order.
+        const sortedStatuses = _.sortBy(engineStatuses, 'test');
+        assert.equal(_.get(sortedStatuses, '[0].test'), 1);
+        assert.equal(_.get(sortedStatuses, '[1].test'), 3);
+    }
+}, {
+    id: 'composition test #6',
     engines: [{
         name: 'engine1',
         languages: [],
@@ -365,7 +525,6 @@ module.exports = [{
         languages: [],
         analyzeFile() {
             return Promise.resolve({
-                //  Don't return warnings on purpose - we are testing more coverage.
                 status: {
                     test: 2
                 }
@@ -385,9 +544,94 @@ module.exports = [{
         assert.equal(result.warnings[0].test, 'result');
 
         assert(_.isArray(engineStatuses), 'engineStatuses is an array');
+        assert.equal(engineStatuses.length, 2);
         //  Sort the statuses as bundle engines return be executed out of order.
         const sortedStatuses = _.sortBy(engineStatuses, 'test');
         assert.equal(_.get(sortedStatuses, '[0].test'), 1);
         assert.equal(_.get(sortedStatuses, '[1].test'), 2);
+    }
+}, {
+    id: 'languge test #1',
+    engines: [{
+        name: 'engine1',
+        languages: ['test'],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result' }],
+                status: {
+                    test: 1
+                }
+            });
+        }
+    }, {
+        name: 'engine2',
+        languages: ['not-test'],
+        analyzeFile() {
+            return Promise.resolve({
+                status: {
+                    test: 2
+                }
+            });
+        }
+    }],
+    pipeline: {
+        bundle: [{
+            engine1: {}
+        }, {
+            engine2: {}
+        }]
+    },
+    params: {
+        language: 'test'
+    },
+    then: (result, engineStatuses) => {
+        assert(_.isArray(result.warnings), 'warnings is an array');
+        assert.equal(result.warnings.length, 1);
+        assert.equal(result.warnings[0].test, 'result');
+
+        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
+        assert.equal(engineStatuses.length, 1);
+        assert.equal(engineStatuses[0].test, 1);
+    }
+}, {
+    id: 'languge test #2',
+    engines: [{
+        name: 'engine1',
+        languages: ['not-test'],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result' }],
+                status: {
+                    test: 1
+                }
+            });
+        }
+    }, {
+        name: 'engine2',
+        languages: ['not-test-either'],
+        analyzeFile() {
+            return Promise.resolve({
+                status: {
+                    test: 2
+                }
+            });
+        }
+    }],
+    pipeline: {
+        bundle: [{
+            engine1: {}
+        }, {
+            engine2: {}
+        }]
+    },
+    params: {
+        language: 'test'
+    },
+    then: (result, engineStatuses) => {
+        assert(_.isArray(result.warnings), 'warnings is an array');
+        assert.equal(result.warnings.length, 0);
+
+        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
+        assert.equal(engineStatuses.length, 0);
     }
 }];

@@ -40,14 +40,7 @@ class EnginePipeline {
         if ((_.isEmpty(engine.languages)) || (_.findIndex(engine.languages, lang =>
             _.eq(_.toLower(_.trim(lang)), lowerLang)
         ) > -1)) {
-            return engine.analyzeFile(hostPath, language, content, context)
-                .catch((err) => {
-                    logger.error(
-                        'File analysis failed', {
-                            engine: engineName,
-                            err
-                        });
-                });
+            return engine.analyzeFile(hostPath, language, content, context);
         }
 
         return Promise.resolve();
@@ -79,19 +72,26 @@ class EnginePipeline {
             const newContext = _.cloneDeep(context) || {};
 
             if (!_.isNil(bundle)) {
-                // Process engines asynchronously
+                // Process engines asynchronously but ignore each separate failure.
                 return Promise.all(
-                    _.map(bundle, (value) => {
-                        const singleEntry = EnginePipeline._getSingleEngine(value);
+                    _.map(bundle, bundleItem =>
+                        (() => {
+                            const singleEntry = EnginePipeline._getSingleEngine(bundleItem);
 
-                        if (_.isNil(singleEntry)) {
-                            return this._runPipeline(
-                                value, hostPath, language, content, newContext, refEngineStatuses);
-                        }
-                        newContext.engineParams = singleEntry.engineParams;
-                        return this._runSingleEngine(
-                            singleEntry.engineName, hostPath, language, content, newContext);
-                    })
+                            if (_.isNil(singleEntry)) {
+                                return this._runPipeline(
+                                    bundleItem, hostPath, language, content, newContext, refEngineStatuses);
+                            }
+
+                            //  Run the engine with its params.
+                            newContext.engineParams = singleEntry.engineParams;
+                            return this._runSingleEngine(
+                                singleEntry.engineName, hostPath, language, content, newContext);
+                        })()
+                            .catch((err) => {
+                                logger.warn('Failure during bundle pipleline run, continuing', err);
+                            })
+                    )
                 ).then((res) => {
                     const results = _.compact(res);
                     const bundleResults = _.reduce(results, (accum, oneResult) => {
@@ -152,6 +152,7 @@ class EnginePipeline {
                             //  skipped engines.
                             const status = _.get(results, 'status');
                             if (!_.isNil(status)) {
+                                // istanbul ignore else
                                 if (_.isArray(refEngineStatuses)) {
                                     refEngineStatuses.push(status);
                                 }
@@ -165,7 +166,10 @@ class EnginePipeline {
                         })
                         //  Capture the error if it happens. Note that an engine could reject the promise
                         //  with a nil error in which case we will continue onto the next engine.
-                        .catch((err) => { error = err; })
+                        .catch((err) => {
+                            logger.error('Failure during sequence pipleline run, stopping', err);
+                            error = err;
+                        })
                         //  Error or not increment the index in the sequence to get the next engine.
                         .then(() => { i += 1; })
                 )
@@ -178,6 +182,7 @@ class EnginePipeline {
                     });
             }
         } catch (err) {
+            // istanbul ignore next
             return Promise.reject(err);
         }
         return Promise.reject(new Error('Bad engine pipeline config.'));
