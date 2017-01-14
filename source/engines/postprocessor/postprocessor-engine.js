@@ -122,7 +122,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
 
         // go from fromLine to toLine,
         // and return true if everything in between is only whitespace
-        const linesBetween =_.join(_.slice(lines, fromLine, toLine - 1), ' ');
+        const linesBetween = _.join(_.slice(lines, fromLine, toLine - 1), ' ');
         return _.isEmpty(_.trim(linesBetween));
     }
 
