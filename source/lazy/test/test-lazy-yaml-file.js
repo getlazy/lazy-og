@@ -9,8 +9,6 @@
 // lazy ignore class-methods-use-this
 // lazy ignore lodash/preferred-alias
 
-require('./bootstrap');
-
 const _ = require('lodash');
 const assert = require('assert');
 const LazyYamlFile = require('../app/lazy-yaml-file');

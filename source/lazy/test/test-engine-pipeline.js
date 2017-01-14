@@ -7,8 +7,6 @@
 // lazy ignore prefer-arrow-callback
 // lazy ignore func-names
 
-require('./bootstrap');
-
 const td = require('testdouble');
 
 const _ = require('lodash');
