@@ -122,17 +122,8 @@ class PostProcEngineHttpServer extends EngineHttpServer {
 
         // go from fromLine to toLine,
         // and return true if everything in between is only whitespace
-        const lookupLines = _.slice(lines, fromLine, toLine - 1);
-
-        let foundNoSpace = false;
-        _.forEach(lookupLines, (oneLine) => {  // lazy ignore-once consistent-return
-            if (!_.isEmpty(_.trim(oneLine))) {
-                foundNoSpace = true;
-                return false; // no need to look further...
-            }
-        });
-
-        return !foundNoSpace;
+        const linesBetween =_.join(_.slice(lines, fromLine, toLine - 1), ' ');
+        return _.isEmpty(_.trim(linesBetween));
     }
 
     /**
