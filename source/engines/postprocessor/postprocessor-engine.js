@@ -234,6 +234,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             }
             return false;
         });
+
         // If there are some rules that are reported for ignorance,
         // but they haven't been reported, mark their ignorance as warning
         // lazy ignore-once lodash/prefer-map ; As we are just adding more warnings, following is more readable.
@@ -241,6 +242,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             warningList.push({
                 type: 'Warning',
                 message: `No [${warn.ruleId}] rule violation.`,
+                //  We set spaces around the rule ID so that it cannot be disabled.
                 ruleId: ' lazy-no-ignore-once ',
                 line: warn.line,
                 column: 1
