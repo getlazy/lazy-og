@@ -634,4 +634,233 @@ module.exports = [{
         assert(_.isArray(engineStatuses), 'engineStatuses is an array');
         assert.equal(engineStatuses.length, 0);
     }
+}, {
+    id: 'languge test #3',
+    engines: [{
+        name: 'engine1',
+        languages: ['test'],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result' }],
+                status: {
+                    test: 1
+                }
+            });
+        }
+    }, {
+        name: 'engine2',
+        languages: ['test'],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result2' }],
+                status: {
+                    test: 2
+                }
+            });
+        }
+    }],
+    pipeline: {
+        bundle: [{
+            engine1: {}
+        }, {
+            engine2: {}
+        }]
+    },
+    params: {
+        language: 'test'
+    },
+    then: (result, engineStatuses) => {
+        assert(_.isArray(result.warnings), 'warnings is an array');
+        assert.equal(result.warnings.length, 2);
+
+        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
+        assert.equal(engineStatuses.length, 2);
+    }
+}, {
+    id: 'languge test #4',
+    engines: [{
+        name: 'engine1',
+        languages: ['test', 'test2'],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result' }],
+                status: {
+                    test: 1
+                }
+            });
+        }
+    }, {
+        name: 'engine2',
+        languages: ['test3'],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result2' }],
+                status: {
+                    test: 2
+                }
+            });
+        }
+    }],
+    pipeline: {
+        bundle: [{
+            engine1: {}
+        }, {
+            engine2: {}
+        }]
+    },
+    params: {
+        language: 'test2'
+    },
+    then: (result, engineStatuses) => {
+        assert(_.isArray(result.warnings), 'warnings is an array');
+        assert.equal(result.warnings.length, 1);
+
+        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
+        assert.equal(engineStatuses.length, 1);
+    }
+}, {
+    id: 'languge test #5',
+    engines: [{
+        name: 'engine1',
+        languages: ['test', 1234, ' TEST2 ', null, undefined, { x: 1 }, ['x', '1']],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result' }],
+                status: {
+                    test: 1
+                }
+            });
+        }
+    }, {
+        name: 'engine2',
+        languages: ['test3'],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result2' }],
+                status: {
+                    test: 2
+                }
+            });
+        }
+    }],
+    pipeline: {
+        bundle: [{
+            engine1: {}
+        }, {
+            engine2: {}
+        }]
+    },
+    params: {
+        language: 'test2'
+    },
+    then: (result, engineStatuses) => {
+        assert(_.isArray(result.warnings), 'warnings is an array');
+        assert.equal(result.warnings.length, 1);
+
+        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
+        assert.equal(engineStatuses.length, 1);
+    }
+}, {
+    id: 'languge test #6',
+    engines: [{
+        name: 'engine1',
+        languages: ['JavaScript'],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result' }],
+                status: {
+                    test: 1
+                }
+            });
+        }
+    }, {
+        name: 'engine2',
+        languages: ['Babel ES6 JavaScript'],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result2' }],
+                status: {
+                    test: 2
+                }
+            });
+        }
+    }],
+    pipeline: {
+        bundle: [{
+            engine1: {}
+        }, {
+            engine2: {}
+        }]
+    },
+    params: {
+        hostPath: 'test.js',
+        language: 'Babel ES6 JavaScript',
+        content: '\'use strict\''
+    },
+    then: (result, engineStatuses) => {
+        assert(_.isArray(result.warnings), 'warnings is an array');
+        assert.equal(result.warnings.length, 2);
+        //  Sort the result as bundle engines return be executed out of order.
+        const sortedWarnings = _.sortBy(result.warnings, 'test');
+        assert.equal(sortedWarnings[0].test, 'result');
+        assert.equal(sortedWarnings[1].test, 'result2');
+
+        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
+        assert.equal(engineStatuses.length, 2);
+        //  Sort the statuses as bundle engines return be executed out of order.
+        const sortedStatuses = _.sortBy(engineStatuses, 'test');
+        assert.equal(_.get(sortedStatuses, '[0].test'), 1);
+        assert.equal(_.get(sortedStatuses, '[1].test'), 2);
+    }
+}, {
+    id: 'languge test #6',
+    engines: [{
+        name: 'engine1',
+        languages: ['JavaScript'],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result' }],
+                status: {
+                    test: 1
+                }
+            });
+        }
+    }, {
+        name: 'engine2',
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result2' }],
+                status: {
+                    test: 2
+                }
+            });
+        }
+    }],
+    pipeline: {
+        bundle: [{
+            engine1: {}
+        }, {
+            engine2: {}
+        }]
+    },
+    params: {
+        hostPath: 'test.js',
+        language: 'JavaScript',
+        content: '\'use strict\''
+    },
+    then: (result, engineStatuses) => {
+        assert(_.isArray(result.warnings), 'warnings is an array');
+        assert.equal(result.warnings.length, 2);
+        //  Sort the result as bundle engines return be executed out of order.
+        const sortedWarnings = _.sortBy(result.warnings, 'test');
+        assert.equal(sortedWarnings[0].test, 'result');
+        assert.equal(sortedWarnings[1].test, 'result2');
+
+        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
+        assert.equal(engineStatuses.length, 2);
+        //  Sort the statuses as bundle engines return be executed out of order.
+        const sortedStatuses = _.sortBy(engineStatuses, 'test');
+        assert.equal(_.get(sortedStatuses, '[0].test'), 1);
+        assert.equal(_.get(sortedStatuses, '[1].test'), 2);
+    }
 }];
