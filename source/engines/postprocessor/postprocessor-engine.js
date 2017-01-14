@@ -53,12 +53,11 @@ class PostProcEngineHttpServer extends EngineHttpServer {
 
     /**
      * Parses the source code looking for lazy directives in comments
-     * @param {string} content Content of the source file
+     * @param {Array} lines Content of the source file, split in lines
      * @return {Object} List of all directives found in comments
      */
-    _getLazyDirectives(content) {
+    _getLazyDirectives(lines) {
         const self = this;
-        const lines = _.split(content, '\n');
         const directives = {
             ignore: [],
             ignore_once: []
@@ -104,6 +103,37 @@ class PostProcEngineHttpServer extends EngineHttpServer {
         return warningList;
     }
 
+    /**
+     * Given the lines of source code, and two line numbers,
+     * return true if there is nothing except whitespaces between the two
+     * given lines
+     * @param {Number} fromLine starting line
+     * @param {Number} toLine ending line
+     * @param {Array} lines array of lines to analyze
+     * @return {boolean} true if there is nothin but whitespaces between fromLine and toLine; false otherwise
+     */
+    _nothingBetweenLines(fromLine, toLine, lines) {
+        if (_.eq(toLine, fromLine)) {
+            return true; // same line
+        }
+        if (_.gt(fromLine, toLine)) {
+            return false;  // "from" is after "to" line
+        }
+
+        // go from fromLine to toLine,
+        // and return true if everything in between is only whitespace
+        const lookupLines = _.slice(lines, fromLine, toLine - 1);
+
+        let foundNoSpace = false;
+        _.forEach(lookupLines, (oneLine) => {  // lazy ignore-once consistent-return
+            if (!_.isEmpty(_.trim(oneLine))) {
+                foundNoSpace = true;
+                return false; // no need to look further...
+            }
+        });
+
+        return !foundNoSpace;
+    }
 
     /**
      * Remove all messages that should be ignored once (only for the first time they occurr)
@@ -111,7 +141,8 @@ class PostProcEngineHttpServer extends EngineHttpServer {
      * @param {Object} toRemove List of ruleId's to remove from warningList
      * @return {Object} Filtered list of messages
      */
-    _removeIgnoreOnceWarnings(warningList, toRemove) {
+    _removeIgnoreOnceWarnings(warningList, toRemove, lines) {
+        const self = this;
         const processedDirectives = [];
 
         _.pullAllWith(warningList, toRemove, (warning, directive) => {
@@ -124,7 +155,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             const warningRule = _.toLower(_.get(warning, 'ruleId'));
             const directiveRule = _.toLower(_.get(directive, 'ruleId'));
 
-            if ((_.eq(warningRule, directiveRule)) && (_.gte(warningLine, directiveLine))) {
+            if ((_.eq(warningRule, directiveRule)) && self._nothingBetweenLines(directiveLine, warningLine, lines)) {
                 // Remember directives we have processed to avoid using them again
                 processedDirectives.push(directive);
                 return true;
@@ -165,9 +196,10 @@ class PostProcEngineHttpServer extends EngineHttpServer {
                     warnings: [wooHoo]
                 });
             }
-            const directives = self._getLazyDirectives(content);
+            const lines = _.split(content, '\n');
+            const directives = self._getLazyDirectives(lines);
 
-            self._removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once);
+            self._removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once, lines);
             self._removeIgnoreWarnings(filteredWarnings, directives.ignore);
 
             if (_.size(filteredWarnings) < 1) {
