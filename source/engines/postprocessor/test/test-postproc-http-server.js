@@ -146,6 +146,42 @@ const ANALYZE_FILE_FIXTURE = [{
         assert.equal(warningsPerType['Info'].length, 1);
     },
     catch: ASSERT_FALSE
+},
+{
+    name: '200 - Ignore current line',
+    params: {
+        path: '/src/test.js',
+        language: 'JavaScript',
+        content: `some.code.at.line(1)
+        code with error; // lazy ignore`,
+        context: require('./testdata1.json')
+    },
+    then: (results) => {
+        const warnings = results.warnings;
+        assert.equal(warnings.length, 2);
+        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
+        assert.equal(warningsPerType['Error'].length, 1);
+        assert.equal(warningsPerType['Info'].length, 1);
+    },
+    catch: ASSERT_FALSE
+},
+{
+    name: '200 - Ignore current line w/ comment',
+    params: {
+        path: '/src/test.js',
+        language: 'JavaScript',
+        content: `some.code.at.line(1)
+        code with error; // lazy ignore ; ignore all here`,
+        context: require('./testdata1.json')
+    },
+    then: (results) => {
+        const warnings = results.warnings;
+        assert.equal(warnings.length, 2);
+        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
+        assert.equal(warningsPerType['Error'].length, 1);
+        assert.equal(warningsPerType['Info'].length, 1);
+    },
+    catch: ASSERT_FALSE
 }
 ];
 

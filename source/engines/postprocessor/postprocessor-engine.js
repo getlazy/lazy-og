@@ -26,7 +26,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
      */
     _parseLine(line) {
         // lazy ignore-once no-useless-escape ; Linter is confused w/ regex
-        const regex = /(#|\/\*|\/\/)\W*lazy\s+(\S*)\s+([^;\*]*)\s*;*(.*)/g;
+        const regex = /(#|\/\*|\/\/)\W*lazy\s+(\S*)\s*([^;\*]*)\s*;*(.*)/g;
 
         const command = {
             commandStr: '',
@@ -53,25 +53,31 @@ class PostProcEngineHttpServer extends EngineHttpServer {
 
     /**
      * Parses the source code looking for lazy directives in comments
-     * @param {string} content Content of the source file
+     * @param {Array} lines Content of the source file, split in lines
      * @return {Object} List of all directives found in comments
      */
-    _getLazyDirectives(content) {
+    _getLazyDirectives(lines) {
         const self = this;
-        const lines = _.split(content, '\n');
         const directives = {
             ignore: [],
-            ignore_once: []
+            ignore_once: [],
+            ignore_local: []
         };
 
         _.forEach(lines, (oneLine, lineNo) => {
             const command = self._parseLine(oneLine);
 
             if (_.eq(command.commandStr, 'ignore')) {
-                // lazy ignore-once lodash/prefer-map ; _.map with be more complicated in this case
-                _.forEach(command.args, (ruleToIgnore) => {
-                    directives.ignore.push(_.toLower(ruleToIgnore));
-                });
+                if (_.isEmpty(command.args)) {
+                    // if there are no args, then treat this as
+                    // "ignore all warnings at this line"
+                    directives.ignore_local.push(lineNo + 1);
+                } else {
+                    // lazy ignore-once lodash/prefer-map ; _.map with be more complicated in this case
+                    _.forEach(command.args, (ruleToIgnore) => {
+                        directives.ignore.push(_.toLower(ruleToIgnore));
+                    });
+                }
             }
 
             if (_.eq(command.commandStr, 'ignore-once')) {
@@ -85,6 +91,29 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             }
         });
         return directives;
+    }
+
+    /**
+     * Given the lines of source code, and two line numbers,
+     * return true if there is nothing except whitespaces between the two
+     * given lines
+     * @param {Number} fromLine starting line
+     * @param {Number} toLine ending line
+     * @param {Array} lines array of lines to analyze
+     * @return {boolean} true if there is nothin but whitespaces between fromLine and toLine; false otherwise
+     */
+    _nothingBetweenLines(fromLine, toLine, lines) {
+        if (_.eq(toLine, fromLine)) {
+            return true; // same line
+        }
+        if (_.gt(fromLine, toLine)) {
+            return false;  // "from" is after "to" line
+        }
+
+        // go from fromLine to toLine,
+        // and return true if everything in between is only whitespace
+        const linesBetween = _.join(_.slice(lines, fromLine, toLine - 1), ' ');
+        return _.isEmpty(_.trim(linesBetween));
     }
 
     /**
@@ -104,6 +133,37 @@ class PostProcEngineHttpServer extends EngineHttpServer {
         return warningList;
     }
 
+    /**
+     * Remove all messages that should be ignored in current line, only
+     * @param {Object} warningList List of messages from which to remove warnings
+     * @param {Object} toRemove List of lines to remove warnings from
+     * @return {Object} Filtered list of messages
+     */
+    _removeLocalWarnings(warningList, toRemove) {
+        const processedLines = [];
+
+        _.pullAllWith(warningList, toRemove, (warning, directiveLine) => {
+            const warningLine = _.parseInt(_.get(warning, 'line', 0), 10);
+            if (_.eq(warningLine, directiveLine)) {
+                processedLines.push(directiveLine);
+                return true;
+            }
+            return false;
+        });
+        // If there are some lines that are reported for ignorance,
+        // but they haven't been reported, mark their ignorance as warning
+        // lazy ignore-once lodash/prefer-map ; As we are just adding more warnings, following is more readable.
+        _.forEach(_.difference(toRemove, processedLines), (line) => {
+            warningList.push({
+                type: 'Warning',
+                message: 'No rules violated at this line.',
+                ruleId: ' lazy-no-ignore-line ',
+                line,
+                column: 1
+            });
+        });
+        return warningList;
+    }
 
     /**
      * Remove all messages that should be ignored once (only for the first time they occurr)
@@ -111,7 +171,8 @@ class PostProcEngineHttpServer extends EngineHttpServer {
      * @param {Object} toRemove List of ruleId's to remove from warningList
      * @return {Object} Filtered list of messages
      */
-    _removeIgnoreOnceWarnings(warningList, toRemove) {
+    _removeIgnoreOnceWarnings(warningList, toRemove, lines) {
+        const self = this;
         const processedDirectives = [];
 
         _.pullAllWith(warningList, toRemove, (warning, directive) => {
@@ -124,7 +185,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             const warningRule = _.toLower(_.get(warning, 'ruleId'));
             const directiveRule = _.toLower(_.get(directive, 'ruleId'));
 
-            if ((_.eq(warningRule, directiveRule)) && (_.gte(warningLine, directiveLine))) {
+            if ((_.eq(warningRule, directiveRule)) && self._nothingBetweenLines(directiveLine, warningLine, lines)) {
                 // Remember directives we have processed to avoid using them again
                 processedDirectives.push(directive);
                 return true;
@@ -169,9 +230,11 @@ class PostProcEngineHttpServer extends EngineHttpServer {
                 });
             }
 
-            const directives = self._getLazyDirectives(content);
+            const lines = _.split(content, '\n');
+            const directives = self._getLazyDirectives(lines);
 
-            self._removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once);
+            self._removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once, lines);
+            self._removeLocalWarnings(filteredWarnings, directives.ignore_local);
             self._removeIgnoreWarnings(filteredWarnings, directives.ignore);
 
             if (_.size(filteredWarnings) < 1) {
