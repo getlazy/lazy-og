@@ -154,11 +154,44 @@ class Engine
         const self = this;
 
         const redirectLogStreamIntoLogger = (stream) => {
+            const pendingBuffers = [];
+            const dumpPendingBuffers = () => {
+                const incompleteBuffersAsString = HigherDockerManager.containerOutputBuffersToString(pendingBuffers);
+                logger.error(`Dumping incomplete buffers received from ${self.name} engine:`, incompleteBuffersAsString);
+            };
+
+            const logEngineMessage = (messageData) => {
+                logger.log(messageData.level, messageData.message, messageData.meta);
+            };
+
             stream.on('data', (buffer) => {
-                logger.info(`[${self.name}]`,
-                    _.trim(HigherDockerManager.containerOutputBuffersToString([buffer])));
+                //  First try to parse as JSON the line as we received it. If it succeeds then it means
+                //  that it was a valid and complete JSON which in turn means that pending buffers
+                //  were not and we will just dump them as they were received.
+                let messageJson = HigherDockerManager.containerOutputBuffersToString([buffer]);
+                try {
+                    let messageData = JSON.parse(messageJson);
+                    dumpPendingBuffers();
+                    logEngineMessage(messageData);
+                } catch(e) {
+                    //  Since single buffer parsing failed we will now try to parse this buffer together
+                    //  with all the other pending buffers.
+                    pendingBuffers.push(buffer);
+                    messageJson = HigherDockerManager.containerOutputBuffersToString(pendingBuffers);
+
+                    try {
+                        messageData = JSON.parse(messageJson);
+                        //  Parse succeeded so let's clear the buffers.
+                        pendingBuffers = [];
+                        logEngineMessage(messageData);
+                    } catch(e) {
+                        //  Do nothing - we have to wait for the next buffer.
+                    }
+                }
             });
             stream.on('end', () => {
+                //  Before ending dump all the pending buffers as they are.
+                dumpPendingBuffers();
                 logger.info(
                     'Stopped streaming logs for engine', self.name);
             });

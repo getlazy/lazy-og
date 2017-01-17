@@ -143,6 +143,9 @@ LAZY_CONFIG_SCHEMA = {
         ui: {
             $ref: '#/definitions/engine'
         },
+        config: {
+            type: 'object'
+        },
         engine_pipeline: {
             type: 'object',
             minProperties: 1,

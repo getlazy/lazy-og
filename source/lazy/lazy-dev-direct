@@ -4,6 +4,7 @@ docker run -it --rm \
     -v "$(pwd)/config:/config" \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -p "16827:80" \
+    --link elk \
     --stop-signal SIGTERM \
     -w /app \
     --env-file env \

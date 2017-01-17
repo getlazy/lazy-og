@@ -3,16 +3,12 @@
 
 /* global logger */
 
-//  Initialize all global variables.
-global.logger = require('./logger');
-
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const internalControllers = require('./controllers/internal');
 const externalControllers = require('./controllers/external');
 const EngineManager = require('./engine-manager');
-const LazyYamlFile = require('./lazy-yaml-file');
 
 //  Engine manager object managing all the engine containers.
 let engineManager = null;
@@ -36,7 +32,7 @@ class Main
      * @param {string} lazyYamlFilePath Path to lazy YAML configuration file.
      * @return {Promise} Promise which is resolved when the application has started.
      */
-    static main(lazyYamlFilePath) {
+    static main(lazyConfig) {
         logger.info('Starting lazy');
 
         //  Start procedure is as follows:
@@ -51,17 +47,15 @@ class Main
         //      5.  Load all controllers for the external Express app - this step depends on engine
         //          manager correctly started and running which is why we have to wait for step #4
         //          to finish.
-        return Main._loadLazyYaml(lazyYamlFilePath)
-            .then((lazyConfig) => {
-                //  Config is the combined preset configuration with overrides from user-defined
-                //  configuration.
-                config = _.assignIn({
-                    privateApiPort: PRIVATE_API_PORT
-                }, lazyConfig);
 
-                engineManager = new EngineManager(config);
-            })
-            .then(() => Main._initializeExternalExpressApp())
+        //  Config is the combined preset configuration with overrides from user-defined
+        //  configuration.
+        config = _.assignIn({
+            privateApiPort: PRIVATE_API_PORT
+        }, lazyConfig);
+        engineManager = new EngineManager(config);
+
+        Main._initializeExternalExpressApp()
             .then(() => Main._initializeInternalExpressApp())
             .then(() => Main._recreateAllEngines())
             .then(() => Main._loadExternalExpressAppControllers())
@@ -180,10 +174,6 @@ class Main
      */
     static _recreateAllEngines() {
         return engineManager.start();
-    }
-
-    static _loadLazyYaml(lazyYamlFilePath) {
-        return LazyYamlFile.load(lazyYamlFilePath);
     }
 }
 
