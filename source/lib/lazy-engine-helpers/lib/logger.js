@@ -11,15 +11,11 @@ const getEngineLogger = () => {
         return logger;
     }
 
-    logger = new(winston.Logger)({
+    logger = new winston.Logger({
         transports: [
-            new (winston.transports.Console)({
-                formatter: (options) => {
-                    return options.level.toUpperCase() + ' ' +
-                        (options.message ? options.message : '') +
-                        (options.meta && Object.keys(options.meta).length ?
-                            '\n\t'+ JSON.stringify(options.meta) : '');
-                }
+            // We leave it to lazy to parse our logs and correctly redirect them.
+            new winston.transports.Console({
+                formatter: JSON.stringify
             })
         ]
     });
