@@ -4,13 +4,13 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t getlazy/taskrun-engine:$(PACKAGE_VERSION) \
-		-t getlazy/taskrun-engine:latest \
+		-t getlazy/npm-task-engine:$(PACKAGE_VERSION) \
+		-t getlazy/npm-task-engine:latest \
 		.
 
 push:
-	docker push getlazy/taskrun-engine:$(PACKAGE_VERSION)
-	docker push getlazy/taskrun-engine:latest
+	docker push getlazy/npm-task-engine:$(PACKAGE_VERSION)
+	docker push getlazy/npm-task-engine:latest
 
 run:
 	docker run -it --rm \
