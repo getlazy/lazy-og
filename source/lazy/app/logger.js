@@ -13,13 +13,7 @@ const initialize = (lazyConfig) => {
 
     const elasticConfig = _.get(lazyConfig, 'config.logger.elastic');
     if (elasticConfig) {
-        console.log('alright', elasticConfig);
-        transports.push(new winstonElasticsearch(_.assignIn(elasticConfig, {
-            transformer: (x, ...args) => {
-                // console.log(x, ...args);
-                return x;
-            }
-        })));
+        transports.push(new winstonElasticsearch(elasticConfig));
     }
 
     const logstashUdpConfig = _.get(lazyConfig, 'config.logger.logstash-udp');
