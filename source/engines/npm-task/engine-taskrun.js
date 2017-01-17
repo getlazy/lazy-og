@@ -96,7 +96,11 @@ class TaskRunnerEngineHttpServer extends EngineHttpServer {
         const taskName = _.get(context, 'engineParams.run');
         const task = _.find(this._installedTasks, taskName);
         const taskObj = _.get(task, taskName);
-        return taskObj.executeLazy(hostPath, language, content, context);
+        try {
+            return taskObj.executeLazy(hostPath, language, content, context);
+        } catch (error) {
+            return Promise.reject(error);
+        }
     }
 }
 
