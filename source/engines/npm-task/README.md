@@ -1,4 +1,4 @@
-# lazy-taskrun-engine
+# lazy-npm-task-engine
 Engine capable of running simple tasks from external NPMs
 
 The engine that is capable of downloading task implementation during the boot, and executing it from lazy pipeline.
@@ -12,7 +12,7 @@ To configure this engine, put the following lines in the `engines` section of `l
 ```
 engines:
   taskEngine:
-    image: getlazy/taskrun-engine:latest
+    image: getlazy/npm-task-engine-engine:latest
 	boot_wait: true # optional, defaults to true, flag instructing lazy to wait for engine's boot process to finish
 	boot_timeout: 120 # optional timeout to wait for engine to boot
 	meta: {} # optional metadata for the engine, if not provided lazy queries the engine for it
