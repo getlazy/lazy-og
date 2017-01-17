@@ -7,7 +7,7 @@ const EngineHelpers = require('@lazyass/engine-helpers');
 
 global.logger = EngineHelpers.Logger.getEngineLogger();
 
-const Engine = require('./engine-taskrun');
+const Engine = require('./engine-npm-task');
 
 const engine = new Engine();
 

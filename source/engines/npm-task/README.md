@@ -1,9 +1,9 @@
 # lazy-taskrun-engine
 Engine capable of running simple tasks from external NPMs
 
-The engine that is capable of downloading tasks during the boot, and executing them from lazy pipeline.
+The engine that is capable of downloading task implementation during the boot, and executing it from lazy pipeline.
 
-There can be any number of tasks loaded in this engine. Each task must be a NPM package that can be installed via `npm install` command.
+There can be one task loaded in this engine. It must be a NPM package that can be installed via `npm install` command.
 
 ## Task Engine
  
@@ -18,11 +18,9 @@ engines:
 	meta: {} # optional metadata for the engine, if not provided lazy queries the engine for it
 
 	config:
-	  tasks:
-        task1: 'task-npm-package:3.1.2'  # npm-package-name:version or just npm-package-name
-		task2: 
-          packageName: 'task-npm-package'
-          packageVersion: '3.1.2'  # optional, default is "latest"
+	  task: 'npm-neb-test1' # npm-package-name:version or just npm-package-name
+	  # task: 'npm-neb-test1:latest'
+	  # task: 'npm-neb-test1:3.2.1'
 ```
 
 Then, you can use `task1` and `task2` in engine pipline in `lazy.yaml`:
@@ -30,17 +28,14 @@ Then, you can use `task1` and `task2` in engine pipline in `lazy.yaml`:
 ```
 engine_pipeline:
 	- sequence:               
-      - taskEngine:      # Engine name
-         run: 'task1'    # Name of the task to run
-	  - taskEngine:      # Engine name
-         run: 'task2'    # Name of the task to run
-		 taskConfig:     # Optional config for this task
-            prop1: 'val1'     #  =||=
-         prop2: 'val2'  
+	  - taskEngine:        # Engine name
+		 taskConfig:       # Optional config for this task
+            prop1: 'val1'  #  =||=
+         prop2: 'val2'     #  =||=
 ```
 ## Task Modules
 
-Each task that you wish to use with `taskrun` engine should be implemented as a simple Node.js module that exports just one function:
+Each task that you wish to use with this engine should be implemented as a simple Node.js module that exports just one function:
 
 `executeLazy (hostPath, language, content, context)`
 
