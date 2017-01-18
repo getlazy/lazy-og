@@ -8,8 +8,8 @@ const Main = require('./app/main.js');
 const Logger = require('./app/logger');
 
 const safeLog = (level, message) => {
-    if (logger) {
-        logger.log(level, message);
+    if (global.logger) {
+        global.logger.log(level, message);
     } else {
         // lazy ignore no-console ; we don't have a logger so nowhere else to log
         console.log(message);
