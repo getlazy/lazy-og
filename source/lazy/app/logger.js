@@ -12,7 +12,12 @@ const initialize = (lazyConfig) => {
 
     const elasticConfig = _.get(lazyConfig, 'config.logger.elastic');
     if (elasticConfig) {
-        transports.push(new WinstonElasticsearch(elasticConfig));
+        const elasticsearchTransport = new WinstonElasticsearch(elasticConfig);
+        elasticsearchTransport.on('error', (err) => {
+            // lazy ignore no-console ; where else can we log when logging is failing?
+            console.error('***** Elasticsearch logger transport error', err);
+        });
+        transports.push(elasticsearchTransport);
     }
 
     let consoleConfig = _.get(lazyConfig, 'config.logger.console');
