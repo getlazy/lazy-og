@@ -1,4 +1,7 @@
+
 'use strict';
+
+/* global logger */
 
 // lazy ignore class-methods-use-this
 
@@ -21,7 +24,6 @@ const ruleIgnoredAll = {
 const VERY_LARGE_LINE_NUMBER = 100000000;  // Probably no file will have more than 100 milion lines...
 
 class PostProcEngineHttpServer extends EngineHttpServer {
-
     /**
      * Parse the single line looking for lazy directives
      * Lazy directive can be in form of single line or
@@ -81,8 +83,8 @@ class PostProcEngineHttpServer extends EngineHttpServer {
 
             // Ignoring all the rules?
             if (_.eq(command.commandStr, 'ignore-all')) {
-                directives.ignore_all = true;  
-                return directives;
+                directives.ignore_all = true;
+                return;
             }
 
             if (_.eq(command.commandStr, 'ignore-start')) {
@@ -94,7 +96,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
 
             if (_.eq(command.commandStr, 'ignore-end')) {
                 if (!_.isNil(deadZone)) {
-                    // If deadZone is not nill, that means we have 
+                    // If deadZone is not nill, that means we have
                     // detected ignore-start directive before
                     deadZone.endLine = lineNo + 1;
                     directives.dead_zones.push(deadZone);
@@ -167,12 +169,12 @@ class PostProcEngineHttpServer extends EngineHttpServer {
     _removeIgnoreWarnings(warningList, toRemove) {
         _.remove(warningList, (warning) => {
             const ruleId = _.get(warning, 'ruleId');
-            if (_.isNil(ruleId)) {
+            if (_.isNil(ruleId) || !_.includes(toRemove, _.toLower(ruleId))) {
                 return false;
             }
-            return _.includes(toRemove, _.toLower(ruleId));
+            logger.info('remove-warning', { ruleId });
+            return true;
         });
-        return warningList;
     }
 
     /**
@@ -187,6 +189,9 @@ class PostProcEngineHttpServer extends EngineHttpServer {
         _.pullAllWith(warningList, toRemove, (warning, directiveLine) => {
             const warningLine = _.parseInt(_.get(warning, 'line', 0), 10);
             if (_.eq(warningLine, directiveLine)) {
+                logger.info('remove-local-warnings', {
+                    ruleId: warning.ruleId
+                });
                 processedLines.push(directiveLine);
                 return true;
             }
@@ -204,7 +209,6 @@ class PostProcEngineHttpServer extends EngineHttpServer {
                 column: 1
             });
         });
-        return warningList;
     }
 
     /**
@@ -230,6 +234,9 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             if ((_.eq(warningRule, directiveRule)) && self._nothingBetweenLines(directiveLine, warningLine, lines)) {
                 // Remember directives we have processed to avoid using them again
                 processedDirectives.push(directive);
+                logger.info('remove-ignore-once-warnings', {
+                    ruleId: warningRule
+                });
                 return true;
             }
             return false;
@@ -248,7 +255,6 @@ class PostProcEngineHttpServer extends EngineHttpServer {
                 column: 1
             });
         });
-        return warningList;
     }
 
     /**
@@ -261,7 +267,11 @@ class PostProcEngineHttpServer extends EngineHttpServer {
     _removeDeadZoneWarnings(warningList, deadZones) {
         _.pullAllWith(warningList, deadZones, (warning, oneDeadZone) => {
             const warningLine = _.parseInt(_.get(warning, 'line', 0), 10);
-            return _.inRange(warningLine, oneDeadZone.startLine, oneDeadZone.endLine);
+            if (!_.inRange(warningLine, oneDeadZone.startLine, oneDeadZone.endLine)) {
+                return false;
+            }
+            logger.info('remove-dead-zone-warning', { ruleId: warning.ruleId });
+            return true;
         });
         return warningList;
     }
@@ -280,12 +290,14 @@ class PostProcEngineHttpServer extends EngineHttpServer {
         //  We use a promise as we get any exceptions wrapped up as failures.
         return new Promise((resolve) => {
             const filteredWarnings = _.get(context, 'previousStepResults.warnings');
-            const wooHooMsgs = _.get(context, 'engineParams.woohoos', ['Woo-hoo! No linter warnings - your code looks pretty nice.']);
+            const wooHooMsgs = _.get(context, 'engineParams.woohoos',
+                ['Woo-hoo! No linter warnings - your code looks pretty nice.']);
 
             wooHoo.message = _.sample(wooHooMsgs);
 
             if (_.isNil(filteredWarnings)) { // nothing from the previos engines
-                resolve({warnings: [wooHoo]});
+                resolve({ warnings: [wooHoo] });
+                return;
             }
 
             const lines = _.split(content, '\n');
@@ -293,7 +305,8 @@ class PostProcEngineHttpServer extends EngineHttpServer {
 
             if (directives.ignore_all) {
                 // Ignoring everything - just get out
-                resolve ({warnings: [ruleIgnoredAll]}); 
+                resolve({ warnings: [ruleIgnoredAll] });
+                return;
             }
             self._removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once, lines);
             self._removeLocalWarnings(filteredWarnings, directives.ignore_local);
@@ -301,8 +314,10 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             self._removeDeadZoneWarnings(filteredWarnings, directives.dead_zones);
 
             if (_.size(filteredWarnings) < 1) {
+                logger.info('woohoo');
                 filteredWarnings.push(wooHoo);
             }
+
             resolve({
                 warnings: filteredWarnings
             });
