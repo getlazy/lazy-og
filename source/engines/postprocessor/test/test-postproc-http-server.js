@@ -201,6 +201,45 @@ const ANALYZE_FILE_FIXTURE = [{
         assert.equal(warnings[0].ruleId,' lazy-off ');
     },
     catch: ASSERT_FALSE
+},
+{
+    name: '200 - Ignore-start no ignore-end',
+    params: {
+        path: '/src/test.js',
+        language: 'JavaScript',
+        content: `// lazy ignore-start ; ignore everything`,
+        context: require('./testdata.json')
+    },
+    then: (results) => {
+        const warnings = results.warnings;
+        assert.equal(warnings.length, 1);
+        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
+        assert(_.isNil(warningsPerType['Error']));
+        assert.equal(warningsPerType['Info'].length, 1);
+        assert(_.isNil(warningsPerType['Warning']));
+        assert.equal(warnings[0].ruleId,' lazy-no-linter-warnings ');
+    },
+    catch: ASSERT_FALSE
+},
+{
+    name: '200 - Ignore-start and ignore-end',
+    params: {
+        path: '/src/test.js',
+        language: 'JavaScript',
+        content: `// lazy ignore-start ; ignore everything
+        const some_code_with_warning = null;
+        // lazy ignore-end`,
+        context: require('./testdata1.json')
+    },
+    then: (results) => {
+        const warnings = results.warnings;
+        assert.equal(warnings.length, 2);
+        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
+        assert.equal(warningsPerType['Error'].length, 1);
+        assert.equal(warningsPerType['Info'].length, 1);
+        assert(_.isNil(warningsPerType['Warning']));
+    },
+    catch: ASSERT_FALSE
 }
 ];
 

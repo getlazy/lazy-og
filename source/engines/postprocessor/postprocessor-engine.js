@@ -18,6 +18,8 @@ const ruleIgnoredAll = {
     ruleId: ' lazy-off '
 };
 
+const VERY_LARGE_LINE_NUMBER = 100000000;  // Probably no file will have more than 100 milion lines...
+
 class PostProcEngineHttpServer extends EngineHttpServer {
 
     /**
@@ -68,8 +70,11 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             ignore_all: false,
             ignore: [],
             ignore_once: [],
-            ignore_local: []
+            ignore_local: [],
+            dead_zones: []   // Dead zones are parts of the file in which we should ignore warnings
         };
+
+        let deadZone;
 
         _.forEach(lines, (oneLine, lineNo) => {
             const command = self._parseLine(oneLine);
@@ -78,6 +83,23 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             if (_.eq(command.commandStr, 'ignore-all')) {
                 directives.ignore_all = true;  
                 return directives;
+            }
+
+            if (_.eq(command.commandStr, 'ignore-start')) {
+                deadZone = {
+                    startLine: lineNo + 1,
+                    endLine: VERY_LARGE_LINE_NUMBER
+                };
+            }
+
+            if (_.eq(command.commandStr, 'ignore-end')) {
+                if (!_.isNil(deadZone)) {
+                    // If deadZone is not nill, that means we have 
+                    // detected ignore-start directive before
+                    deadZone.endLine = lineNo + 1;
+                    directives.dead_zones.push(deadZone);
+                    deadZone = undefined;
+                }
             }
 
             if (_.eq(command.commandStr, 'ignore')) {
@@ -103,6 +125,12 @@ class PostProcEngineHttpServer extends EngineHttpServer {
                 });
             }
         });
+
+        // Finally, if there was ignore-start,
+        // but no ignore-end, add dead zone
+        if (!_.isNil(deadZone)) {
+            directives.dead_zones.push(deadZone);
+        }
 
         return directives;
     }
@@ -220,6 +248,22 @@ class PostProcEngineHttpServer extends EngineHttpServer {
         });
         return warningList;
     }
+
+    /**
+     * Removes all messages from dead zones. Dead zones are lines between
+     * lazy ignore-start and lazy ignore-end directives.
+     * @param {Object} warningList List of messages from which to remove warnings
+     * @param {Object} deadZones List of dead zones to remove warnings from
+     * @return {Object} Filtered list of messages
+     */
+    _removeDeadZoneWarnings(warningList, deadZones) {
+        _.pullAllWith(warningList, deadZones, (warning, oneDeadZone) => {
+            const warningLine = _.parseInt(_.get(warning, 'line', 0), 10);
+            return _.inRange(warningLine, oneDeadZone.startLine, oneDeadZone.endLine);
+        });
+        return warningList;
+    }
+
     /**
      * Analyzes the previous engine's messages that are passed in context,
      * and post process them according to directives found in content
@@ -252,6 +296,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             self._removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once, lines);
             self._removeLocalWarnings(filteredWarnings, directives.ignore_local);
             self._removeIgnoreWarnings(filteredWarnings, directives.ignore);
+            self._removeDeadZoneWarnings(filteredWarnings, directives.dead_zones);
 
             if (_.size(filteredWarnings) < 1) {
                 filteredWarnings.push(wooHoo);

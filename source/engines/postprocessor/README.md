@@ -30,3 +30,5 @@ Following directives are currently supported:
 * `lazy ignore <rule-id>` disables all occurences of `<rule-id>`
 * `lazy ignore-once <rule-id>` disable only the first occurrence of `rule-id` after the directive
 * `lazy ignore-all` if found anywhere in the file, this directive will remove all the warnings
+* `lazy ignore-start` disable all warnings from this point to the first `lazy ignore-end` directive, or to the end of the file if no `lazy ignore-end` is found
+* `lazy ignore-end` stop ignoring warnings from now on
