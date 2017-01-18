@@ -4,6 +4,7 @@
 const _ = require('lodash');
 const winston = require('winston');
 const WinstonElasticsearch = require('winston-elasticsearch');
+const fp = require('lodash/fp');
 
 const LAZY_VERSION = require('../package.json').version;
 
@@ -29,18 +30,22 @@ const initialize = (lazyConfig) => {
 
     if (consoleConfig) {
         transports.push(new winston.transports.Console({
+            timestamp: () => new Date(),
             level: consoleConfig.level,
             formatter: (options) => {
                 const message = options.message ? options.message : '';
-                const meta = (options.meta && _.keys(options.meta).length) ?
-                    `${JSON.stringify(options.meta)}` : '';
-                return `[${LAZY_VERSION}] ${options.level.toUpperCase()} ${message} ${meta}`;
+                const meta = (options.meta && !_.isEmpty(options.meta)) ?
+                    JSON.stringify(options.meta) : '';
+                return `${options.timestamp().toISOString()} ${options.level.toUpperCase()} ${message} ${meta}`;
             }
         }));
     }
 
     const logger = new winston.Logger({
-        transports
+        transports,
+        rewriters: [
+            (level, message, meta) => fp.extend(meta, { lazy_version: LAZY_VERSION })
+        ]
     });
 
     return Promise.resolve(logger);
