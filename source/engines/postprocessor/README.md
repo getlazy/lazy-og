@@ -29,3 +29,4 @@ Following directives are currently supported:
 
 * `lazy ignore <rule-id>` disables all occurences of `<rule-id>`
 * `lazy ignore-once <rule-id>` disable only the first occurrence of `rule-id` after the directive
+* `lazy ignore-all` if found anywhere in the file, this directive will remove all the warnings

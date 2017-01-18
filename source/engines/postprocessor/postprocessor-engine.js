@@ -12,6 +12,12 @@ const wooHoo = {
     ruleId: ' lazy-no-linter-warnings '
 };
 
+const ruleIgnoredAll = {
+    type: 'Info',
+    message: 'All lazy checks ignored in this file.',
+    ruleId: ' lazy-off '
+};
+
 class PostProcEngineHttpServer extends EngineHttpServer {
 
     /**
@@ -59,6 +65,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
     _getLazyDirectives(lines) {
         const self = this;
         const directives = {
+            ignore_all: false,
             ignore: [],
             ignore_once: [],
             ignore_local: []
@@ -66,6 +73,12 @@ class PostProcEngineHttpServer extends EngineHttpServer {
 
         _.forEach(lines, (oneLine, lineNo) => {
             const command = self._parseLine(oneLine);
+
+            // Ignoring all the rules?
+            if (_.eq(command.commandStr, 'ignore-all')) {
+                directives.ignore_all = true;  
+                return directives;
+            }
 
             if (_.eq(command.commandStr, 'ignore')) {
                 if (_.isEmpty(command.args)) {
@@ -90,6 +103,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
                 });
             }
         });
+
         return directives;
     }
 
@@ -225,14 +239,16 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             wooHoo.message = _.sample(wooHooMsgs);
 
             if (_.isNil(filteredWarnings)) { // nothing from the previos engines
-                resolve({
-                    warnings: [wooHoo]
-                });
+                resolve({warnings: [wooHoo]});
             }
 
             const lines = _.split(content, '\n');
             const directives = self._getLazyDirectives(lines);
 
+            if (directives.ignore_all) {
+                // Ignoring everything - just get out
+                resolve ({warnings: [ruleIgnoredAll]}); 
+            }
             self._removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once, lines);
             self._removeLocalWarnings(filteredWarnings, directives.ignore_local);
             self._removeIgnoreWarnings(filteredWarnings, directives.ignore);
