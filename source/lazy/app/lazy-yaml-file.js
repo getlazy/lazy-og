@@ -31,7 +31,7 @@ class LazyYamlFile {
                     return resolvedConfig;
                 }
 
-                logger.error('errors in lazy configuration', configErrors);
+                logger.error('Errors in lazy configuration', { err: configErrors });
                 return Promise.reject(new Error('invalid lazy configuration'));
             });
     }
@@ -98,7 +98,7 @@ class LazyYamlFile {
         return ajv.errors;
     }
 
-    static _issueWarnings(config) {
+    static _issueWarnings(/* config */) {
         //  Nothing to do yet.
     }
 

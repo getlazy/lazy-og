@@ -71,7 +71,7 @@ class Engine
     start() {
         const self = this;
 
-        logger.info('Starting', self.name, 'engine');
+        logger.info('Starting engine', { engine: self.name });
         return self._redirectContainerLogsToLogger()
             .then(() => self._container.status())
             .then((containerStatus) => {
@@ -157,10 +157,9 @@ class Engine
             let pendingBuffers = [];
             const logAndClearPendingBuffers = () => {
                 if (!_.isEmpty(pendingBuffers)) {
-                    const incompleteBuffersAsString =
-                        HigherDockerManager.containerOutputBuffersToString(pendingBuffers);
-                    logger.error(`Dumping incomplete buffers received from ${self.name} engine:`,
-                        incompleteBuffersAsString);
+                    const logs = _.map(pendingBuffers, buffer =>
+                        HigherDockerManager.containerOutputBuffersToString([buffer]));
+                    logger.error('Dumping non-JSON logs', { engine: self.name, logs });
                     pendingBuffers = [];
                 }
             };
@@ -198,8 +197,7 @@ class Engine
             stream.on('end', () => {
                 //  Before ending dump all the pending buffers as they are.
                 logAndClearPendingBuffers();
-                logger.info(
-                    'Stopped streaming logs for engine', self.name);
+                logger.info('Stopped streaming logs', { engine: self.name });
             });
             stream.on('error', (err) => {
                 logger.error('Error while streaming logs for engine', { err, engine: self.name });

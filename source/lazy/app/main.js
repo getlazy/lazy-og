@@ -66,8 +66,9 @@ class Main
                         process.exit(-1);
                     })
                     .catch((stopErr) => {
-                        logger.error('Failed to cleanup after lazy', stopErr);
-                        process.exit(-2);
+                        logger.error('Failed to cleanup after lazy', { err: stopErr }, () => {
+                            process.exit(-2);
+                        });
                     });
             });
     }
@@ -103,7 +104,7 @@ class Main
                         return;
                     }
 
-                    logger.info('lazy listening to internal requests on', PRIVATE_API_PORT);
+                    logger.info('lazy listening to internal requests on', { port: PRIVATE_API_PORT });
                     resolve();
                 });
 
@@ -151,7 +152,7 @@ class Main
                     return;
                 }
 
-                logger.info('lazy listening on', port);
+                logger.info('lazy listening', { port });
                 resolve();
             });
 
