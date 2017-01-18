@@ -206,8 +206,6 @@ class Engine
             });
         };
 
-        //  TODO: Track last received output for the container so that logs can
-        //      be recaptured from that point.
         return self._container.logs({
             follow: true,
             stdout: true,
