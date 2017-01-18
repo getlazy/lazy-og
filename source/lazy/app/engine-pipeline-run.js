@@ -3,7 +3,7 @@
 
 /* global logger */
 
-const _ = require('lodash');
+const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want whole lotta lodash...
 
 // Keep running the promises returned by the given action while the given condition returns true.
 const asyncWhile = (condition, action) => {
@@ -117,23 +117,29 @@ class EnginePipelineRun {
             const results = _.compact(res);
             const bundleResults = _.reduce(results, (accum, oneResult) => {
                 const status = _.get(oneResult, 'status');
-                const warnings = _.get(oneResult, 'warnings');
 
-                // Since we are running engines in parallel,
-                // we need to collect and accumulate output of all engines.
-                if (!_.isNil(warnings)) {
-                    // lazy ignore-once no-param-reassign
-                    accum.warnings = _.union(accum.warnings, warnings);
-                }
-
-                // Also, accumulate statuses of each engine
+                // Accumulate statuses of each engine
                 if (!_.isNil(status)) {
                     this._engineStatuses.push(status);
                 }
+
+                // Since we are running engines in parallel,
+                // we need to collect and accumulate output of all engines.
+                _.assignInWith(accum, oneResult, (accumValue, resultValue) => {
+                    // do not allow undefined value to overwrite something that is defined
+                    if (_.isUndefined(resultValue)) {
+                        return accumValue;
+                    }
+
+                    // if the property is array, then merge them instead of overwriting
+                    if (_.isArray(resultValue)) {
+                        return _.union(accumValue, resultValue);
+                    }
+
+                    return undefined; // Leave the rest to default assignement rules.
+                });
                 return accum;
-            }, {
-                warnings: []
-            });
+            }, {});
 
             return Promise.resolve(bundleResults);
         });
@@ -144,6 +150,11 @@ class EnginePipelineRun {
 
         let i = 0;
         let error;
+
+        // In sequencing engines (seq A -> Seq B), we need to accumulate results of each engine,
+        // in such a way that output from seq B overrides output from seq A,
+        // while the parts of seq A that are not modified by seq B remain the same
+        const sequenceResults = {};
 
         // Run engines sequentially until we have through all of them or one has returned
         // en error.
@@ -181,6 +192,9 @@ class EnginePipelineRun {
                         results.status = undefined;
                     }
 
+                    // Merge the results so that latest one overrides former.
+                    _.assignIn(sequenceResults, results);
+
                     newContext.previousStepResults = results;
                 })
                 // Capture the error if it happens. Note that an engine could reject the promise
@@ -197,7 +211,7 @@ class EnginePipelineRun {
                     return Promise.reject(error);
                 }
 
-                return Promise.resolve(newContext.previousStepResults);
+                return Promise.resolve(sequenceResults);
             });
     }
 }

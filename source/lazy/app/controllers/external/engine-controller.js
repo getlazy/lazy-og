@@ -43,10 +43,13 @@ const addEndpoints = (app, options) => {
         try {
             const statuses = [];
             return enginePipeline.analyzeFile(hostPath, language, content, context, statuses)
-                .then((warnings) => {
+                .then((engineOutput) => {
                     // Did any engine reported that is has checked the code?
                     if (!_.find(statuses, { codeChecked: true })) {
-                        warnings.warnings.push({
+                        if (_.isUndefined(engineOutput.warnings)) {
+                            engineOutput.warnings = [];
+                        }
+                        engineOutput.warnings.push({
                             type: 'Info',
                             //  We set spaces around the rule ID so that it cannot be disabled.
                             ruleId: ' lazy-no-linters-defined ',
@@ -55,10 +58,10 @@ const addEndpoints = (app, options) => {
                         });
                         // Remove the info that all is fine, since we don't really know it
                         // if no engine checked the file. Delete rules ' lazy-no-linter-warnings '
-                        _.remove(warnings.warnings, warn =>
+                        _.remove(engineOutput.warnings, warn =>
                             (_.eq(warn.ruleId, ' lazy-no-linter-warnings ')));
                     }
-                    return res.send(warnings);
+                    return res.send(engineOutput);
                 }).catch((err) => {
                     res.status(500).send({
                         error: err && err.message

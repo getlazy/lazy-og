@@ -3,7 +3,7 @@
 
 /* global logger */
 
-const _ = require('lodash');
+const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want whole lotta lodash...
 const fp = require('lodash/fp');
 const detect = require('language-detect');
 const EnginePipelineRun = require('./engine-pipeline-run');
