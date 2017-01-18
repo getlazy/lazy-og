@@ -2,7 +2,7 @@
 
 /* global logger */
 
-const _ = require('lodash');
+const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want whole lotta lodash...
 const selectn = require('selectn');
 const proxy = require('http-proxy-middleware');
 const PACKAGE_VERSION = require('../../../package.json').version;
@@ -44,11 +44,11 @@ const addEndpoints = (app, options) => {
             const statuses = [];
             return enginePipeline.analyzeFile(hostPath, language, content, context, statuses)
                 .then((engineOutput) => {
+                    if (_.isUndefined(engineOutput.warnings)) {
+                        _.set(engineOutput, 'warnings', []);
+                    }
                     // Did any engine reported that is has checked the code?
                     if (!_.find(statuses, { codeChecked: true })) {
-                        if (_.isUndefined(engineOutput.warnings)) {
-                            engineOutput.warnings = [];
-                        }
                         engineOutput.warnings.push({
                             type: 'Info',
                             //  We set spaces around the rule ID so that it cannot be disabled.

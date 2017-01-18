@@ -39,7 +39,8 @@ module.exports = [{
         sequence: []
     },
     then: (result) => {
-        assert(_.isUndefined(result));
+        assert(!_.isUndefined(result));
+        assert(_.isEqual(result, {}));
     }
 }, {
     id: 'success #2',
@@ -293,7 +294,6 @@ module.exports = [{
         assert.equal(result.warnings.length, 2);
         assert.equal(_.get(result, 'warnings[0].test'), 'result');
         assert.equal(_.get(result, 'warnings[1].test'), 'result2');
-
         assert(_.isArray(engineStatuses), 'engineStatuses is an array');
         assert.equal(engineStatuses.length, 2);
         assert.equal(_.get(engineStatuses, '[0].test'), 1);
@@ -628,9 +628,7 @@ module.exports = [{
         language: 'test'
     },
     then: (result, engineStatuses) => {
-        assert(_.isArray(result.warnings), 'warnings is an array');
-        assert.equal(result.warnings.length, 0);
-
+        assert (_.isNil(result.warnings), 'no warnings');
         assert(_.isArray(engineStatuses), 'engineStatuses is an array');
         assert.equal(engineStatuses.length, 0);
     }

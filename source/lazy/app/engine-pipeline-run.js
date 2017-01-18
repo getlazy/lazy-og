@@ -117,10 +117,10 @@ class EnginePipelineRun {
             const results = _.compact(res);
             const bundleResults = _.reduce(results, (accum, oneResult) => {
                 const status = _.get(oneResult, 'status');
-
                 // Accumulate statuses of each engine
                 if (!_.isNil(status)) {
                     this._engineStatuses.push(status);
+                    oneResult.status = undefined; // lazy ignore-once no-param-reassign
                 }
 
                 // Since we are running engines in parallel,
@@ -140,7 +140,6 @@ class EnginePipelineRun {
                 });
                 return accum;
             }, {});
-
             return Promise.resolve(bundleResults);
         });
     }
