@@ -3,8 +3,7 @@
 
 const _ = require('lodash');
 const winston = require('winston');
-const winstonLogstashUdp = require('winston-logstash-udp');
-const winstonElasticsearch = require('winston-elasticsearch');
+const WinstonElasticsearch = require('winston-elasticsearch');
 
 const LAZY_VERSION = require('../package.json').version;
 
@@ -13,15 +12,10 @@ const initialize = (lazyConfig) => {
 
     const elasticConfig = _.get(lazyConfig, 'config.logger.elastic');
     if (elasticConfig) {
-        transports.push(new winstonElasticsearch(elasticConfig));
+        transports.push(new WinstonElasticsearch(elasticConfig));
     }
 
-    const logstashUdpConfig = _.get(lazyConfig, 'config.logger.logstash-udp');
-    if (logstashUdpConfig) {
-        transports.push(new winstonLogstashUdp.LogstashUDP(logstashUdpConfig));
-    }
-
-    const consoleConfig = _.get(lazyConfig, 'config.logger.console');
+    let consoleConfig = _.get(lazyConfig, 'config.logger.console');
     if (!consoleConfig && _.isEmpty(transports)) {
         consoleConfig = {
             level: 'info'
@@ -32,10 +26,10 @@ const initialize = (lazyConfig) => {
         transports.push(new winston.transports.Console({
             level: consoleConfig.level,
             formatter: (options) => {
-                return '[' + LAZY_VERSION + '] ' +
-                    options.level.toUpperCase() + ' ' + (options.message ? options.message : '') +
-                    (options.meta && Object.keys(options.meta).length ?
-                        '\n\t'+ JSON.stringify(options.meta) : '');
+                const message = options.message ? options.message : '';
+                const meta = (options.meta && _.keys(options.meta).length) ?
+                    `${JSON.stringify(options.meta)}` : '';
+                return `[${LAZY_VERSION}] ${options.level.toUpperCase()} ${message} ${meta}`;
             }
         }));
     }
