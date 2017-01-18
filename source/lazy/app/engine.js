@@ -154,13 +154,19 @@ class Engine
         const self = this;
 
         const redirectLogStreamIntoLogger = (stream) => {
-            const pendingBuffers = [];
-            const dumpPendingBuffers = () => {
-                const incompleteBuffersAsString = HigherDockerManager.containerOutputBuffersToString(pendingBuffers);
-                logger.error(`Dumping incomplete buffers received from ${self.name} engine:`, incompleteBuffersAsString);
+            let pendingBuffers = [];
+            const logAndClearPendingBuffers = () => {
+                if (!_.isEmpty(pendingBuffers)) {
+                    const incompleteBuffersAsString =
+                        HigherDockerManager.containerOutputBuffersToString(pendingBuffers);
+                    logger.error(`Dumping incomplete buffers received from ${self.name} engine:`,
+                        incompleteBuffersAsString);
+                    pendingBuffers = [];
+                }
             };
 
             const logEngineMessage = (messageData) => {
+                messageData.engine = self.name; // lazy ignore-once no-param-reassign
                 logger.log(messageData.level, messageData.message, messageData.meta);
             };
 
@@ -170,28 +176,28 @@ class Engine
                 //  were not and we will just dump them as they were received.
                 let messageJson = HigherDockerManager.containerOutputBuffersToString([buffer]);
                 try {
-                    let messageData = JSON.parse(messageJson);
-                    dumpPendingBuffers();
+                    const messageData = JSON.parse(messageJson);
+                    logAndClearPendingBuffers();
                     logEngineMessage(messageData);
-                } catch(e) {
+                } catch (e1) {
                     //  Since single buffer parsing failed we will now try to parse this buffer together
                     //  with all the other pending buffers.
                     pendingBuffers.push(buffer);
                     messageJson = HigherDockerManager.containerOutputBuffersToString(pendingBuffers);
 
                     try {
-                        messageData = JSON.parse(messageJson);
+                        const messageData = JSON.parse(messageJson);
                         //  Parse succeeded so let's clear the buffers.
                         pendingBuffers = [];
                         logEngineMessage(messageData);
-                    } catch(e) {
+                    } catch (e2) {
                         //  Do nothing - we have to wait for the next buffer.
                     }
                 }
             });
             stream.on('end', () => {
                 //  Before ending dump all the pending buffers as they are.
-                dumpPendingBuffers();
+                logAndClearPendingBuffers();
                 logger.info(
                     'Stopped streaming logs for engine', self.name);
             });
