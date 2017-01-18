@@ -60,7 +60,9 @@ class EnginePipeline {
             // If detected and declared languages are not one and the same include engines for
             // the detected language as well.
             if (lowerCaseLanguage !== detectedLanguage) {
-                logger.warn(`Detected language ${detectedLanguage} !== ${lowerCaseLanguage}`);
+                logger.warn('Detected language mismatches passed language', {
+                    detectedLanguage, passedLanguage: lowerCaseLanguage
+                });
                 engines = _.union(engines, this._languagesToEnginesMap.get(detectedLanguage));
                 // Add the detected language to context so that engines can potentially make
                 // use of it.

@@ -202,7 +202,7 @@ class Engine
                     'Stopped streaming logs for engine', self.name);
             });
             stream.on('error', (err) => {
-                logger.error('Error while streaming logs for engine', self.name, err);
+                logger.error('Error while streaming logs for engine', { err, engine: self.name });
             });
         };
 
@@ -213,8 +213,8 @@ class Engine
         })
             .then(redirectLogStreamIntoLogger)
             .catch((err) => {
-                logger.error(
-                    'Error while setting up streaming of logs for engine', self.name, err);
+                logger.error('Error while setting up streaming of logs for engine',
+                    { err, engine: self.name });
                 //  We don't pass the error as streaming of logs is non-critical.
             });
     }

@@ -55,7 +55,7 @@
     "request": "^2.79.0",
     "request-promise-native": "^1.0.3",
     "winston": "^2.3.0",
-    "winston-elasticsearch": "github:ierceg/winston-elasticsearch#v5.0"
+    "winston-elasticsearch": "github:ierceg/winston-elasticsearch#v5.1.0"
   },
   "devDependencies": {
     "@lazyass/node-lazy-client": "^1.2.1",

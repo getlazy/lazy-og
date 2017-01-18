@@ -63,7 +63,9 @@ class EnginePipelineRun {
 
         if (_.isNil(engine)) {
             // Engine is present in pipeline, but no definition exists.
-            logger.warn(`Engine ${engineName} defined but doesn't exist, skipping`);
+            logger.warn('Skipping inexisting engine', {
+                engine: engineName
+            });
             // We carry forward the results of the previous engine.
             return Promise.resolve(context.previousStepResults);
         }
@@ -106,7 +108,9 @@ class EnginePipelineRun {
                     return this._runSingleEngine(engineItem.engineName, newContext);
                 })()
                     .catch((err) => {
-                        logger.warn('Failure during bundle pipleline run, continuing', err);
+                        logger.warn('Failure during bundle pipleline run, continuing', {
+                            err
+                        });
                     })
             )
         ).then((res) => {
@@ -182,7 +186,7 @@ class EnginePipelineRun {
                 // Capture the error if it happens. Note that an engine could reject the promise
                 // with a nil error in which case we will continue onto the next engine.
                 .catch((err) => {
-                    logger.error('Failure during sequence pipleline run, stopping', err);
+                    logger.error('Failure during sequence pipleline run, stopping', { err });
                     error = err;
                 })
                 // Error or not increment the index in the sequence to get the next engine.
