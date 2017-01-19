@@ -9,7 +9,25 @@ const common = require('@lazyass/common');
 
 const LAZY_VERSION = require('../package.json').version;
 
-const initialize = (lazyConfig) => {
+const createTemporaryLogger = () => {
+    winston.addColors(common.LazyLoggingLevels.colors);
+
+    const logger = new winston.Logger({
+        transports: [new winston.transports.Console({
+            timestamp: () => new Date().toISOString(),
+            level: 'metric',
+            colorize: true
+        })],
+        levels: common.LazyLoggingLevels.levels
+    });
+    logger.on('error', (err) => {
+        console.log('Logging error', err);
+    });
+
+    return logger;
+};
+
+const initializeLogger = (lazyConfig) => {
     const transports = [];
 
     const elasticConfig = _.get(lazyConfig, 'config.logger.elastic');
@@ -17,7 +35,7 @@ const initialize = (lazyConfig) => {
         const elasticsearchTransport = new WinstonElasticsearch(elasticConfig);
         elasticsearchTransport.on('error', (err) => {
             // lazy ignore no-console ; where else can we log when logging is failing?
-            console.error('***** Elasticsearch logger transport error', err);
+            console.error('***** ElasticSearch logger transport error', err);
         });
         transports.push(elasticsearchTransport);
     }
@@ -54,5 +72,6 @@ const initialize = (lazyConfig) => {
 };
 
 module.exports = {
-    initialize
+    createTemporaryLogger,
+    initialize: initializeLogger
 };

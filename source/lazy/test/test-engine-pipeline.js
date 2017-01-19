@@ -3,6 +3,8 @@
 
 /* global logger, describe, it, before, after, afterEach */
 
+require('./bootstrap');
+
 //  To set some properties we need `this` of `describe` and `it` callback functions.
 // lazy ignore prefer-arrow-callback
 // lazy ignore func-names
