@@ -8,7 +8,7 @@ const low = require('lowdb');
 const LowdbLibFileAsync = require('lowdb/lib/file-async');
 const mkdirp = require('mkdirp');
 const EngineHelpers = require('@lazyass/engine-helpers');
-const request = require('request-promise-native');
+const url = require('url');
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
