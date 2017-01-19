@@ -165,7 +165,8 @@ class Engine
             };
 
             const logEngineMessage = (messageData) => {
-                messageData.engine = self.name; // lazy ignore-once no-param-reassign
+                const meta = messageData.meta || {};
+                meta.engine = self.name; // lazy ignore-once no-param-reassign
                 logger.log(messageData.level, messageData.message, messageData.meta);
             };
 
