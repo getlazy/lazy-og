@@ -172,7 +172,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             if (_.isNil(ruleId) || !_.includes(toRemove, _.toLower(ruleId))) {
                 return false;
             }
-            logger.info('remove-warning', { ruleId });
+            logger.metric('remove-warning', { ruleId });
             return true;
         });
     }
@@ -189,7 +189,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
         _.pullAllWith(warningList, toRemove, (warning, directiveLine) => {
             const warningLine = _.parseInt(_.get(warning, 'line', 0), 10);
             if (_.eq(warningLine, directiveLine)) {
-                logger.info('remove-local-warnings', {
+                logger.metric('remove-local-warnings', {
                     ruleId: warning.ruleId
                 });
                 processedLines.push(directiveLine);
@@ -234,7 +234,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             if ((_.eq(warningRule, directiveRule)) && self._nothingBetweenLines(directiveLine, warningLine, lines)) {
                 // Remember directives we have processed to avoid using them again
                 processedDirectives.push(directive);
-                logger.info('remove-ignore-once-warnings', {
+                logger.metric('remove-ignore-once-warnings', {
                     ruleId: warningRule
                 });
                 return true;
@@ -270,7 +270,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             if (!_.inRange(warningLine, oneDeadZone.startLine, oneDeadZone.endLine)) {
                 return false;
             }
-            logger.info('remove-dead-zone-warning', { ruleId: warning.ruleId });
+            logger.metric('remove-dead-zone-warning', { ruleId: warning.ruleId });
             return true;
         });
         return warningList;
@@ -287,6 +287,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
     analyzeFile(hostPath, language, content, context) {
         const self = this;
 
+
         //  We use a promise as we get any exceptions wrapped up as failures.
         return new Promise((resolve) => {
             const filteredWarnings = _.get(context, 'previousStepResults.warnings');
@@ -296,15 +297,19 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             wooHoo.message = _.sample(wooHooMsgs);
 
             if (_.isNil(filteredWarnings)) { // nothing from the previos engines
+                logger.metric('woohoo-state');
                 resolve({ warnings: [wooHoo] });
                 return;
             }
+
+            //  Log metrics for all warnings.
+            _.forEach(filteredWarnings, warning => logger.metric('warning', { ruleId: warning.ruleId }));
 
             const lines = _.split(content, '\n');
             const directives = self._getLazyDirectives(lines);
 
             if (directives.ignore_all) {
-                // Ignoring everything - just get out
+                // Ignoring everything - just get out.
                 resolve({ warnings: [ruleIgnoredAll] });
                 return;
             }
@@ -314,7 +319,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             self._removeDeadZoneWarnings(filteredWarnings, directives.dead_zones);
 
             if (_.size(filteredWarnings) < 1) {
-                logger.info('woohoo');
+                logger.metric('woohoo-state');
                 filteredWarnings.push(wooHoo);
             }
 
