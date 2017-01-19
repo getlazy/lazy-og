@@ -3,7 +3,7 @@
 
 /* global logger */
 
-const _ = require('lodash');
+const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want whole lotta lodash...
 const fs = require('fs-promise');
 const path = require('path');
 const yaml = require('js-yaml');
@@ -288,7 +288,7 @@ LAZY_CONFIG_SCHEMA = {
             items: {
                 $ref: '#/definitions/engine_pipeline_item'
             },
-            uniqueItems: true
+            uniqueItems: false  // allow engines to appear multiple times in pipeline
         },
         engine_pipeline_item: {
             type: 'object',

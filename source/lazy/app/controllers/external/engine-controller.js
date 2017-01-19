@@ -41,28 +41,9 @@ const addEndpoints = (app, options) => {
         const context = selectn('body.context', req);
 
         try {
-            const statuses = [];
-            return enginePipeline.analyzeFile(hostPath, language, content, context, statuses)
-                .then((engineOutput) => {
-                    if (_.isUndefined(engineOutput.warnings)) {
-                        _.set(engineOutput, 'warnings', []);
-                    }
-                    // Did any engine reported that is has checked the code?
-                    if (!_.find(statuses, { codeChecked: true })) {
-                        engineOutput.warnings.push({
-                            type: 'Info',
-                            //  We set spaces around the rule ID so that it cannot be disabled.
-                            ruleId: ' lazy-no-linters-defined ',
-                            message: `No engine registered for [${language}]. This file has not been checked for language-specific warnings.`,
-                            filePath: hostPath
-                        });
-                        // Remove the info that all is fine, since we don't really know it
-                        // if no engine checked the file. Delete rules ' lazy-no-linter-warnings '
-                        _.remove(engineOutput.warnings, warn =>
-                            (_.eq(warn.ruleId, ' lazy-no-linter-warnings ')));
-                    }
-                    return res.send(engineOutput);
-                }).catch((err) => {
+            return enginePipeline.analyzeFile(hostPath, language, content, context)
+                .then(engineOutput => res.send(engineOutput))
+                .catch((err) => {
                     res.status(500).send({
                         error: err && err.message
                     });

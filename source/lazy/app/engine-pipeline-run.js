@@ -21,7 +21,6 @@ class EnginePipelineRun {
         this._language = language;
         this._content = content;
         this._context = context;
-        this._engineStatuses = [];
         this._alreadyRan = false;
     }
 
@@ -33,10 +32,6 @@ class EnginePipelineRun {
 
         this._alreadyRan = true;
         return this._runPipeline(this._pipelineRoot, this._context);
-    }
-
-    get engineStatuses() {
-        return this._engineStatuses;
     }
 
     _runPipeline(pipeline, context) {
@@ -116,13 +111,6 @@ class EnginePipelineRun {
         ).then((res) => {
             const results = _.compact(res);
             const bundleResults = _.reduce(results, (accum, oneResult) => {
-                const status = _.get(oneResult, 'status');
-                // Accumulate statuses of each engine
-                if (!_.isNil(status)) {
-                    this._engineStatuses.push(status);
-                    oneResult.status = undefined; // lazy ignore-once no-param-reassign
-                }
-
                 // Since we are running engines in parallel,
                 // we need to collect and accumulate output of all engines.
                 _.assignInWith(accum, oneResult, (accumValue, resultValue) => {
@@ -178,23 +166,9 @@ class EnginePipelineRun {
             })()
                 // Process the results no matter if we ran the engine or another pipeline.
                 .then((results) => {
-                    // If the engine returned a status, add it to our list of statuses
-                    // but don't pass it to the next engine (that is remove it from
-                    // the results). This solves the problem of repeating statuses with
-                    // skipped engines.
-                    const status = _.get(results, 'status');
-                    if (!_.isNil(status)) {
-                        this._engineStatuses.push(status);
-
-                        // Setting to undefined is faster than deleting property.
-                        // lazy ignore-once no-param-reassign
-                        results.status = undefined;
-                    }
-
                     // Merge the results so that latest one overrides former.
                     _.assignIn(sequenceResults, results);
-
-                    newContext.previousStepResults = results;
+                    newContext.previousStepResults = _.cloneDeep(sequenceResults);
                 })
                 // Capture the error if it happens. Note that an engine could reject the promise
                 // with a nil error in which case we will continue onto the next engine.
