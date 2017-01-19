@@ -110,7 +110,7 @@ class EngineManager
         //  Resolve the repository auth if its values are kept in the lazy's process environment.
         const resolvedRepositoryAuth = EngineManager._resolveRepositoryAuthValues(repositoryAuth);
 
-        logger.info('Pulling image', imageName, 'for engine', engineName);
+        logger.info('Pulling image', { engine: engineName, image: imageName });
         return HigherDockerManager.pullImage(resolvedRepositoryAuth, imageName)
             .then(() => {
                 const createEngineParams = {
@@ -247,7 +247,7 @@ class EngineManager
             .then(containers =>
                 Promise.all(_.map(containers, (container) => {
                     logger.info('Stopping/waiting/deleting engine container',
-                        _.head(container.Names));
+                        { container: _.head(container.Names) });
                     if (container.id === self._container.id) {
                         return Promise.resolve();
                     }

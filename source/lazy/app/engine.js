@@ -71,7 +71,7 @@ class Engine
     start() {
         const self = this;
 
-        logger.info('Starting', self.name, 'engine');
+        logger.info('Starting engine', { engine: self.name });
         return self._redirectContainerLogsToLogger()
             .then(() => self._container.status())
             .then((containerStatus) => {
@@ -154,21 +154,57 @@ class Engine
         const self = this;
 
         const redirectLogStreamIntoLogger = (stream) => {
+            let pendingBuffers = [];
+            const logAndClearPendingBuffers = () => {
+                if (!_.isEmpty(pendingBuffers)) {
+                    const logs = _.map(pendingBuffers, buffer =>
+                        HigherDockerManager.containerOutputBuffersToString([buffer]));
+                    logger.error('Dumping non-JSON logs', { engine: self.name, logs });
+                    pendingBuffers = [];
+                }
+            };
+
+            const logEngineMessage = (messageData) => {
+                const meta = messageData.meta || {};
+                meta.engine = self.name; // lazy ignore-once no-param-reassign
+                logger.log(messageData.level, messageData.message, messageData.meta);
+            };
+
             stream.on('data', (buffer) => {
-                logger.info(`[${self.name}]`,
-                    _.trim(HigherDockerManager.containerOutputBuffersToString([buffer])));
+                //  First try to parse as JSON the line as we received it. If it succeeds then it means
+                //  that it was a valid and complete JSON which in turn means that pending buffers
+                //  were not and we will just dump them as they were received.
+                let messageJson = HigherDockerManager.containerOutputBuffersToString([buffer]);
+                try {
+                    const messageData = JSON.parse(messageJson);
+                    logAndClearPendingBuffers();
+                    logEngineMessage(messageData);
+                } catch (e1) {
+                    //  Since single buffer parsing failed we will now try to parse this buffer together
+                    //  with all the other pending buffers.
+                    pendingBuffers.push(buffer);
+                    messageJson = HigherDockerManager.containerOutputBuffersToString(pendingBuffers);
+
+                    try {
+                        const messageData = JSON.parse(messageJson);
+                        //  Parse succeeded so let's clear the buffers.
+                        pendingBuffers = [];
+                        logEngineMessage(messageData);
+                    } catch (e2) {
+                        //  Do nothing - we have to wait for the next buffer.
+                    }
+                }
             });
             stream.on('end', () => {
-                logger.info(
-                    'Stopped streaming logs for engine', self.name);
+                //  Before ending dump all the pending buffers as they are.
+                logAndClearPendingBuffers();
+                logger.info('Stopped streaming logs', { engine: self.name });
             });
             stream.on('error', (err) => {
-                logger.error('Error while streaming logs for engine', self.name, err);
+                logger.error('Error while streaming logs for engine', { err, engine: self.name });
             });
         };
 
-        //  TODO: Track last received output for the container so that logs can
-        //      be recaptured from that point.
         return self._container.logs({
             follow: true,
             stdout: true,
@@ -176,8 +212,8 @@ class Engine
         })
             .then(redirectLogStreamIntoLogger)
             .catch((err) => {
-                logger.error(
-                    'Error while setting up streaming of logs for engine', self.name, err);
+                logger.error('Error while setting up streaming of logs for engine',
+                    { err, engine: self.name });
                 //  We don't pass the error as streaming of logs is non-critical.
             });
     }

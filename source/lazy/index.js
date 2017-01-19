@@ -3,29 +3,44 @@
 
 /* global logger */
 
+const Logger = require('./app/logger');
+// Until we load configuration we cannot configure our logger so we use default logger in the meantime.
+global.logger = Logger.createTemporaryLogger();
+
+const LazyYamlFile = require('./app/lazy-yaml-file');
 const Main = require('./app/main.js');
 
-//  We always try to load /config/lazy.yaml. Since lazy runs in a docker container the only way to
-//  "pass" it is by either building on top of its image or mounting a local directory as /config
-Main.main('/config/lazy.yaml')
-    .then(() => {
-        logger.info('lazy initialized');
-    })
-    .catch((err) => {
-        logger.error('Failed to initialize lazy', err);
-        process.exit(-1);
-    });
-
-//  Setup graceful termination on SIGINT.
+// Setup graceful termination on SIGINT.
 process.on('SIGINT', () => {
-    logger.info('Received SIGINT, stopping lazy.');
+    logger.warn('Received SIGINT, stopping lazy.');
     Main.stop()
         .then(() => {
             logger.info('lazy stopped.');
             process.exit(0);
         })
         .catch((err) => {
-            logger.error('Error occurred during stopping', err);
+            logger.error('Error occurred during stopping', { err });
             process.exit(-1);
         });
 });
+
+// We always try to load /config/lazy.yaml. Since lazy runs in a docker container the only way to
+// "pass" it is by either building on top of its image or mounting a local directory as /config
+// We have to try to load the configuration before even configuring logger as it may contain
+// logger configuration.
+LazyYamlFile.load('/config/lazy.yaml')
+    .then(lazyConfig => Logger.initialize(lazyConfig)
+        .then((logger) => {
+            // Initialize the global logger.
+            global.logger = logger;
+
+            return Main.main(lazyConfig);
+        })
+        .then(() => {
+            logger.info('lazy initialized');
+        })
+        .catch((err) => {
+            logger.error('Failed to initialize lazy', { err });
+            process.exit(-1);
+        })
+    );

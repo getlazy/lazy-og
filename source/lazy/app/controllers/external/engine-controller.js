@@ -64,10 +64,10 @@ const addEndpoints = (app, options) => {
                         error: err && err.message
                     });
                 });
-        } catch (e) {
-            logger.error('Exception during file analysis', e);
+        } catch (err) {
+            logger.error('Exception during file analysis', { err });
             return res.status(500).send({
-                error: e && e.message
+                error: err && err.message
             });
         }
     });

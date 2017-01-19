@@ -140,6 +140,23 @@ repository_auth: # optional, only needed if your engines are in a private Docker
     username_env: DOCKER_REPOSITORY_USERNAME_ENVVAR
     password_env: DOCKER_REPOSITORY_PASSWORD_ENVVAR
     email_env: DOCKER_REPOSITORY_EMAIL_ENVVAR
+# Optional configuration for different aspects of lazy.
+config:
+    # Logging is by default directed to console but other sinks are possible.
+    logger:
+        # Changes to default level is possible.
+        console:
+            level: warn # If we are logging metrics into ElasticSearch or elsewhere then we don't need
+            # to see them on console so we can change the minimum logging level.
+        # Configuration of ElasticSearch logging. Since all logging is JSON logs will appear in ElasticSearch
+        # as `(level, message, meta)` tuple.
+        elastic: # as seen here https://github.com/ierceg/winston-elasticsearch
+            level: metric
+            indexPrefix: lazy-default # Usually we prefix the logs with lazy and lazy instance's ID.
+            clientOpts: # as seen here https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/configuration.html
+                # For example if running ELK (ElasticSearch-LogStash-Kibana) in Docker alongside lazy.
+                host: http://elk:9200
+                apiVersion: "5.0"
 # Each file is run through this pipeline.
 engine_pipeline:
   bundle:                     # bundle: - run engines asynchronously (in parallel)
@@ -162,7 +179,6 @@ engine_pipeline:
       - reducer:              # and, finally, limit the number of reported errors
           maxWarningsPerRule: 5     # allow up to 5 warnings for same rule-id
           maxWarningsPerFile: 300   # allow up to 150 warnings per file
-
 engines: # each of these engines can be left out and other custom or official engines may be added
     eslint:
         image: getlazy/eslint-engine:latest

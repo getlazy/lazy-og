@@ -5,6 +5,7 @@ docker run -it --rm \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -p "16827:80" \
     --stop-signal SIGTERM \
+    --link elk \
     -w /app \
     --env-file env \
     ierceg/node-dev:6.9.1 \
