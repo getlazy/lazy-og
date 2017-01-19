@@ -1,10 +1,15 @@
 
 'use strict';
 
-const EngineHelpers = require('@lazyass/engine-helpers');
-global.logger = EngineHelpers.Logger.getEngineLogger();
+/* global logger */
+
+// In engine processes it is strongly recommended to include engine-helpers as the first thing
+// in the process's lifetime and then immediately invoke `initialize` which will setup global logger,
+// default handlers for uncaught exceptions, unhandled promises and so on.
+require('@lazyass/engine-helpers').initialize();
 
 const Engine = require('./file-stats-engine');
+
 const engine = new Engine();
 
 engine.start()
@@ -26,6 +31,6 @@ process.on('SIGTERM', () => {
         })
         .catch((err) => {
             logger.error('Error occurred during stopping', err);
-            process.exit(-1);
+            process.exit(-2);
         });
 });
