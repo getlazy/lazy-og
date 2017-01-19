@@ -4,6 +4,7 @@
 /* global logger */
 // lazy ignore lodash/chaining
 // lazy ignore lodash/chain-style
+// lazy ignore class-methods-use-this
 
 const _ = require('lodash');
 const CLIEngine = require('eslint').CLIEngine;
@@ -80,12 +81,14 @@ class EslintEngineHttpServer extends EngineHttpServer {
                         line: warning.line,
                         column: warning.column
                     };
+
                     if (!_.isNull(warning.ruleId)) {
-                        const ruleDocs =getRuleURI(warning.ruleId);
+                        const ruleDocs = getRuleURI(warning.ruleId);
                         const moreInfoUrl = (ruleDocs.found) ? ruleDocs.url : `https://www.google.com/search?q=${warning.ruleId}`;
                         rWarning.moreInfo = moreInfoUrl;
                     }
-                    return  rWarning;
+
+                    return rWarning;
                 })
                 .filter()
                 .value();
@@ -99,7 +102,6 @@ class EslintEngineHttpServer extends EngineHttpServer {
         });
     }
 
-    /* eslint class-methods-use-this: off */
     getMeta() {
         return {
             languages: ['JavaScript']
