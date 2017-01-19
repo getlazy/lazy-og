@@ -39,6 +39,7 @@
   },
   "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
+    "@lazyass/common": "^1.0.0",
     "ajv": "^5.0.0-beta.1",
     "async": "^2.1.4",
     "body-parser": "^1.15.2",
