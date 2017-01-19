@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/getlazy/lazy-pullreq-engine#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^2.0.0",
+    "@lazyass/engine-helpers": "^3.2.1",
     "lodash": "^4.17.3",
     "lowdb": "^0.14.0",
     "octokat": "^0.4.18",
