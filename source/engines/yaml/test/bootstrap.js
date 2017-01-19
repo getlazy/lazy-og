@@ -2,7 +2,7 @@
 'use strict';
 
 const EngineHelpers = require('@lazyass/engine-helpers');
-global.logger = EngineHelpers.Logger.getEngineLogger();
+EngineHelpers.initialize();
 
 const Engine = require('../yaml-engine');
 const engine = new Engine();
