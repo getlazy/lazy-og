@@ -6,7 +6,7 @@ const _ = require('lodash');
 // Function that should be invoked first thing on engine boot.
 const initialize = () => {
     // Set global logger.
-    global.logger = require('./lib/logger');
+    global.logger = require('./lib/logger').getEngineLogger();
 
     // Setup uncaught exception and unhandled promise rejection handling.
     process.on('uncaughtException', (err) => {
