@@ -1,6 +1,6 @@
 {
   "name": "lazy-file-stats-engine",
-  "version": "1.5.2",
+  "version": "1.6.0",
   "description": "lazy engine tracking file editing and other statistics",
   "main": "index.js",
   "scripts": {
