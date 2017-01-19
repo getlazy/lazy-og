@@ -21,6 +21,8 @@ const initialize = () => {
 
         throw new Error(`Unhandled promise rejection: ${reason}`);
     });
+
+    return module.exports;
 };
 
 // lazy ignore global-require
