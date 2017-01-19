@@ -135,7 +135,7 @@ class EngineHttpServer
                 this._isReady = true;
             })
             .catch((err) => {
-                logger.warn(`Failed to listen on port ${this._port}`, err);
+                logger.error('Server listen failed', { err, port: this._port });
                 //  We have to cleanup as we have already invoked `beforeListening`.
                 return this.afterListening()
                     //  Note that in this case it makes sense to define functions for
