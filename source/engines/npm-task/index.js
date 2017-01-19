@@ -1,13 +1,12 @@
 
 'use strict';
 
-/* global logger */
+// In engine processes it is strongly recommended to include engine-helpers as the first thing
+// in the process's lifetime and then immediately invoke `initialize` which will setup global logger,
+// default handlers for uncaught exceptions, unhandled promises and so on.
+require('@lazyass/engine-helpers').initialize();
 
-const EngineHelpers = require('@lazyass/engine-helpers');
-
-global.logger = EngineHelpers.Logger.getEngineLogger();
-
-const Engine = require('./engine-npm-task');
+const Engine = require('./npm-task-engine');
 
 const engine = new Engine();
 
