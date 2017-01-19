@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/getlazy/lazy-reducer-engine#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^3.0.1",
+    "@lazyass/engine-helpers": "^3.2.1",
     "lodash": "^4.17.4"
   },
   "devDependencies": {
