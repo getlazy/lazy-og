@@ -1,6 +1,8 @@
 
 'use strict';
 
+/* global logger */
+
 const _ = require('lodash');
 const low = require('lowdb');
 //  lowdb uses lodash internally but eslint cannot know that.
@@ -83,6 +85,29 @@ class FileStatsEngineHttpServer extends EngineHttpServer
         });
     }
 
+    // TODO: Move this to lazy-common as it was copied from pullreq engine.
+    static repoFromRemote(remote) {
+        const httpProtocolRegex = /^https:\/\/github.com\/(.+)\/(.+)\.git/g;
+        const httpFetch = httpProtocolRegex.exec(remote);
+        if (httpFetch) {
+            return {
+                owner: httpFetch[1],
+                repo: httpFetch[2]
+            };
+        }
+
+        const sshProtocolRegex = /^git@github.com:(.+)\/(.+)\.git/g;
+        const sshFetch = sshProtocolRegex.exec(remote);
+        if (sshFetch) {
+            return {
+                owner: sshFetch[1],
+                repo: sshFetch[2]
+            };
+        }
+
+        return remote;
+    }
+
     /**
      * Analyzes the given file content for the given language and analysis configuration.
      * @param {string} host Name of the host requesting file analysis.
@@ -94,26 +119,27 @@ class FileStatsEngineHttpServer extends EngineHttpServer
      */
     analyzeFile(hostPath, language, content, context) {
         const self = this;
-
         //  We use a promise as we get any exceptions wrapped up as failures.
         return new Promise((resolve) => {
             //  We capture the events and then later extract the stats on-demand.
+            const data = {
+                time: Date.now(),
+                hostname: context && context.hostname,
+                hostPath,
+                language,
+                client: context && context.client,
+                originRepository: FileStatsEngineHttpServer.repoFromRemote(_
+                    .chain(context)
+                    .get('repositoryInformation.remotes')
+                    .find(remote => remote && _.eq(remote.name, 'origin'))
+                    .get('refs.fetch')
+                    .value()),
+                branch: _.get(context, 'repositoryInformation.status.current')
+            };
             self._db.get('AnalyzeFileEvent')
-                .push({
-                    time: Date.now(),
-                    hostname: context && context.hostname,
-                    hostPath,
-                    language,
-                    client: context && context.client,
-                    originRepository: _
-                        .chain(context)
-                        .get('repositoryInformation.remotes')
-                        .find(remote => remote && _.eq(remote.name, 'origin'))
-                        .get('refs.fetch')
-                        .value(),
-                    branch: _.get(context, 'repositoryInformation.status.current')
-                })
+                .push(data)
                 .value();
+            logger.metric('analyze-file', data);
 
             resolve({});
         });
