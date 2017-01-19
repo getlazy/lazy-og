@@ -1,32 +1,31 @@
 
 'use strict';
 
-// Setup uncaught exception handling first thing in the process.
-const safeLog = (level, message, meta, callback) => {
-    if (global.logger) {
-        global.logger.log(level, message, meta, callback);
-    } else {
-        // lazy ignore no-console ; we don't have a logger so nowhere else to log
-        console.log(JSON.stringify({ level, message, meta }));
-    }
-};
+const _ = require('lodash');
 
-process.on('uncaughtException', (err) => {
-    safeLog('error', 'Uncaught exception', { err }, () => {
-        process.exit(-1001);
+// Function that should be invoked first thing on engine boot.
+const initialize = () => {
+    // Set global logger.
+    global.logger = require('./lib/logger');
+
+    // Setup uncaught exception and unhandled promise rejection handling.
+    process.on('uncaughtException', (err) => {
+        global.logger.error('Uncaught exception', { err }, () => {
+            process.exit(-1001);
+        });
     });
-});
+    process.on('unhandledRejection', (reason) => {
+        if (_.isObject(reason)) {
+            throw reason;
+        }
 
-process.on('unhandledRejection', (reason, promise) => {
-    if (_.isObject(reason)) {
-        throw reason;
-    }
-
-    throw new Error(`Unhandled promise rejection: ${reason}`);
-});
+        throw new Error(`Unhandled promise rejection: ${reason}`);
+    });
+};
 
 // lazy ignore global-require
 module.exports = {
+    initialize,
     AdaptedAtomLinter: require('./lib/adapted-atom-linter'),
     Logger: require('./lib/logger'),
     HelperContainer: require('./lib/helper-container'),
