@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/getlazy/lazy-eslint-engine#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^3.0.1",
+    "@lazyass/engine-helpers": "^3.2.1",
     "babel-eslint": "6.1.2",
     "eslint": "^3.10.2",
     "eslint-config-google": "^0.7.0",
