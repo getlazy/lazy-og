@@ -1,5 +1,7 @@
 'use strict';
 
+/* global logger */
+
 // lazy ignore class-methods-use-this
 // lazy ignore lodash/chaining ; We actually love using chaining...
 
@@ -9,7 +11,6 @@ const EngineHelpers = require('@lazyass/engine-helpers');
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
 class ReducerEngineHttpServer extends EngineHttpServer {
-
     _reduceWarnings(allWarnings, maxWarningsPerRule, maxWarningsPerFile) {
         const allEnginesResults = {
             warnings: []
