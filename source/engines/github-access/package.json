@@ -1,6 +1,6 @@
 {
   "name": "lazy-github-access-engine",
-  "version": "1.5.2",
+  "version": "1.6.0",
   "description": "lazy engine allowing lazy to access user's GitHub data",
   "main": "index.js",
   "scripts": {
