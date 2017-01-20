@@ -25,6 +25,8 @@ const infoCodeNotChecked = {
     message: ''
 };
 
+const supportedLanguages = ['javascript', 'json', 'yaml', 'html', 'c', 'c++', 'objective-c', 'objective-c++', 'css', 'scss', 'less', 'sugarcss', 'php', 'java', 'cpp', 'c#', 'shell', 'ruby', 'python', 'coffeescript'];
+
 const VERY_LARGE_LINE_NUMBER = 100000000;  // Probably no file will have more than 100 milion lines...
 
 class PostProcEngineHttpServer extends EngineHttpServer {
@@ -291,7 +293,6 @@ class PostProcEngineHttpServer extends EngineHttpServer {
     analyzeFile(hostPath, language, content, context) {
         const self = this;
 
-
         //  We use a promise as we get any exceptions wrapped up as failures.
         return new Promise((resolve) => {
             const filteredWarnings = _.get(context, 'previousStepResults.warnings', []);
@@ -319,23 +320,26 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             //  Log metrics for all warnings.
             _.forEach(filteredWarnings, warning => logger.metric('warning', { ruleId: warning.ruleId }));
 
-            const lines = _.split(content, '\n');
-            const directives = self._getLazyDirectives(lines);
+            // Look for directive only in languages that support either //, / *, or # style comments
+            if (_.includes(supportedLanguages, _.toLower(_.trim(language)))) {
+                const lines = _.split(content, '\n');
+                const directives = self._getLazyDirectives(lines);
 
-            if (directives.ignore_all) {
-                // Ignoring everything - report it and get out
-                logger.metric('ignored-all');
-                const newFilteredWarnings = [infoIgnoredAll];
-                if (!isCodeChecked) {
-                    newFilteredWarnings.push(infoCodeNotChecked);
-                }   
-                resolve ({warnings: newFilteredWarnings});
-                return;
+                if (directives.ignore_all) {
+                    // Ignoring everything - report it and get out
+                    logger.metric('ignored-all');
+                    const newFilteredWarnings = [infoIgnoredAll];
+                    if (!isCodeChecked) {
+                        newFilteredWarnings.push(infoCodeNotChecked);
+                    }
+                    resolve ({warnings: newFilteredWarnings});
+                    return;
+                }
+                self._removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once, lines);
+                self._removeLocalWarnings(filteredWarnings, directives.ignore_local);
+                self._removeIgnoreWarnings(filteredWarnings, directives.ignore);
+                self._removeDeadZoneWarnings(filteredWarnings, directives.dead_zones);
             }
-            self._removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once, lines);
-            self._removeLocalWarnings(filteredWarnings, directives.ignore_local);
-            self._removeIgnoreWarnings(filteredWarnings, directives.ignore);
-            self._removeDeadZoneWarnings(filteredWarnings, directives.dead_zones);
 
             // If there are no warnings after processing directives, return wooHoo
             if (_.isEmpty(filteredWarnings) ) {
@@ -348,7 +352,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
 
     getMeta() {
         return {
-            languages: ['JavaScript', 'JSON', 'YAML', 'HTML', 'C', 'C++', 'Objective-C', 'Objective-C++', 'CSS', 'SCSS', 'LESS', 'SugarCSS', 'PHP', 'Java']
+            languages: []
         };
     }
 }
