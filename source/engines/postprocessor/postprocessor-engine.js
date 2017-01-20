@@ -9,16 +9,20 @@ const _ = require('lodash');
 const EngineHelpers = require('@lazyass/engine-helpers');
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
-const wooHoo = {
+const infoWooHoo = {
     type: 'Info',
     message: '',
     ruleId: ' lazy-no-linter-warnings '
 };
-
-const ruleIgnoredAll = {
+const infoIgnoredAll = {
     type: 'Info',
     message: 'All lazy checks ignored in this file.',
     ruleId: ' lazy-off '
+};
+const infoCodeNotChecked = {
+    type: 'Info',
+    ruleId: ' lazy-no-linters-defined ',
+    message: ''
 };
 
 const VERY_LARGE_LINE_NUMBER = 100000000;  // Probably no file will have more than 100 milion lines...
@@ -290,15 +294,25 @@ class PostProcEngineHttpServer extends EngineHttpServer {
 
         //  We use a promise as we get any exceptions wrapped up as failures.
         return new Promise((resolve) => {
-            const filteredWarnings = _.get(context, 'previousStepResults.warnings');
-            const wooHooMsgs = _.get(context, 'engineParams.woohoos',
+            const filteredWarnings = _.get(context, 'previousStepResults.warnings', []);
+            const wooHooMsgs = _.get(context, 'engineParams.woohoos', 
                 ['Woo-hoo! No linter warnings - your code looks pretty nice.']);
 
-            wooHoo.message = _.sample(wooHooMsgs);
+            infoWooHoo.message = _.sample(wooHooMsgs);
+            infoCodeNotChecked.message = `No engine registered for [${language}]. This file has not been checked for language-specific warnings.`;
 
-            if (_.isNil(filteredWarnings)) { // nothing from the previos engines
+            // Did any engine reported that it has checked the code?
+            const previousStatus = _.get(context, 'previousStepResults.status',{});
+            const isCodeChecked = _.get(previousStatus,'codeChecked', false);
+            if (!isCodeChecked) {
+                filteredWarnings.push(infoCodeNotChecked);
+            }
+
+            // If there are no warnings from previous steps and the code is checked,
+            // then don't bother, just return wooHoo
+            if (_.isEmpty(filteredWarnings)) { // nothing from the previos engines
                 logger.metric('woohoo-state');
-                resolve({ warnings: [wooHoo] });
+                resolve({warnings: [infoWooHoo]});
                 return;
             }
 
@@ -309,8 +323,10 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             const directives = self._getLazyDirectives(lines);
 
             if (directives.ignore_all) {
-                // Ignoring everything - just get out.
-                resolve({ warnings: [ruleIgnoredAll] });
+                // Ignoring everything - report it and get out
+                filteredWarnings.push(infoIgnoredAll);
+                logger.metric('ignored-all');
+                resolve ({warnings: filteredWarnings}); 
                 return;
             }
             self._removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once, lines);
@@ -318,14 +334,12 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             self._removeIgnoreWarnings(filteredWarnings, directives.ignore);
             self._removeDeadZoneWarnings(filteredWarnings, directives.dead_zones);
 
-            if (_.size(filteredWarnings) < 1) {
+            // If there are no warnings after processing directives, return wooHoo
+            if (_.isEmpty(filteredWarnings) ) {
                 logger.metric('woohoo-state');
-                filteredWarnings.push(wooHoo);
+                filteredWarnings.push(infoWooHoo);
             }
-
-            resolve({
-                warnings: filteredWarnings
-            });
+            resolve ({warnings: filteredWarnings}); 
         });
     }
 
