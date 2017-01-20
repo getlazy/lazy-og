@@ -3,7 +3,7 @@
 
 /* global logger */
 
-const _ = require('lodash');
+const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want whole lotta lodash...
 const fp = require('lodash/fp');
 const detect = require('language-detect');
 const EnginePipelineRun = require('./engine-pipeline-run');
@@ -45,7 +45,7 @@ class EnginePipeline {
         });
     }
 
-    analyzeFile(hostPath, language, content, context, refEngineStatuses) {
+    analyzeFile(hostPath, language, content, context) {
         // Detect the language and run the engines for both the detected and the declared language.
         // This way even if we got an incorrect language or no language, we will be able to
         // analyze the file to the best of our abilities.
@@ -81,25 +81,7 @@ class EnginePipeline {
         // Run the pipleine from the root.
         const pipelineRun = new EnginePipelineRun(this._namesToEnginesMap, engines,
             this._pipelineRoot, hostPath, language, content, context);
-        return pipelineRun.run()
-            .then((results) => {
-                //  Merge engine statuses on success.
-                EnginePipeline._mergeEngineStatuses(refEngineStatuses, pipelineRun.engineStatuses);
-                return Promise.resolve(results);
-            })
-            .catch((err) => {
-                //  Merge engine statuses on failure.
-                EnginePipeline._mergeEngineStatuses(refEngineStatuses, pipelineRun.engineStatuses);
-                return Promise.reject(err);
-            });
-    }
-
-    static _mergeEngineStatuses(refEngineStatuses, runEngineStatuses) {
-        // istanbul ignore next
-        if (_.isArray(refEngineStatuses)) {
-            //  Merge the resulting engine statuses to the given "reference" to array.
-            Array.prototype.push.apply(refEngineStatuses, runEngineStatuses);
-        }
+        return pipelineRun.run();
     }
 }
 

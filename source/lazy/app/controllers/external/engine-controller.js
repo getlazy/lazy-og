@@ -2,7 +2,7 @@
 
 /* global logger */
 
-const _ = require('lodash');
+const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want whole lotta lodash...
 const selectn = require('selectn');
 const proxy = require('http-proxy-middleware');
 const PACKAGE_VERSION = require('../../../package.json').version;
@@ -41,25 +41,9 @@ const addEndpoints = (app, options) => {
         const context = selectn('body.context', req);
 
         try {
-            const statuses = [];
-            return enginePipeline.analyzeFile(hostPath, language, content, context, statuses)
-                .then((warnings) => {
-                    // Did any engine reported that is has checked the code?
-                    if (!_.find(statuses, { codeChecked: true })) {
-                        warnings.warnings.push({
-                            type: 'Info',
-                            //  We set spaces around the rule ID so that it cannot be disabled.
-                            ruleId: ' lazy-no-linters-defined ',
-                            message: `No engine registered for [${language}]. This file has not been checked for language-specific warnings.`,
-                            filePath: hostPath
-                        });
-                        // Remove the info that all is fine, since we don't really know it
-                        // if no engine checked the file. Delete rules ' lazy-no-linter-warnings '
-                        _.remove(warnings.warnings, warn =>
-                            (_.eq(warn.ruleId, ' lazy-no-linter-warnings ')));
-                    }
-                    return res.send(warnings);
-                }).catch((err) => {
+            return enginePipeline.analyzeFile(hostPath, language, content, context)
+                .then(engineOutput => res.send(engineOutput))
+                .catch((err) => {
                     res.status(500).send({
                         error: err && err.message
                     });

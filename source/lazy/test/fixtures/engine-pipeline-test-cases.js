@@ -39,7 +39,8 @@ module.exports = [{
         sequence: []
     },
     then: (result) => {
-        assert(_.isUndefined(result));
+        assert(!_.isUndefined(result));
+        assert(_.isEqual(result, {}));
     }
 }, {
     id: 'success #2',
@@ -114,7 +115,7 @@ module.exports = [{
         assert.equal(_.get(result, 'warnings[0].test2.warnings[0].test'), 'result');
     }
 }, {
-    id: 'status are returned in sequence',
+    id: 'last status survives',
     engines: [{
         name: 'engine1',
         languages: [],
@@ -149,9 +150,8 @@ module.exports = [{
         }]
     },
     // lazy ignore-once no-unused-vars
-    then: (result, engineStatuses) => {
-        assert.equal(_.get(engineStatuses, '[0].test'), 1);
-        assert.equal(_.get(engineStatuses, '[1].test'), 2);
+    then: (result) => {
+        assert.equal(_.get(result, 'status.test'), 2);
     }
 }, {
     id: 'inexisting engine in bundle #1',
@@ -211,7 +211,7 @@ module.exports = [{
         assert.equal(sortedWarnings[1].test, 'result2');
     }
 }, {
-    id: 'status are returned in bundle',
+    id: 'last status survives in bundle',
     engines: [{
         name: 'engine1',
         languages: [],
@@ -245,13 +245,8 @@ module.exports = [{
         }]
     },
     // lazy ignore-once no-unused-vars
-    then: (result, engineStatuses) => {
-        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
-        assert.equal(engineStatuses.length, 2);
-        //  Sort the statuses as bundle engines return be executed out of order.
-        const sortedStatuses = _.sortBy(engineStatuses, 'test');
-        assert.equal(_.get(sortedStatuses, '[0].test'), 1);
-        assert.equal(_.get(sortedStatuses, '[1].test'), 2);
+    then: (result) => {
+        assert.equal(_.get(result, 'status.test'), 2);
     }
 }, {
     id: 'composition defect #1 fixed',
@@ -288,16 +283,12 @@ module.exports = [{
             }]
         }]
     },
-    then: (result, engineStatuses) => {
+    then: (result) => {      
         assert(_.isArray(result.warnings), 'warnings is an array');
         assert.equal(result.warnings.length, 2);
         assert.equal(_.get(result, 'warnings[0].test'), 'result');
         assert.equal(_.get(result, 'warnings[1].test'), 'result2');
-
-        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
-        assert.equal(engineStatuses.length, 2);
-        assert.equal(_.get(engineStatuses, '[0].test'), 1);
-        assert.equal(_.get(engineStatuses, '[1].test'), 2);
+        assert.equal(_.get(result, 'status.test'), 2);
     }
 }, {
     id: 'composition test #1',
@@ -333,7 +324,7 @@ module.exports = [{
             }]
         }]
     },
-    then: (result, engineStatuses) => {
+    then: (result) => {
         assert(_.isArray(result.warnings), 'warnings is an array');
         assert.equal(result.warnings.length, 2);
         //  Sort the result as bundle engines return be executed out of order.
@@ -341,12 +332,7 @@ module.exports = [{
         assert.equal(sortedWarnings[0].test, 'result');
         assert.equal(sortedWarnings[1].test, 'result2');
 
-        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
-        assert.equal(engineStatuses.length, 2);
-        //  Sort the statuses as bundle engines return be executed out of order.
-        const sortedStatuses = _.sortBy(engineStatuses, 'test');
-        assert.equal(_.get(sortedStatuses, '[0].test'), 1);
-        assert.equal(_.get(sortedStatuses, '[1].test'), 2);
+        assert.equal(_.get(result, 'status.test'), 2);
     }
 }, {
     id: 'composition bug #2 fixed - error in a sequence stops execution',
@@ -391,11 +377,8 @@ module.exports = [{
             engine3: {}
         }]
     },
-    catch: (err, engineStatuses) => {
+    catch: (err) => {
         assert.equal(err.message, 'test-error');
-        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
-        assert.equal(engineStatuses.length, 1);
-        assert.equal(engineStatuses[0].test, 1);
     }
 }, {
     id: 'composition test #4 - error in a bundle does NOT stop execution',
@@ -437,7 +420,7 @@ module.exports = [{
             engine3: {}
         }]
     },
-    then: (results, engineStatuses) => {
+    then: (results) => {
         assert(_.isArray(results.warnings), 'warnings is an array');
         assert.equal(results.warnings.length, 2);
         //  Sort the result as bundle engines return be executed out of order.
@@ -445,12 +428,7 @@ module.exports = [{
         assert.equal(sortedWarnings[0].test, 'result');
         assert.equal(sortedWarnings[1].test, 'result3');
 
-        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
-        assert.equal(engineStatuses.length, 2);
-        //  Sort the statuses as bundle engines return be executed out of order.
-        const sortedStatuses = _.sortBy(engineStatuses, 'test');
-        assert.equal(_.get(sortedStatuses, '[0].test'), 1);
-        assert.equal(_.get(sortedStatuses, '[1].test'), 3);
+        assert.equal(_.get(results, 'status.test'), 3);
     }
 }, {
     id: 'composition test #5',
@@ -492,20 +470,14 @@ module.exports = [{
             engine3: {}
         }]
     },
-    then: (results, engineStatuses) => {
+    then: (results) => {
         assert(_.isArray(results.warnings), 'warnings is an array');
         assert.equal(results.warnings.length, 2);
         //  Sort the result as bundle engines return be executed out of order.
         const sortedWarnings = _.sortBy(results.warnings, 'test');
         assert.equal(sortedWarnings[0].test, 'result');
         assert.equal(sortedWarnings[1].test, 'result3');
-
-        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
-        assert.equal(engineStatuses.length, 2);
-        //  Sort the statuses as bundle engines return be executed out of order.
-        const sortedStatuses = _.sortBy(engineStatuses, 'test');
-        assert.equal(_.get(sortedStatuses, '[0].test'), 1);
-        assert.equal(_.get(sortedStatuses, '[1].test'), 3);
+        assert.equal(_.get(results, 'status.test'), 3);
     }
 }, {
     id: 'composition test #6',
@@ -538,17 +510,12 @@ module.exports = [{
             engine2: {}
         }]
     },
-    then: (result, engineStatuses) => {
+    then: (result) => {
         assert(_.isArray(result.warnings), 'warnings is an array');
         assert.equal(result.warnings.length, 1);
         assert.equal(result.warnings[0].test, 'result');
 
-        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
-        assert.equal(engineStatuses.length, 2);
-        //  Sort the statuses as bundle engines return be executed out of order.
-        const sortedStatuses = _.sortBy(engineStatuses, 'test');
-        assert.equal(_.get(sortedStatuses, '[0].test'), 1);
-        assert.equal(_.get(sortedStatuses, '[1].test'), 2);
+        assert.equal(_.get(result, 'status.test'), 2);
     }
 }, {
     id: 'language test #1',
@@ -584,14 +551,12 @@ module.exports = [{
     params: {
         language: 'test'
     },
-    then: (result, engineStatuses) => {
+    then: (result) => {
         assert(_.isArray(result.warnings), 'warnings is an array');
         assert.equal(result.warnings.length, 1);
         assert.equal(result.warnings[0].test, 'result');
 
-        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
-        assert.equal(engineStatuses.length, 1);
-        assert.equal(engineStatuses[0].test, 1);
+        assert.equal(_.get(result, 'status.test'), 1);
     }
 }, {
     id: 'language test #2',
@@ -627,12 +592,10 @@ module.exports = [{
     params: {
         language: 'test'
     },
-    then: (result, engineStatuses) => {
-        assert(_.isArray(result.warnings), 'warnings is an array');
-        assert.equal(result.warnings.length, 0);
-
-        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
-        assert.equal(engineStatuses.length, 0);
+    then: (result) => {
+        assert (_.isNil(result.warnings), 'no warnings');
+        assert (_.isNil(result.status), 'no status');
+        
     }
 }, {
     id: 'language test #3',
@@ -669,12 +632,10 @@ module.exports = [{
     params: {
         language: 'test'
     },
-    then: (result, engineStatuses) => {
+    then: (result) => {
         assert(_.isArray(result.warnings), 'warnings is an array');
         assert.equal(result.warnings.length, 2);
-
-        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
-        assert.equal(engineStatuses.length, 2);
+        assert.equal(_.get(result, 'status.test'), 2);
     }
 }, {
     id: 'language test #4',
@@ -711,12 +672,10 @@ module.exports = [{
     params: {
         language: 'test2'
     },
-    then: (result, engineStatuses) => {
+    then: (result) => {
         assert(_.isArray(result.warnings), 'warnings is an array');
         assert.equal(result.warnings.length, 1);
-
-        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
-        assert.equal(engineStatuses.length, 1);
+        assert.equal(_.get(result, 'status.test'), 1);
     }
 }, {
     id: 'language test #5',
@@ -753,12 +712,11 @@ module.exports = [{
     params: {
         language: 'test2'
     },
-    then: (result, engineStatuses) => {
+    then: (result) => {
         assert(_.isArray(result.warnings), 'warnings is an array');
         assert.equal(result.warnings.length, 1);
 
-        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
-        assert.equal(engineStatuses.length, 1);
+        assert.equal(_.get(result, 'status.test'), 1);
     }
 }, {
     id: 'language test #6',
@@ -798,7 +756,7 @@ module.exports = [{
         language: 'Babel ES6 JavaScript',
         content: '\'use strict\''
     },
-    then: (result, engineStatuses) => {
+    then: (result) => {
         assert(_.isArray(result.warnings), 'warnings is an array');
         assert.equal(result.warnings.length, 2);
         //  Sort the result as bundle engines return be executed out of order.
@@ -806,12 +764,7 @@ module.exports = [{
         assert.equal(sortedWarnings[0].test, 'result');
         assert.equal(sortedWarnings[1].test, 'result2');
 
-        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
-        assert.equal(engineStatuses.length, 2);
-        //  Sort the statuses as bundle engines return be executed out of order.
-        const sortedStatuses = _.sortBy(engineStatuses, 'test');
-        assert.equal(_.get(sortedStatuses, '[0].test'), 1);
-        assert.equal(_.get(sortedStatuses, '[1].test'), 2);
+        assert.equal(_.get(result, 'status.test'), 2);
     }
 }, {
     id: 'language test #6',
@@ -849,7 +802,7 @@ module.exports = [{
         language: 'JavaScript',
         content: '\'use strict\''
     },
-    then: (result, engineStatuses) => {
+    then: (result) => {
         assert(_.isArray(result.warnings), 'warnings is an array');
         assert.equal(result.warnings.length, 2);
         //  Sort the result as bundle engines return be executed out of order.
@@ -857,11 +810,6 @@ module.exports = [{
         assert.equal(sortedWarnings[0].test, 'result');
         assert.equal(sortedWarnings[1].test, 'result2');
 
-        assert(_.isArray(engineStatuses), 'engineStatuses is an array');
-        assert.equal(engineStatuses.length, 2);
-        //  Sort the statuses as bundle engines return be executed out of order.
-        const sortedStatuses = _.sortBy(engineStatuses, 'test');
-        assert.equal(_.get(sortedStatuses, '[0].test'), 1);
-        assert.equal(_.get(sortedStatuses, '[1].test'), 2);
+        assert.equal(_.get(result, 'status.test'), 2);
     }
 }];

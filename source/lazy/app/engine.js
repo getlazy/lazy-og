@@ -3,7 +3,7 @@
 
 /* global logger */
 
-const _ = require('lodash');
+const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want whole lotta lodash...
 const url = require('url');
 const request = require('request-promise-native');
 const async = require('async');
@@ -133,21 +133,7 @@ class Engine
             }
         };
 
-        return request(requestParams)
-            .then((results) => {
-                const processedWarnings = {};
-                if (_.isArray(results.warnings)) {
-                    /* eslint arrow-body-style: off */
-                    processedWarnings.warnings = _.map(results.warnings, (warning) => {
-                        //  Add the actual client file path.
-                        return _.assignIn(warning, {
-                            filePath: hostPath
-                        });
-                    });
-                }
-                processedWarnings.status = _.get(results, 'status', {});
-                return processedWarnings;
-            });
+        return request(requestParams);
     }
 
     _redirectContainerLogsToLogger() {

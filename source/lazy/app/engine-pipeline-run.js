@@ -3,7 +3,7 @@
 
 /* global logger */
 
-const _ = require('lodash');
+const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want whole lotta lodash...
 
 // Keep running the promises returned by the given action while the given condition returns true.
 const asyncWhile = (condition, action) => {
@@ -21,7 +21,6 @@ class EnginePipelineRun {
         this._language = language;
         this._content = content;
         this._context = context;
-        this._engineStatuses = [];
         this._alreadyRan = false;
     }
 
@@ -33,10 +32,6 @@ class EnginePipelineRun {
 
         this._alreadyRan = true;
         return this._runPipeline(this._pipelineRoot, this._context);
-    }
-
-    get engineStatuses() {
-        return this._engineStatuses;
     }
 
     _runPipeline(pipeline, context) {
@@ -116,25 +111,23 @@ class EnginePipelineRun {
         ).then((res) => {
             const results = _.compact(res);
             const bundleResults = _.reduce(results, (accum, oneResult) => {
-                const status = _.get(oneResult, 'status');
-                const warnings = _.get(oneResult, 'warnings');
-
                 // Since we are running engines in parallel,
                 // we need to collect and accumulate output of all engines.
-                if (!_.isNil(warnings)) {
-                    // lazy ignore-once no-param-reassign
-                    accum.warnings = _.union(accum.warnings, warnings);
-                }
+                _.assignInWith(accum, oneResult, (accumValue, resultValue) => {
+                    // do not allow undefined value to overwrite something that is defined
+                    if (_.isUndefined(resultValue)) {
+                        return accumValue;
+                    }
 
-                // Also, accumulate statuses of each engine
-                if (!_.isNil(status)) {
-                    this._engineStatuses.push(status);
-                }
+                    // if the property is array, then merge them instead of overwriting
+                    if (_.isArray(resultValue)) {
+                        return _.union(accumValue, resultValue);
+                    }
+
+                    return undefined; // Leave the rest to default assignement rules.
+                });
                 return accum;
-            }, {
-                warnings: []
-            });
-
+            }, {});
             return Promise.resolve(bundleResults);
         });
     }
@@ -144,6 +137,11 @@ class EnginePipelineRun {
 
         let i = 0;
         let error;
+
+        // In sequencing engines (seq A -> Seq B), we need to accumulate results of each engine,
+        // in such a way that output from seq B overrides output from seq A,
+        // while the parts of seq A that are not modified by seq B remain the same
+        const sequenceResults = {};
 
         // Run engines sequentially until we have through all of them or one has returned
         // en error.
@@ -168,20 +166,9 @@ class EnginePipelineRun {
             })()
                 // Process the results no matter if we ran the engine or another pipeline.
                 .then((results) => {
-                    // If the engine returned a status, add it to our list of statuses
-                    // but don't pass it to the next engine (that is remove it from
-                    // the results). This solves the problem of repeating statuses with
-                    // skipped engines.
-                    const status = _.get(results, 'status');
-                    if (!_.isNil(status)) {
-                        this._engineStatuses.push(status);
-
-                        // Setting to undefined is faster than deleting property.
-                        // lazy ignore-once no-param-reassign
-                        results.status = undefined;
-                    }
-
-                    newContext.previousStepResults = results;
+                    // Merge the results so that latest one overrides former.
+                    _.assignIn(sequenceResults, results);
+                    newContext.previousStepResults = _.cloneDeep(sequenceResults);
                 })
                 // Capture the error if it happens. Note that an engine could reject the promise
                 // with a nil error in which case we will continue onto the next engine.
@@ -197,7 +184,7 @@ class EnginePipelineRun {
                     return Promise.reject(error);
                 }
 
-                return Promise.resolve(newContext.previousStepResults);
+                return Promise.resolve(sequenceResults);
             });
     }
 }
