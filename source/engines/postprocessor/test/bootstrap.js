@@ -1,19 +1,27 @@
 
 'use strict';
 
-// In engine processes it is strongly recommended to include engine-helpers as the first thing
-// in the process's lifetime and then immediately invoke `initialize` which will setup global logger,
-// default handlers for uncaught exceptions, unhandled promises and so on.
-require('@lazyass/engine-helpers').initialize();
+// Default logger in engine helpers outputs JSON, so we need 
+// a more readable one
+const winston = require('winston');
+const common = require('@lazyass/common');
 
-const Engine = require('../postprocessor-engine');
-const engine = new Engine();
+const createTemporaryLogger = () => {
+    winston.addColors(common.LazyLoggingLevels.colors);
 
-module.exports = {
-    start: () => {
-        return engine.start();
-    },
-    stop: () => {
-        return engine.stop();
-    }
+    const logger = new winston.Logger({
+        transports: [new winston.transports.Console({
+            level: 'info',
+            colorize: true,
+            prettyPrint: true
+        })],
+        levels: common.LazyLoggingLevels.levels
+    });
+    logger.on('error', (err) => {
+        console.log('Logging error', err);
+    });
+
+    return logger;
 };
+
+global.logger = createTemporaryLogger();

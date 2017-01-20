@@ -9,12 +9,14 @@
   "author": "Nebojsa Lazic",
   "license": "MIT",
   "dependencies": {
-    "@lazyass/engine-helpers": "^3.2.1",
+    "@lazyass/engine-helpers": "^3.2.2",
     "lodash": "^4.17.4",
     "rewire": "^2.5.2"
   },
   "devDependencies": {
-    "request": "^2.79.0"
+    "@lazyass/common": "^1.0.0",
+    "request": "^2.79.0",
+    "winston": "^2.3.0"
   },
   "repository": {
     "type": "git",

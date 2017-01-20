@@ -3,6 +3,7 @@
   "client": "atom@1.12.7",
   "repositoryInformation": null,
   "previousStepResults": {
+    "status": {"codeChecked":true},
     "warnings": [{
       "type": "Error",
       "message": "[no-tabs]: Unexpected tab character.",

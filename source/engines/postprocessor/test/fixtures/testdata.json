@@ -3,6 +3,7 @@
   "client": "atom@1.12.7",
   "repositoryInformation": null,
   "previousStepResults": {
+    "status": {"codeChecked":true},
     "warnings": [{
       "type": "Warning",
       "message": "Hey hey!",

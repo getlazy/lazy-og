@@ -324,9 +324,12 @@ class PostProcEngineHttpServer extends EngineHttpServer {
 
             if (directives.ignore_all) {
                 // Ignoring everything - report it and get out
-                filteredWarnings.push(infoIgnoredAll);
                 logger.metric('ignored-all');
-                resolve ({warnings: filteredWarnings}); 
+                const newFilteredWarnings = [infoIgnoredAll];
+                if (!isCodeChecked) {
+                    newFilteredWarnings.push(infoCodeNotChecked);
+                }   
+                resolve ({warnings: newFilteredWarnings});
                 return;
             }
             self._removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once, lines);
