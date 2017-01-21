@@ -3,12 +3,8 @@
 // Above must be the absolutely first line in the file otherwise Atom gets confused
 
 /* global atom */
-// lazy ignore import/extensions
-// lazy ignore arrow-body-style
-// lazy ignore lodash/chain-style
-// lazy ignore lodash/chaining
-// lazy ignore arrow-parens
-// lazy ignore no-console
+// lazy ignore import/extensions arrow-body-style lodash/chain-style lodash/chaining
+// lazy ignore arrow-parens no-console lodash/import-scope
 
 import _ from 'lodash';
 
@@ -58,7 +54,7 @@ module.exports = {
         this.subscriptions.dispose();
     },
 
-    getDirectoryForPath(path) {
+    getProjectDirectoryForPath(path) {
         return _.find(atom.project.getDirectories(), (directory) => {
             return directory.contains(path);
         });
@@ -155,11 +151,20 @@ module.exports = {
                         }]);
                     }
 
-                    const directory = self.getDirectoryForPath(filePath);
+                    const directory = self.getProjectDirectoryForPath(filePath);
 
-                    return atom.project.repositoryForDirectory(directory)
-                        .then((repository) => self._processResults(
-                            filePath, fileContents, body.warnings, repository));
+
+                    return new Promise((resolve) => {
+                        //  Directory is nil if the file is not in the project.
+                        if (!directory) {
+                            resolve(null);
+                            return;
+                        }
+
+                        resolve(atom.project.repositoryForDirectory(directory));
+                    })
+                    .then((repository) => self._processResults(
+                        filePath, fileContents, body.warnings, repository));
                 })
                 .then((result) => {
                     //  Delete the request from the map of running requests.
@@ -191,16 +196,16 @@ module.exports = {
     getRepoInfoForPath(path) {
         const self = this;
 
-        const directory = self.getDirectoryForPath(path);
+        const directory = self.getProjectDirectoryForPath(path);
 
         if (_.isNil(directory)) {
-            return null;
+            return Promise.resolve(null);
         }
 
         return atom.project.repositoryForDirectory(directory)
         .then((repository) => {
             if (_.isNil(repository)) {
-                return null;
+                return Promise.resolve(null);
             }
 
             return new Promise((resolve) => {
