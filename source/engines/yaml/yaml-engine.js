@@ -1,6 +1,7 @@
 
 'use strict';
 
+const _ = require('lodash');
 const path = require('path');
 const yaml = require('js-yaml');
 const EngineHelpers = require('@lazyass/engine-helpers');
@@ -14,8 +15,8 @@ class YamlEngineHttpServer extends EngineHttpServer {
         return {
             type,
             message: message.reason,
-            line: message.mark.line,
-            column: message.mark.column
+            line: _.get(message, 'mark.line'),
+            column: _.get(message, 'mark.column')
         };
     }
 
