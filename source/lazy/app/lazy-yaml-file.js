@@ -22,8 +22,8 @@ class LazyYamlFile {
                 const config = yaml.safeLoad(content);
 
                 //  Now expand the "macro" clauses like `~include`.
-                const fileDirname = path.dirname(path.resolve(filePath));
-                return LazyYamlFile._expandMacros(fileDirname, config);
+                const configRootPath = LazyYamlFile._getConfigRootPath(filePath);
+                return LazyYamlFile._expandMacros(configRootPath, config);
             })
             .then((resolvedConfig) => {
                 const configErrors = LazyYamlFile._getConfigErrors(resolvedConfig);
@@ -56,7 +56,7 @@ class LazyYamlFile {
         return _.isUndefined(envvarValue) ? defaultValue : envvarValue;
     }
 
-    static _expandMacros(fileDirname, config) {
+    static _expandMacros(configRootPath, config) {
         // isObject will return true for objects and arrays and we want to further process the arrays.
         if (!_.isObject(config)) {
             // Values are immutable, no need to clone them but we must try to interpolate them.
@@ -74,14 +74,14 @@ class LazyYamlFile {
                 const resolvedClauseContent = LazyYamlFile._interpolateEnvvars(clauseContent);
 
                 if (clause === '~include') {
-                    LazyYamlFile._readFile(resolvedClauseContent, fileDirname)
+                    LazyYamlFile._readFile(resolvedClauseContent, configRootPath)
                         .then((includeFileContent) => {
                             const includedConfig = yaml.safeLoad(includeFileContent);
                             //  Delete the ~include clause and instead of it assign the *resolved*
                             //  included config.
                             //  Currently we don't support deeper resolution of included configs so
                             //  we don't follow this down any further path.
-                            LazyYamlFile._expandMacros(fileDirname, includedConfig)
+                            LazyYamlFile._expandMacros(configRootPath, includedConfig)
                                 .then((resolvedClauseConfig) => {
                                     delete resolvedConfig[clause];
                                     _.assignIn(resolvedConfig, resolvedClauseConfig);
@@ -92,7 +92,7 @@ class LazyYamlFile {
                     return;
                 }
 
-                LazyYamlFile._expandMacros(fileDirname, clauseContent)
+                LazyYamlFile._expandMacros(configRootPath, clauseContent)
                     .then((resolvedClauseConfig) => {
                         resolvedConfig[clause] = resolvedClauseConfig;
                         nextClause();
@@ -122,7 +122,7 @@ class LazyYamlFile {
         //  Nothing to do yet.
     }
 
-    static _readFile(filePath, fileDirname) {
+    static _readFile(filePath, configRootPath) {
         if (isUrl(filePath)) {
             return request(filePath);
         }
@@ -130,10 +130,18 @@ class LazyYamlFile {
         // istanbul ignore else
         let absoluteFilePath = filePath;
         if (!path.isAbsolute(filePath)) {
-            absoluteFilePath = path.resolve(fileDirname, filePath);
+            absoluteFilePath = path.resolve(configRootPath, filePath);
         }
 
         return fs.readFile(absoluteFilePath, 'utf8');
+    }
+
+    static _getConfigRootPath(filePath) {
+        if (isUrl(filePath)) {
+            return null;
+        }
+
+        return path.dirname(path.resolve(filePath));
     }
 }
 

@@ -8,4 +8,4 @@ docker run -it --rm \
     -w /app \
     --env-file env \
     ierceg/node-dev:6.9.1 \
-    nodemon -V -d 1 -L -w /app index.js
+    nodemon -V -d 1 -L -w /app index.js /config/lazy.yaml

@@ -13,8 +13,42 @@ const assert = require('assert');
 const LazyYamlFile = require('../app/lazy-yaml-file');
 const configTests = require('./fixtures/lazy-yaml-file-config-tests');
 const nock = require('nock');
+const path = require('path');
 
-describe.only('LazyYamlFile', function () {
+describe('LazyYamlFile', function () {
+    describe('load', function () {
+        it('works with paths', function () {
+            return LazyYamlFile.load(path.resolve(path.resolve(), 'test/fixtures/valid-yaml-config-test.yaml'));
+        });
+
+        it('works with urls', function () {
+            const lazyTeamConfig = {
+                version: 1,
+                service_url: 'http://a.co',
+                engine_pipeline: {
+                    sequence: [{
+                        test: {}
+                    }]
+                },
+                engines: {
+                    test: {
+                        image: 'a:b'
+                    }
+                }
+            };
+
+            const testRequest = nock('http://example.com')
+                .get('/lazy-team-config.yaml')
+                .reply(200, lazyTeamConfig);
+
+            return LazyYamlFile.load('http://example.com/lazy-team-config.yaml')
+                .then((config) => {
+                    assert(testRequest.isDone());
+                    assert.deepEqual(config, lazyTeamConfig);
+                });
+        });
+    });
+
     describe('_getConfigErrors', function () {
         _.each(configTests, (test) => {
             it(`schema check test ${test.id}`, function () {
@@ -122,7 +156,7 @@ describe.only('LazyYamlFile', function () {
 
             it('complete ~include replacement', function () {
                 const test = {
-                    '~include': 'fixtures/yaml-include-macro-example-1.yaml'
+                    '~include': 'fixtures/yaml-include-macro-test-1.yaml'
                 };
                 return LazyYamlFile._expandMacros('test', test)
                     .then((config) => {
@@ -133,7 +167,7 @@ describe.only('LazyYamlFile', function () {
             it('~include in the middle', function () {
                 const test = {
                     config: {
-                        '~include': 'fixtures/yaml-include-macro-example-1.yaml',
+                        '~include': 'fixtures/yaml-include-macro-test-1.yaml',
                         not: 'replaced',
                         test: 'is replaced'
                     }
@@ -152,9 +186,9 @@ describe.only('LazyYamlFile', function () {
             it('multiple ~include in the middle', function () {
                 const test = {
                     config: {
-                        '~include': 'fixtures/yaml-include-macro-example-1.yaml',
+                        '~include': 'fixtures/yaml-include-macro-test-1.yaml',
                         level1: [null, 12345, [true, {
-                            '~include': 'fixtures/yaml-include-macro-example-2.yaml'
+                            '~include': 'fixtures/yaml-include-macro-test-2.yaml'
                         }, 'test'], undefined]
                     }
                 };
@@ -175,7 +209,7 @@ describe.only('LazyYamlFile', function () {
                 const test = {
                     config: {
                         not: 'replaced',
-                        '~include': 'fixtures/yaml-include-macro-example-3.yaml'
+                        '~include': 'fixtures/yaml-include-macro-test-3.yaml'
                     }
                 };
                 return LazyYamlFile._expandMacros('test', test)
@@ -194,7 +228,7 @@ describe.only('LazyYamlFile', function () {
 
             it('~include with envvar interpolation', function () {
                 process.env.TEST_THIS_ENVVAR = 'test envvar';
-                process.env.TEST_INCLUDE_PATH = 'fixtures/yaml-include-macro-example-1.yaml';
+                process.env.TEST_INCLUDE_PATH = 'fixtures/yaml-include-macro-test-1.yaml';
                 const test = {
                     config: {
                         not: 'replaced',
@@ -202,7 +236,7 @@ describe.only('LazyYamlFile', function () {
                         yes2: '${TEST_THIS_ENVVAR:default not used}',
                         yes3: '${NO_DEFINITION_ENVVAR}',
                         yes4: '${NO_DEFINITION_ENVVAR:xyz}',
-                        '~include': 'fixtures/yaml-include-macro-example-4.yaml'
+                        '~include': 'fixtures/yaml-include-macro-test-4.yaml'
                     }
                 };
                 return LazyYamlFile._expandMacros('test', test)
