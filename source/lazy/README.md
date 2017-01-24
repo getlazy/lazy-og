@@ -159,26 +159,26 @@ config:
                 apiVersion: "5.0"
 # Each file is run through this pipeline.
 engine_pipeline:
-  bundle:                     # bundle: - run engines asynchronously (in parallel)
-    - file-stats:
-    - sequence:               # pullreq engine depends on github-access, so we run them sequentially
-      - github-access:
-      - pullreq:
-    - sequence:               # Linters. Run any and all linters
-      - bundle:               # in parallel,
-        - emcc:
-        - css:
-        - html:
-        - eslint:
-        - yaml:
-        - stylelint:
-        - php-l:
-        - pmd-java:
-        - tidy-html:
-      - postp:                # apply postprocessor to their output
-      - reducer:              # and, finally, limit the number of reported errors
-          maxWarningsPerRule: 5     # allow up to 5 warnings for same rule-id
-          maxWarningsPerFile: 300   # allow up to 150 warnings per file
+    bundle:                     # bundle: - run engines asynchronously (in parallel)
+        - file-stats:
+        - sequence:               # pullreq engine depends on github-access, so we run them sequentially
+            - github-access:
+            - pullreq:
+        - sequence:               # Linters. Run any and all linters
+            - bundle:               # in parallel,
+                - emcc:
+                - css:
+                - html:
+                - eslint:
+                - yaml:
+                - stylelint:
+                - php-l:
+                - pmd-java:
+                - tidy-html:
+            - postp:                # apply postprocessor to their output
+            - reducer:              # and, finally, limit the number of reported errors
+                maxWarningsPerRule: 5     # allow up to 5 warnings for same rule-id
+                maxWarningsPerFile: ${MAX_WARNINGS_PER_FILE} # read max warnings per file from environment
 engines: # each of these engines can be left out and other custom or official engines may be added
     eslint:
         image: getlazy/eslint-engine:latest
@@ -206,9 +206,9 @@ Note:
 * `version` must be equal to `1`
 * `id` is optional and if not provided it's set to `default`
 * `internal_port` is optional but it must be different from external port
-* `repository_auth` can also be specified with a token
+* `repository_auth` can also be specified with a token but not with directly specifying user name and password due to security concerns
 * `boot_timeout` is optional and its default is 30 seconds
-* `import_env` clause is useful in avoiding specifying secret values like application client ID or secret in lazy.yaml
+* `import_env` clause is useful in avoiding specifying secret values like application client ID or secret in lazy.yaml; an alternative would be to use envvar interpolation but this makes the intent explicit
 * `~include` is a meta-clause that allows splitting up configuration into multiple YAML files; this is very useful for large engine configurations
 
 To allow easier hacking lazy can run engines mounted from local host filesystem. For example if we wanted to hack on `lazy-eslint-engine` we could specify it like this:

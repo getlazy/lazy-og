@@ -21,8 +21,8 @@ class LazyYamlFile {
             .then((content) => {
                 const config = yaml.safeLoad(content);
 
-                //  Now resolve the config clauses and include the content in them.
-                return LazyYamlFile._resolveIncludeClauses(fileDirname, config);
+                //  Now expand the "macro" clauses like `~include`.
+                return LazyYamlFile._expandMacros(fileDirname, config);
             })
             .then((resolvedConfig) => {
                 const configErrors = LazyYamlFile._getConfigErrors(resolvedConfig);
@@ -36,20 +36,45 @@ class LazyYamlFile {
             });
     }
 
-    static _resolveIncludeClauses(fileDirname, config) {
-        const resolvedConfig = _.cloneDeep(config);
-
-        if (!_.isObject(resolvedConfig)) {
-            return Promise.resolve(resolvedConfig);
+    static _interpolateEnvvars(value) {
+        if (!_.isString(value)) {
+            return value;
         }
+
+        // Interpolate the entire string for "${process envvar name}" pattern.
+        const regex = /^\$\{([^:]+)(:(.*))?\}$/;
+        const result = regex.exec(value);
+        if (!result) {
+            return value;
+        }
+
+        const envvarName = result[1];
+        const defaultValue = result[3];
+        const envvarValue = process.env[envvarName];
+
+        return _.isUndefined(envvarValue) ? defaultValue : envvarValue;
+    }
+
+    static _expandMacros(fileDirname, config) {
+        // isObject will return true for objects and arrays and we want to further process the arrays.
+        if (!_.isObject(config)) {
+            // Values are immutable, no need to clone them but we must try to interpolate them.
+            return Promise.resolve(LazyYamlFile._interpolateEnvvars(config));
+        }
+
+        // Always clone as we shouldn't change caller's object/array.
+        const resolvedConfig = _.cloneDeep(config);
 
         return new Promise((resolve, reject) => {
             //  Iterate over config and not resolvedConfig as the latter might be changed during
             //  the iteration and we don't support higher order ~include resolution anyway
             //  (that is resolution of ~include clauses in data loaded from a previous ~include)
             async.eachOf(config, (clauseContent, clause, nextClause) => {
+                const resolvedClauseContent = LazyYamlFile._interpolateEnvvars(clauseContent);
+
                 if (clause === '~include') {
-                    let includeFilePath = clauseContent;
+                    let includeFilePath = resolvedClauseContent;
+                    // istanbul ignore else
                     if (!path.isAbsolute(includeFilePath)) {
                         includeFilePath = path.resolve(fileDirname, includeFilePath);
                     }
@@ -61,7 +86,7 @@ class LazyYamlFile {
                             //  included config.
                             //  Currently we don't support deeper resolution of included configs so
                             //  we don't follow this down any further path.
-                            LazyYamlFile._resolveIncludeClauses(fileDirname, includedConfig)
+                            LazyYamlFile._expandMacros(fileDirname, includedConfig)
                                 .then((resolvedClauseConfig) => {
                                     delete resolvedConfig[clause];
                                     _.assignIn(resolvedConfig, resolvedClauseConfig);
@@ -72,7 +97,7 @@ class LazyYamlFile {
                     return;
                 }
 
-                LazyYamlFile._resolveIncludeClauses(fileDirname, clauseContent)
+                LazyYamlFile._expandMacros(fileDirname, clauseContent)
                     .then((resolvedClauseConfig) => {
                         resolvedConfig[clause] = resolvedClauseConfig;
                         nextClause();
