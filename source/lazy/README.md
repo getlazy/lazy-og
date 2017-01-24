@@ -209,7 +209,7 @@ Note:
 * `repository_auth` can also be specified with a token but not with directly specifying user name and password due to security concerns
 * `boot_timeout` is optional and its default is 30 seconds
 * `import_env` clause is useful in avoiding specifying secret values like application client ID or secret in lazy.yaml; an alternative would be to use envvar interpolation but this makes the intent explicit
-* `~include` is a meta-clause that allows splitting up configuration into multiple YAML files; this is very useful for large engine configurations
+* `~include` is a meta-clause that allows splitting up configuration into multiple YAML files; this is very useful for large engine configurations; you can specify URLs in `~include` for which lazy will issue `GET` requests
 
 To allow easier hacking lazy can run engines mounted from local host filesystem. For example if we wanted to hack on `lazy-eslint-engine` we could specify it like this:
 

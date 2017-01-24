@@ -49,6 +49,7 @@
     "higher": "^1.0.5",
     "higher-docker-manager": "^1.6.0",
     "http-proxy-middleware": "^0.17.3",
+    "is-url": "^1.2.2",
     "js-yaml": "^3.7.0",
     "language-detect": "^1.1.0",
     "lodash": "^4.17.2",
@@ -60,6 +61,7 @@
   },
   "devDependencies": {
     "@lazyass/node-lazy-client": "^1.2.1",
+    "nock": "^9.0.2",
     "testdouble": "^1.10.2"
   }
 }

@@ -9,19 +9,20 @@ const path = require('path');
 const yaml = require('js-yaml');
 const async = require('async');
 const Ajv = require('ajv');
+const isUrl = require('is-url');
+const request = require('request-promise-native');
 
 //  LAZY_CONFIG_SCHEMA is defined at the end of the file but set during module loading.
 let LAZY_CONFIG_SCHEMA;
 
 class LazyYamlFile {
     static load(filePath) {
-        const fileDirname = path.dirname(path.resolve(filePath));
-
         return LazyYamlFile._readFile(filePath)
             .then((content) => {
                 const config = yaml.safeLoad(content);
 
                 //  Now expand the "macro" clauses like `~include`.
+                const fileDirname = path.dirname(path.resolve(filePath));
                 return LazyYamlFile._expandMacros(fileDirname, config);
             })
             .then((resolvedConfig) => {
@@ -73,13 +74,7 @@ class LazyYamlFile {
                 const resolvedClauseContent = LazyYamlFile._interpolateEnvvars(clauseContent);
 
                 if (clause === '~include') {
-                    let includeFilePath = resolvedClauseContent;
-                    // istanbul ignore else
-                    if (!path.isAbsolute(includeFilePath)) {
-                        includeFilePath = path.resolve(fileDirname, includeFilePath);
-                    }
-
-                    LazyYamlFile._readFile(includeFilePath)
+                    LazyYamlFile._readFile(resolvedClauseContent, fileDirname)
                         .then((includeFileContent) => {
                             const includedConfig = yaml.safeLoad(includeFileContent);
                             //  Delete the ~include clause and instead of it assign the *resolved*
@@ -127,8 +122,18 @@ class LazyYamlFile {
         //  Nothing to do yet.
     }
 
-    static _readFile(filePath) {
-        return fs.readFile(filePath, 'utf8');
+    static _readFile(filePath, fileDirname) {
+        if (isUrl(filePath)) {
+            return request(filePath);
+        }
+
+        // istanbul ignore else
+        let absoluteFilePath = filePath;
+        if (!path.isAbsolute(filePath)) {
+            absoluteFilePath = path.resolve(fileDirname, filePath);
+        }
+
+        return fs.readFile(absoluteFilePath, 'utf8');
     }
 }
 

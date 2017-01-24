@@ -12,6 +12,7 @@ const _ = require('lodash');
 const assert = require('assert');
 const LazyYamlFile = require('../app/lazy-yaml-file');
 const configTests = require('./fixtures/lazy-yaml-file-config-tests');
+const nock = require('nock');
 
 describe.only('LazyYamlFile', function () {
     describe('_getConfigErrors', function () {
@@ -218,6 +219,29 @@ describe.only('LazyYamlFile', function () {
                                 }
                             }
                         });
+                    });
+            });
+
+            it('~include of a URL', function () {
+                const testConfig = {
+                    '~include': 'http://example.com/lazy-team-config.yaml'
+                };
+                const lazyTeamConfig = {
+                    test: {
+                        from: {
+                            afar: []
+                        }
+                    }
+                };
+
+                const testRequest = nock('http://example.com')
+                    .get('/lazy-team-config.yaml')
+                    .reply(200, lazyTeamConfig);
+
+                return LazyYamlFile._expandMacros('test', testConfig)
+                    .then((config) => {
+                        assert(testRequest.isDone());
+                        assert.deepEqual(config, lazyTeamConfig);
                     });
             });
         });
