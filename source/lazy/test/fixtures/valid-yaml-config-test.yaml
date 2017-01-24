@@ -1,0 +1,8 @@
+version: 1
+service_url: 'http://a.co'
+engine_pipeline:
+    sequence:
+        - test:
+engines:
+    test:
+        image: 'a:b'

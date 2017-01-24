@@ -24,11 +24,9 @@ process.on('SIGINT', () => {
         });
 });
 
-// We always try to load /config/lazy.yaml. Since lazy runs in a docker container the only way to
-// "pass" it is by either building on top of its image or mounting a local directory as /config
-// We have to try to load the configuration before even configuring logger as it may contain
-// logger configuration.
-LazyYamlFile.load('/config/lazy.yaml')
+// Our 3rd agument is path to lazy.yaml (1st is node, 2nd is index.js)
+const lazyYamlPath = process.argv[2];
+LazyYamlFile.load(lazyYamlPath)
     .then(lazyConfig => Logger.initialize(lazyConfig)
         .then((logger) => {
             // Initialize the global logger.
@@ -41,6 +39,10 @@ LazyYamlFile.load('/config/lazy.yaml')
         })
         .catch((err) => {
             logger.error('Failed to initialize lazy', { err });
-            process.exit(-1);
+            process.exit(-2);
         })
-    );
+    )
+    .catch((err) => {
+        logger.error('Failed to load config', err);
+        process.exit(-3);
+    });

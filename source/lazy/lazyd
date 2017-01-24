@@ -6,4 +6,4 @@ docker run -it --rm \
     --link elk \
     --stop-signal SIGTERM \
     -d \
-    getlazy/lazy:latest
+    getlazy/lazy:latest /config/lazy.yaml
