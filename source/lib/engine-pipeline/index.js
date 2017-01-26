@@ -1,7 +1,5 @@
 
 'use strict';
 
-module.exports = {
-    EnginePipeline: require('./lib/engine-pipeline'),
-    logger: require('@lazyass/common').createPackageLogger('lazy-engine-pipeline')
-};
+module.exports = require('./lib/engine-pipeline');
+module.exports.logger = require('@lazyass/common').createPackageLogger('lazy-engine-pipeline');
