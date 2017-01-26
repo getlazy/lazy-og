@@ -1,3 +1,0 @@
-'~include': 'fixtures/yaml-include-macro-test-1.yaml'
-level2:
-    '~include': 'fixtures/yaml-include-macro-test-2.yaml'

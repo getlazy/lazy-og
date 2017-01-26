@@ -60,7 +60,7 @@ class Main
             .then(() => Main._recreateAllEngines())
             .then(() => Main._loadExternalExpressAppControllers())
             .catch((err) => {
-                logger.error('Failed to boot lazy', { err });
+                logger.error('Failed to boot lazy', { err: err && err.toString() });
                 return Main.stop()
                     .then(() => {
                         process.exit(-1);

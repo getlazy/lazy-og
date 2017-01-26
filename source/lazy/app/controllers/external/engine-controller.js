@@ -6,7 +6,7 @@ const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want w
 const selectn = require('selectn');
 const proxy = require('http-proxy-middleware');
 const PACKAGE_VERSION = require('../../../package.json').version;
-const EnginePipeline = require('../../engine-pipeline');
+const EnginePipeline = require('@lazyass/engine-pipeline');
 
 let enginePipeline;
 let engineManager;
