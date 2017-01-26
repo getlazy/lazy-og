@@ -28,17 +28,22 @@ process.on('SIGINT', () => {
 const redirectPackageLogEvent = (level, packageName, ...args) => {
     // In this example we put the package name into meta, if such exists.
     const argsWithoutMeta = [...args];
-    const meta = argsWithoutMeta.pop();
-    if (typeof(meta) === 'object') { // Nah, not really, use lodash!
+    let meta = argsWithoutMeta.pop();
+    if (_.isObject(meta)) {
         if (!meta._packageName) {
             meta._packageName = packageName;
         }
+    } else {
+        meta = {
+            _packageName: packageName
+        };
     }
     logger.log(level, argsWithoutMeta, meta);
 };
 
 const redirectPackagesLogEvents = (packageNames) => {
-    _.forEach(packageNames, packageName => {
+    _.forEach(packageNames, (packageName) => {
+        // lazy ignore-once global-require import/no-dynamic-require
         require(packageName).logger.on('log', redirectPackageLogEvent);
     });
 };
