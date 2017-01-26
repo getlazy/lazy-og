@@ -109,7 +109,7 @@ class Main
                 });
 
                 internalExpressApp.on('error', (err) => {
-                    logger.error('Internal ExpressJS app error', { err });
+                    logger.error('Internal ExpressJS app error', { err: err && err.toString() });
                 });
             }));
     }
@@ -157,7 +157,7 @@ class Main
             });
 
             externalExpressApp.on('error', (err) => {
-                logger.error('Extenal ExpressJS app error', { err });
+                logger.error('Extenal ExpressJS app error', { err: err && err.toString() });
             });
         });
     }
