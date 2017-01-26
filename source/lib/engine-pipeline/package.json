@@ -1,5 +1,5 @@
 {
-  "name": "@lazyass/lazy-engine-pipeline-runner",
+  "name": "@lazyass/engine-pipeline",
   "version": "1.0.0",
   "description": "Runs tasks through lazy engine pipeline",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getlazy/lazy-engine-pipeline-runner.git"
+    "url": "git+https://github.com/getlazy/lazy-engine-pipeline.git"
   },
   "keywords": [
     "lazy",
@@ -18,7 +18,14 @@
   "author": "The lazy Authors",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/getlazy/lazy-engine-pipeline-runner/issues"
+    "url": "https://github.com/getlazy/lazy-engine-pipeline/issues"
   },
-  "homepage": "https://github.com/getlazy/lazy-engine-pipeline-runner#readme"
+  "homepage": "https://github.com/getlazy/lazy-engine-pipeline#readme",
+  "dependencies": {
+    "@lazyass/common": "^1.0.0",
+    "language-detect": "^1.1.0"
+  },
+  "devDependencies": {
+    "testdouble": "^1.11.0"
+  }
 }
