@@ -1,5 +1,5 @@
 {
-  "name": "@lazyass/config-file",
+  "name": "@lazyass/lazy-config-file",
   "version": "1.0.0",
   "description": "Reads and processes lazy configuration files",
   "main": "index.js",
