@@ -172,7 +172,7 @@ class EnginePipelineRun {
                 // Capture the error if it happens. Note that an engine could reject the promise
                 // with a nil error in which case we will continue onto the next engine.
                 .catch((err) => {
-                    logger.error('Failure during sequence pipleline run, stopping', { err });
+                    logger.error('Failure during sequence pipleline run, stopping', { err: err && err.toString() });
                     error = err;
                 })
                 // Error or not increment the index in the sequence to get the next engine.
