@@ -26,11 +26,9 @@ class HelperContainerManager
      * helper container should be created.
      * @param {string} lazyVolumeName Name of Docker volume (or host path when testing) on which
      * to bind `/lazy` dir.
-     * @param {string} lazyNetworkName Name of Docker network to which helper container should be
-     * connected.
      * @return {Promise} Promise resolving with a new instance of HelperContainerManager.
      */
-    static createContainer(auth, imageName, lazyVolumeName, lazyNetworkName) {
+    static createContainer(auth, imageName, lazyVolumeName) {
         return HelperContainerManager._pullImage(auth, imageName)
             .then(() => {
                 //  Create the helper container.
@@ -41,9 +39,6 @@ class HelperContainerManager
                     Entrypoint: 'tail',
                     Cmd: '-f /dev/null'.split(' '),
                     HostConfig: {
-                        //  When networking mode is a name of another network it's
-                        //  automatically attached.
-                        NetworkMode: lazyNetworkName,
                         Binds: [
                             //  HACK: We hard-code the volume mount path to /lazy which is
                             //  known to all containers.
