@@ -15,7 +15,6 @@ push:
 test:
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
-	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -w /app \
 	    --stop-signal SIGINT \
 	    ierceg/node-dev:6.9.1 \
@@ -24,7 +23,6 @@ test:
 test-cont:
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
-	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -w /app \
 	    --stop-signal SIGINT \
 	    ierceg/node-dev:6.9.1 \
@@ -33,14 +31,12 @@ test-cont:
 coverage:
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
-	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -w /app \
 	    --stop-signal SIGINT \
 	    ierceg/node-dev:6.9.1 \
 	    istanbul cover _mocha -- --recursive -r test/bootstrap
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
-	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -w /app \
 	    ierceg/node-dev:6.9.1 \
 	    istanbul report text

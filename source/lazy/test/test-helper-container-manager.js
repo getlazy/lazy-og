@@ -27,7 +27,6 @@ describe('HelperContainerManager', function () {
             td.when(container.start()).thenResolve({ id: 'test-container-id' });
             td.when(td.replace(HelperContainerManager, '_createContainer')(td.matchers.argThat((params) => {
                 assert.equal(params.Image, 'test-image');
-                assert.equal(_.get(params, 'HostConfig.NetworkMode'), 'test-network');
                 assert.deepEqual(_.get(params, 'HostConfig.Binds'), ['test-volume:/lazy']);
                 assert.deepEqual(_.get(params, 'Labels'), {
                     'org.getlazy.lazy.helper-container-manager.owned': 'true'
@@ -35,7 +34,7 @@ describe('HelperContainerManager', function () {
                 return true;
             }))).thenResolve(container);
 
-            return HelperContainerManager.createContainer({}, 'test-image', 'test-volume', 'test-network')
+            return HelperContainerManager.createContainer({}, 'test-image', 'test-volume')
                 .then((createdContainerId) => {
                     assert.equal(createdContainerId, containerId);
                 });
@@ -49,7 +48,6 @@ describe('HelperContainerManager', function () {
             td.when(container.start()).thenReject(new Error('test-error'));
             td.when(td.replace(HelperContainerManager, '_createContainer')(td.matchers.argThat((params) => {
                 assert.equal(params.Image, 'test-image');
-                assert.equal(_.get(params, 'HostConfig.NetworkMode'), 'test-network');
                 assert.deepEqual(_.get(params, 'HostConfig.Binds'), ['test-volume:/lazy']);
                 assert.deepEqual(_.get(params, 'Labels'), {
                     'org.getlazy.lazy.helper-container-manager.owned': 'true'
@@ -57,7 +55,7 @@ describe('HelperContainerManager', function () {
                 return true;
             }))).thenResolve(container);
 
-            HelperContainerManager.createContainer({}, 'test-image', 'test-volume', 'test-network')
+            HelperContainerManager.createContainer({}, 'test-image', 'test-volume')
                 .catch((err) => {
                     assert.equal(err.statusCode, 500);
                     assert.equal(err.message, 'create failed with test-error');

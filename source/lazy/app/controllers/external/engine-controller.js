@@ -6,7 +6,7 @@ const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want w
 const selectn = require('selectn');
 const proxy = require('http-proxy-middleware');
 const PACKAGE_VERSION = require('../../../package.json').version;
-const EnginePipeline = require('../../engine-pipeline');
+const EnginePipeline = require('@lazyass/engine-pipeline');
 
 let enginePipeline;
 let engineManager;
@@ -49,7 +49,7 @@ const addEndpoints = (app, options) => {
                     });
                 });
         } catch (err) {
-            logger.error('Exception during file analysis', { err });
+            logger.error('Exception during file analysis', { err: err && err.toString() });
             return res.status(500).send({
                 error: err && err.message
             });

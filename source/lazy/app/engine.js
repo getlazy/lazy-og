@@ -77,7 +77,7 @@ class Engine
             .then((containerStatus) => {
                 self._containerUrl = url.format({
                     protocol: 'http',
-                    hostname: containerStatus.Config.Hostname,
+                    hostname: _.get(containerStatus, 'NetworkSettings.IPAddress'),
                     port: self._config.port
                 });
             })
@@ -96,7 +96,7 @@ class Engine
 
         const requestParams = {
             method: 'GET',
-            url: `${self._containerUrl}/status`,
+            url: url.resolve(self._containerUrl, 'status'),
             json: true,
             headers: {
                 Accept: 'application/json'
@@ -120,7 +120,7 @@ class Engine
 
         const requestParams = {
             method: 'POST',
-            url: `${self._containerUrl}/file`,
+            url: url.resolve(self._containerUrl, 'file'),
             json: true,
             headers: {
                 Accept: 'application/json'
@@ -227,7 +227,7 @@ class Engine
                             healthyStatus = true;
                             next();
                         })
-                        .catch(() => {
+                        .catch((err) => {
                             //  Increment the request counter and wait a bit until trying again.
                             requestCounter += 1;
                             setTimeout(next, ARBITRARY_ENGINE_BOOT_CHECK_DELAY_MS);
@@ -253,7 +253,7 @@ class Engine
     _getMeta() {
         const requestParams = {
             method: 'GET',
-            url: `${this._containerUrl}/meta`,
+            url: url.resolve(this._containerUrl, 'meta'),
             json: true,
             headers: {
                 Accept: 'application/json'

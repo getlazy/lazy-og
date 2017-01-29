@@ -18,9 +18,7 @@ const initialize = (app, options) => {
         const imageName = _.get(req, 'body.imageName');
         const lazyVolumeName = _.get(req, 'body.lazyVolumeName');
 
-        options.engineManager.getLazyNetwork()
-            .then(lazyNetwork => HelperContainerManager.createContainer(
-                auth, imageName, lazyVolumeName, _.get(lazyNetwork, 'Name')))
+        HelperContainerManager.createContainer(auth, imageName, lazyVolumeName)
             .then(containerId => res.send({ containerId }))
             .catch(_.curry(errorResponse)(res));
     });
