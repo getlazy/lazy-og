@@ -49,7 +49,7 @@ class EngineManager
         const self = this;
 
         return Promise.all([
-            HigherDockerManager.getOwnContainer().then(container => container.status()),
+            EngineManager._getOwnContainer().then(container => container.status()),
             self._findLazyVolumeOrCreateIt()])
             .then((results) => {
                 [self._container, self._volume] = results;
@@ -109,7 +109,7 @@ class EngineManager
         const resolvedRepositoryAuth = EngineManager._resolveRepositoryAuthValues(repositoryAuth);
 
         logger.info('Pulling image', { engine: engineName, image: imageName });
-        return HigherDockerManager.pullImage(resolvedRepositoryAuth, imageName)
+        return EngineManager._pullImage(resolvedRepositoryAuth, imageName)
             .then(() => {
                 const createEngineParams = {
                     Image: imageName,
@@ -158,7 +158,7 @@ class EngineManager
                     volume: self._volume.Name,
                     createEngineParams
                 });
-                return HigherDockerManager.createContainer(createEngineParams);
+                return EngineManager._createContainer(createEngineParams);
             })
             .then(engineContainer =>
                 engineContainer.start()
@@ -170,7 +170,7 @@ class EngineManager
     _findLazyVolumeOrCreateIt() {
         const self = this;
 
-        return HigherDockerManager.getVolumesForLabel(
+        return EngineManager._getVolumesForLabel(
                 Label.OrgGetlazyLazyEngineManagerOwner, self._id)
             .then((volumes) => {
                 if (!_.isEmpty(volumes)) {
@@ -185,7 +185,7 @@ class EngineManager
                 //  Add the label to later use it to find this container.
                 volumeCreateParams.Labels[Label.OrgGetlazyLazyEngineManagerOwner] = self._id;
 
-                return HigherDockerManager.createVolume(volumeCreateParams);
+                return EngineManager._createVolume(volumeCreateParams);
             });
     }
 
@@ -193,7 +193,7 @@ class EngineManager
         const self = this;
 
         //  Stop/wait/delete all containers owned by this lazy (equivalence determined by ID)
-        return HigherDockerManager.getContainersForLabel(Label.OrgGetlazyLazyEngineManagerOwner, self._id)
+        return EngineManager._getContainersForLabel(Label.OrgGetlazyLazyEngineManagerOwner, self._id)
             .then(containers =>
                 Promise.all(_.map(containers, (container) => {
                     logger.info('Stopping/waiting/deleting engine container',
@@ -222,6 +222,59 @@ class EngineManager
             }
         });
         return resolvedRepositoryAuth;
+    }
+
+    /**
+     * Wrapper around HigherDockerManager.pullImage for easier unit testing.
+     * @private
+     */
+    static _pullImage(...args) {
+        // istanbul ignore next
+        return HigherDockerManager.pullImage(...args);
+    }
+
+    /**
+     * Wrapper around HigherDockerManager.getOwnContainer for easier unit testing.
+     * @private
+     */
+    static _getOwnContainer() {
+        // istanbul ignore next
+        return HigherDockerManager.getOwnContainer();
+    }
+
+    /**
+     * Wrapper around HigherDockerManager.createContainer for easier unit testing.
+     * @private
+     */
+    static _createContainer(...args) {
+        // istanbul ignore next
+        return HigherDockerManager.createContainer(...args);
+    }
+
+    /**
+     * Wrapper around HigherDockerManager.getVolumesForLabel for easier unit testing.
+     * @private
+     */
+    static _getVolumesForLabel(...args) {
+        // istanbul ignore next
+        return HigherDockerManager.getVolumesForLabel(...args);
+    }
+
+    /**
+     * Wrapper around HigherDockerManager.createVolume for easier unit testing.
+     * @private
+     */
+    static _createVolume(...args) {
+        // istanbul ignore next
+        return HigherDockerManager.createVolume(...args);
+    }
+
+    /**
+     * Wrapper around HigherDockerManager.getContainersForLabel for easier unit testing.
+     * @private
+     */
+    static _getContainersForLabel(...args) {
+        return HigherDockerManager.getContainersForLabel(...args);
     }
 }
 
