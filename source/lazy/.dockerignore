@@ -18,7 +18,11 @@ envvars*
 lazy
 lazyd
 lazy-dev
+lazy-noelk
+lazy-dev-direct
 
 # Ignore lazy.yaml and related - image shouldn't contain them as they need to be specified at runtime.
 lazy.yaml
 eslint-rules.yaml
+
+env*
