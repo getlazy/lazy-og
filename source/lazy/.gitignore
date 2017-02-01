@@ -44,3 +44,7 @@ lazy.yaml
 test/lazy-test.yaml
 
 env
+
+config/eslint-rules.yaml
+
+config/test.yaml
