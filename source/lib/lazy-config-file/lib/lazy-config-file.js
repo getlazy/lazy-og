@@ -245,8 +245,20 @@ LAZY_CONFIG_SCHEMA = {
                     pattern: '^.+:.+$'
                 },
                 command: {
-                    type: 'string',
-                    minLength: 1
+                    oneOf: [
+                        {
+                            type: 'string',
+                            minLength: 1
+                        },
+                        {
+                            type: 'array',
+                            minItems: 1,
+                            items: {
+                                type: 'string',
+                                minLength: 1
+                            }
+                        }
+                    ]
                 },
                 working_dir: {
                     type: 'string',

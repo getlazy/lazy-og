@@ -596,7 +596,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should NOT be shorter than 1 characters'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.command #3',
     config: {
@@ -614,6 +614,77 @@ module.exports = [{
             }
         }
     }
+}, {
+    id: 'test engine.command #4',
+    config: {
+        version: 1,
+        service_url: 'http://a.co',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b',
+                command: []
+            }
+        }
+    },
+    firstErrorMessage: 'should match exactly one schema in oneOf'
+}, {
+    id: 'test engine.command #5',
+    config: {
+        version: 1,
+        service_url: 'http://a.co',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b',
+                command: ['']
+            }
+        }
+    },
+    firstErrorMessage: 'should match exactly one schema in oneOf'
+}, {
+    id: 'test engine.command #6',
+    config: {
+        version: 1,
+        service_url: 'http://a.co',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b',
+                command: ['x']
+            }
+        }
+    }
+}, {
+    id: 'test engine.command #7',
+    config: {
+        version: 1,
+        service_url: 'http://a.co',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b',
+                command: [1]
+            }
+        }
+    },
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.working_dir #1',
     config: {
