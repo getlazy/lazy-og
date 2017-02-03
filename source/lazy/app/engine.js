@@ -15,8 +15,7 @@ const ARBITRARY_ENGINE_BOOT_CHECK_DELAY_MS = 100;
 /**
  * Engine class.
  */
-class Engine
-{
+class Engine {
     /**
      * Constructs a new instance of Engine with the given name and languages.
      * @param {string} name Name of the engine
@@ -152,7 +151,7 @@ class Engine
 
             const logEngineMessage = (messageData) => {
                 const meta = messageData.meta || {};
-                meta.engine = self.name; // lazy ignore-once no-param-reassign
+                meta.engine = self.name;
                 logger.log(messageData.level, messageData.message, messageData.meta);
             };
 
