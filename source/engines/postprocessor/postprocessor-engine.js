@@ -41,7 +41,6 @@ class PostProcEngineHttpServer extends EngineHttpServer {
      * @return {Object} Command object
      */
     _parseLine(line) {
-        // lazy ignore-once no-useless-escape ; Linter is confused w/ regex
         const regex = /(#|\/\*|\/\/)\W*lazy\s+(\S*)\s*([^;\*]*)\s*;*(.*)/g;
 
         const command = {
@@ -51,10 +50,10 @@ class PostProcEngineHttpServer extends EngineHttpServer {
         };
 
         let m;
-        while ((m = regex.exec(line)) !== null) { // lazy ignore-once no-cond-assign ; This is standard regex usage
+        while ((m = regex.exec(line)) !== null) {
             // This is necessary to avoid infinite loops with zero-width matches
             if (m.index === regex.lastIndex) {
-                regex.lastIndex++; // lazy ignore-once no-plusplus ; What's wrong with plusplus, anyway?
+                regex.lastIndex++;
             }
             const commandStr = _.get(m, '[2]', '');
 
@@ -217,6 +216,23 @@ class PostProcEngineHttpServer extends EngineHttpServer {
         });
     }
 
+    _removeIgnoreAlwaysWarnings(warningList, ignoreAlwaysWarnings) {
+        if (_.isEmpty(ignoreAlwaysWarnings)) {
+            return;
+        }
+
+        // Always omit all warnings which rule ID is on the list of ignore-always.
+        _.remove(warningList, (warning) => {
+            const remove = !_.isUndefined(warning.ruleId) && _.includes(ignoreAlwaysWarnings, warning.ruleId);
+            if (remove) {
+                logger.metric('remove-ignore-always-warnings', {
+                    ruleId: warning.ruleId
+                });
+            }
+            return remove;
+        });
+    }
+
     /**
      * Remove all messages that should be ignored once (only for the first time they occurr)
      * @param {Object} warningList List of messages from which to remove warnings
@@ -296,8 +312,9 @@ class PostProcEngineHttpServer extends EngineHttpServer {
         //  We use a promise as we get any exceptions wrapped up as failures.
         return new Promise((resolve) => {
             const filteredWarnings = _.get(context, 'previousStepResults.warnings', []);
-            const wooHooMsgs = _.get(context, 'engineParams.woohoos', 
+            const wooHooMsgs = _.get(context, 'engineParams.woohoos',
                 ['Woo-hoo! No linter warnings - your code looks pretty nice.']);
+            const ignoreAlwaysWarnings = _.get(context, 'engineParams.ignore-always');
 
             infoWooHoo.message = _.sample(wooHooMsgs);
             infoCodeNotChecked.message = `No engine registered for [${language}]. This file has not been checked for language-specific warnings.`;
@@ -317,8 +334,11 @@ class PostProcEngineHttpServer extends EngineHttpServer {
                 return;
             }
 
-            //  Log metrics for all warnings.
+            // Log metrics for all warnings.
             _.forEach(filteredWarnings, warning => logger.metric('warning', { ruleId: warning.ruleId }));
+
+            // Remove all always ignore warnings.
+            self._removeIgnoreAlwaysWarnings(filteredWarnings, ignoreAlwaysWarnings);
 
             // Look for directive only in languages that support either //, / *, or # style comments
             if (_.includes(supportedLanguages, _.toLower(_.trim(language)))) {
@@ -346,7 +366,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
                 logger.metric('woohoo-state');
                 filteredWarnings.push(infoWooHoo);
             }
-            resolve ({warnings: filteredWarnings}); 
+            resolve ({warnings: filteredWarnings});
         });
     }
 
