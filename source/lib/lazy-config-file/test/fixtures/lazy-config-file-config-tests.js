@@ -45,21 +45,21 @@ module.exports = [{
     id: '#8',
     config: {
         version: 1,
-        service_url: 'http://a.co'
+        service_url: 'http://getlazy.org'
     },
     firstErrorMessage: 'should have required property \'engine_pipeline\''
 }, {
     id: '#9',
     config: {
         version: 1,
-        service_url: 'https://a.co'
+        service_url: 'https://getlazy.org'
     },
     firstErrorMessage: 'should have required property \'engine_pipeline\''
 }, {
     id: '#10',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: null
     },
     firstErrorMessage: 'should be object'
@@ -67,7 +67,7 @@ module.exports = [{
     id: '#11',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {}
     },
     firstErrorMessage: 'should NOT have less than 1 properties'
@@ -75,7 +75,7 @@ module.exports = [{
     id: '#12',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             bundle: [],
             sequence: []
@@ -86,7 +86,7 @@ module.exports = [{
     id: '#13',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             test: {}
         }
@@ -96,7 +96,7 @@ module.exports = [{
     id: '#14',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             bundle: 123
         }
@@ -106,7 +106,7 @@ module.exports = [{
     id: '#15',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             bundle: []
         }
@@ -116,7 +116,7 @@ module.exports = [{
     id: '#16',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             bundle: ['test']
         }
@@ -126,7 +126,7 @@ module.exports = [{
     id: '#17',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             bundle: [{}]
         }
@@ -136,7 +136,7 @@ module.exports = [{
     id: '#18',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             bundle: [{
                 test: 'test'
@@ -148,7 +148,7 @@ module.exports = [{
     id: '#19',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             bundle: [{
                 sequence: 'test'
@@ -160,7 +160,7 @@ module.exports = [{
     id: '#20',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             bundle: [{
                 sequence: []
@@ -172,7 +172,7 @@ module.exports = [{
     id: '#21',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             bundle: [{
                 sequence: ['test']
@@ -184,7 +184,7 @@ module.exports = [{
     id: '#22',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             bundle: [{
                 sequence: [{}]
@@ -196,7 +196,7 @@ module.exports = [{
     id: '#23',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             bundle: [{
                 sequence: [{
@@ -210,7 +210,7 @@ module.exports = [{
     id: '#24',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             bundle: [{
                 sequence: [{
@@ -224,7 +224,7 @@ module.exports = [{
     id: '#25',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: 123
         }
@@ -234,7 +234,7 @@ module.exports = [{
     id: '#26',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: []
         }
@@ -244,7 +244,7 @@ module.exports = [{
     id: '#27',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: ['test']
         }
@@ -254,7 +254,7 @@ module.exports = [{
     id: '#28',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{}]
         }
@@ -264,7 +264,7 @@ module.exports = [{
     id: '#29',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: 'test'
@@ -276,7 +276,7 @@ module.exports = [{
     id: '#30',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 sequence: 'test'
@@ -288,7 +288,7 @@ module.exports = [{
     id: '#31',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 sequence: []
@@ -300,7 +300,7 @@ module.exports = [{
     id: '#32',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 sequence: ['test']
@@ -312,7 +312,7 @@ module.exports = [{
     id: '#33',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 sequence: [{}]
@@ -324,7 +324,7 @@ module.exports = [{
     id: '#34',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 bundle: [{
@@ -338,7 +338,7 @@ module.exports = [{
     id: '#35',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 bundle: [{
@@ -352,7 +352,7 @@ module.exports = [{
     id: '#36',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 bundle: [{
@@ -369,7 +369,7 @@ module.exports = [{
     id: '#37',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 bundle: [{
@@ -387,7 +387,7 @@ module.exports = [{
     id: '#38',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 bundle: [{
@@ -406,7 +406,7 @@ module.exports = [{
     id: '#39',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 bundle: [{
@@ -425,7 +425,7 @@ module.exports = [{
     id: '#40',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -438,7 +438,7 @@ module.exports = [{
     id: '#41',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -451,7 +451,7 @@ module.exports = [{
     id: '#42',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -466,7 +466,7 @@ module.exports = [{
     id: '#43',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -481,7 +481,7 @@ module.exports = [{
     id: '#44',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -496,7 +496,7 @@ module.exports = [{
     id: '#45',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -513,7 +513,7 @@ module.exports = [{
     id: '#46',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -530,7 +530,7 @@ module.exports = [{
     id: '#47',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -547,7 +547,7 @@ module.exports = [{
     id: '#48',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -565,7 +565,7 @@ module.exports = [{
     id: 'test engine.command #1',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -583,7 +583,7 @@ module.exports = [{
     id: 'test engine.command #2',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -601,7 +601,7 @@ module.exports = [{
     id: 'test engine.command #3',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -618,7 +618,7 @@ module.exports = [{
     id: 'test engine.command #4',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -636,7 +636,7 @@ module.exports = [{
     id: 'test engine.command #5',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -654,7 +654,7 @@ module.exports = [{
     id: 'test engine.command #6',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -671,7 +671,7 @@ module.exports = [{
     id: 'test engine.command #7',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -689,7 +689,7 @@ module.exports = [{
     id: 'test engine.working_dir #1',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -707,7 +707,7 @@ module.exports = [{
     id: 'test engine.working_dir #2',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -725,7 +725,7 @@ module.exports = [{
     id: 'test engine.working_dir #3',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -742,7 +742,7 @@ module.exports = [{
     id: 'test engine.volumes #1',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -760,7 +760,7 @@ module.exports = [{
     id: 'test engine.volumes #2',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -778,7 +778,7 @@ module.exports = [{
     id: 'test engine.volumes #3',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -796,7 +796,7 @@ module.exports = [{
     id: 'test engine.volumes #4',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -814,7 +814,7 @@ module.exports = [{
     id: 'test engine.volumes #5',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -831,7 +831,7 @@ module.exports = [{
     id: 'test engine.volumes #6',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -849,7 +849,7 @@ module.exports = [{
     id: 'test engine.port #1',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -867,7 +867,7 @@ module.exports = [{
     id: 'test engine.port #2',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -885,7 +885,7 @@ module.exports = [{
     id: 'test engine.port #3',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -902,7 +902,7 @@ module.exports = [{
     id: 'test engine.boot_wait #1',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -920,7 +920,7 @@ module.exports = [{
     id: 'test engine.boot_wait #2',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -937,7 +937,7 @@ module.exports = [{
     id: 'test engine.boot_timeout #1',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -955,7 +955,7 @@ module.exports = [{
     id: 'test engine.boot_timeout #2',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -973,7 +973,7 @@ module.exports = [{
     id: 'test engine.boot_timeout #3',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -990,7 +990,7 @@ module.exports = [{
     id: 'test engine.meta #1',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1008,7 +1008,7 @@ module.exports = [{
     id: 'test engine.meta #2',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1025,7 +1025,7 @@ module.exports = [{
     id: 'test engine.meta #3',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1045,7 +1045,7 @@ module.exports = [{
     id: 'test engine.meta #4',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1064,7 +1064,7 @@ module.exports = [{
     id: 'test engine.meta #5',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1084,7 +1084,7 @@ module.exports = [{
     id: 'test engine.meta #6',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1103,7 +1103,7 @@ module.exports = [{
     id: 'test engine.meta #7',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1123,7 +1123,7 @@ module.exports = [{
     id: 'test engine.env #1',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1141,7 +1141,7 @@ module.exports = [{
     id: 'test engine.env #2',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1159,7 +1159,7 @@ module.exports = [{
     id: 'test engine.env #3',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1177,7 +1177,7 @@ module.exports = [{
     id: 'test engine.env #4',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1195,7 +1195,7 @@ module.exports = [{
     id: 'test engine.env #5',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1212,7 +1212,7 @@ module.exports = [{
     id: 'test engine.env #6',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1230,7 +1230,7 @@ module.exports = [{
     id: 'test engine.import_env #1',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1248,7 +1248,7 @@ module.exports = [{
     id: 'test engine.import_env #2',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1266,7 +1266,7 @@ module.exports = [{
     id: 'test engine.import_env #3',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1284,7 +1284,7 @@ module.exports = [{
     id: 'test engine.import_env #4',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1302,7 +1302,7 @@ module.exports = [{
     id: 'test engine.import_env #5',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1319,7 +1319,7 @@ module.exports = [{
     id: 'test engine.import_env #6',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1337,7 +1337,7 @@ module.exports = [{
     id: 'test engine.config #1',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1355,7 +1355,7 @@ module.exports = [{
     id: 'test engine.config #2',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1372,7 +1372,7 @@ module.exports = [{
     id: 'test engine.config #3',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1391,7 +1391,7 @@ module.exports = [{
     id: 'test engine.config #4',
     config: {
         version: 1,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1412,7 +1412,7 @@ module.exports = [{
     config: {
         version: 1,
         repository_auth: null,
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1430,7 +1430,7 @@ module.exports = [{
     config: {
         version: 1,
         repository_auth: {},
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1450,7 +1450,7 @@ module.exports = [{
         repository_auth: {
             test: 'this'
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1470,7 +1470,7 @@ module.exports = [{
         repository_auth: {
             username_env: 'test'
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1491,7 +1491,7 @@ module.exports = [{
             username_env: 'test',
             password_env: 123
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1512,7 +1512,7 @@ module.exports = [{
             username_env: 'test',
             password_env: '123'
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1533,7 +1533,7 @@ module.exports = [{
             password_env: '',
             fail: 'this'
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1555,7 +1555,7 @@ module.exports = [{
             password_env: '',
             email_env: []
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1577,7 +1577,7 @@ module.exports = [{
             password_env: '',
             email_env: ''
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1599,7 +1599,7 @@ module.exports = [{
             password_env: '',
             email_env: 'x'
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1618,7 +1618,7 @@ module.exports = [{
         repository_auth: {
             token: { test: 'this' }
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1638,7 +1638,7 @@ module.exports = [{
         repository_auth: {
             token: ''
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1658,7 +1658,7 @@ module.exports = [{
         repository_auth: {
             token: 'x'
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         engine_pipeline: {
             sequence: [{
                 test: {}
@@ -1677,7 +1677,7 @@ module.exports = [{
         repository_auth: {
             token: 'x'
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         ui: null,
         engine_pipeline: {
             sequence: [{
@@ -1698,7 +1698,7 @@ module.exports = [{
         repository_auth: {
             token: 'x'
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         ui: {},
         engine_pipeline: {
             sequence: [{
@@ -1719,7 +1719,7 @@ module.exports = [{
         repository_auth: {
             token: 'x'
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         ui: {
             image: 'a:b'
         },
@@ -1741,7 +1741,7 @@ module.exports = [{
         repository_auth: {
             token: 'x'
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         id: null,
         engine_pipeline: {
             sequence: [{
@@ -1762,7 +1762,7 @@ module.exports = [{
         repository_auth: {
             token: 'x'
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         id: '',
         engine_pipeline: {
             sequence: [{
@@ -1783,7 +1783,7 @@ module.exports = [{
         repository_auth: {
             token: 'x'
         },
-        service_url: 'http://a.co',
+        service_url: 'http://getlazy.org',
         id: 'xyz',
         engine_pipeline: {
             sequence: [{
@@ -1793,6 +1793,214 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b'
+            }
+        }
+    }
+}, {
+    id: 'test helper_containers #1',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b'
+            }
+        },
+        helper_containers: null
+    },
+    firstErrorMessage: 'should be object'
+}, {
+    id: 'test helper_containers #2',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b'
+            }
+        },
+        helper_containers: {}
+    },
+    firstErrorMessage: 'should NOT have less than 1 properties'
+}, {
+    id: 'test helper_containers #3',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b'
+            }
+        },
+        helper_containers: {
+            '': 'test'
+        }
+    },
+    firstErrorMessage: 'should NOT have additional properties'
+}, {
+    id: 'test helper_containers #4',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b'
+            }
+        },
+        helper_containers: {
+            test: null
+        }
+    },
+    firstErrorMessage: 'should be object'
+}, {
+    id: 'test helper_containers #5',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b'
+            }
+        },
+        helper_containers: {
+            test: {}
+        }
+    },
+    firstErrorMessage: 'should NOT have less than 1 properties'
+}, {
+    id: 'test helper_containers #6',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b'
+            }
+        },
+        helper_containers: {
+            test: {
+                image: 1234
+            }
+        }
+    },
+    firstErrorMessage: 'should be string'
+}, {
+    id: 'test helper_containers #7',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b'
+            }
+        },
+        helper_containers: {
+            test: {
+                image: 'xyz'
+            }
+        }
+    },
+    firstErrorMessage: 'should match pattern "^.+:.+$"'
+}, {
+    id: 'test helper_containers #8',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b'
+            }
+        },
+        helper_containers: {
+            test: {
+                image: 'a/b/c:123'
+            }
+        }
+    }
+}, {
+    id: 'test helper_containers #9',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b'
+            }
+        },
+        helper_containers: {
+            test: {
+                image: 'a/b/c:123',
+                bad: 'test'
+            }
+        }
+    },
+    firstErrorMessage: 'should NOT have more than 1 properties'
+}, {
+    id: 'test helper_containers #12',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b'
+            }
+        },
+        helper_containers: {
+            test1: {
+                image: 'a/b/c:123'
+            },
+            test2: {
+                image: 'a/b/c:123'
             }
         }
     }

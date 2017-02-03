@@ -202,6 +202,16 @@ LAZY_CONFIG_SCHEMA = {
                 }
             },
             additionalProperties: false
+        },
+        helper_containers: {
+            type: 'object',
+            minProperties: 1,
+            patternProperties: {
+                '^.+$': {
+                    $ref: '#/definitions/helper_container_item'
+                }
+            },
+            additionalProperties: false
         }
     },
     required: ['version', 'service_url', 'engines', 'engine_pipeline'],
@@ -239,11 +249,7 @@ LAZY_CONFIG_SCHEMA = {
         engine: {
             type: 'object',
             properties: {
-                image: {
-                    type: 'string',
-                    minLength: 3,
-                    pattern: '^.+:.+$'
-                },
+                image: { $ref: '#/definitions/docker_image' },
                 command: {
                     oneOf: [
                         {
@@ -354,6 +360,20 @@ LAZY_CONFIG_SCHEMA = {
                         { type: 'null' }
                     ]
                 }
+            },
+            additionalProperties: false
+        },
+        docker_image: {
+            type: 'string',
+            minLength: 3,
+            pattern: '^.+:.+$'
+        },
+        helper_container_item: {
+            type: 'object',
+            minProperties: 1,
+            maxProperties: 1,
+            properties: {
+                image: { $ref: '#/definitions/docker_image' }
             },
             additionalProperties: false
         }
