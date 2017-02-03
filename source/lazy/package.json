@@ -41,7 +41,7 @@
   "dependencies": {
     "@lazyass/common": "^1.1.0",
     "@lazyass/engine-pipeline": "^1.0.0",
-    "@lazyass/lazy-config-file": "^1.0.0",
+    "@lazyass/lazy-config-file": "^1.2.0",
     "async": "^2.1.4",
     "body-parser": "^1.15.2",
     "common-errors": "^1.0.0",

@@ -15,9 +15,9 @@
     "@lazyass/common" "^1.1.0"
     language-detect "^1.1.0"
 
-"@lazyass/lazy-config-file@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@lazyass/lazy-config-file/-/lazy-config-file-1.0.0.tgz#bf36f25f16784230072c643d8ece04f9fc5aa569"
+"@lazyass/lazy-config-file@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@lazyass/lazy-config-file/-/lazy-config-file-1.2.0.tgz#08516c2a4fa0f51e36c742b083fcb1bc27763d0f"
   dependencies:
     "@lazyass/common" "^1.1.0"
     ajv "^5.0.0-beta.1"
