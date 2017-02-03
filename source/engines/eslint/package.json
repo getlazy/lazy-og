@@ -31,7 +31,6 @@
     "eslint-rule-documentation": "^1.0.4",
     "js-yaml": "^3.7.0",
     "lodash": "^4.17.2",
-    "npmi": "^2.0.1",
     "selectn": "^1.1.1",
     "yarn-install": "^0.2.1"
   },
