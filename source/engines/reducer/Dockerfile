@@ -1,8 +1,12 @@
 FROM node:6.9-alpine
-MAINTAINER Ivan Erceg <ivan@softwaremarbles.com>
-ARG NPM_TOKEN
-STOPSIGNAL SIGTERM
+MAINTAINER lazy team <team@getlazy.org>
+
 WORKDIR /app
 COPY . /app
+
+ENV NODE_ENV=production
+ARG NPM_TOKEN
 RUN npm install
+
+STOPSIGNAL SIGTERM
 ENTRYPOINT ["node", "/app/index.js"]
