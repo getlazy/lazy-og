@@ -93,7 +93,7 @@ array-uniq@^1.0.1:
 
 array.filter@^0.1.0:
   version "0.1.5"
-  resolved "http://registry.npmjs.org/array.filter/-/array.filter-0.1.5.tgz#7ef07c37f472223f3e5c4b73be637face765bcd7"
+  resolved "https://registry.yarnpkg.com/array.filter/-/array.filter-0.1.5.tgz#7ef07c37f472223f3e5c4b73be637face765bcd7"
   dependencies:
     curry2 "^1.0.1"
     selectn "^1.0.5"
