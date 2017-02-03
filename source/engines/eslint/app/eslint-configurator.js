@@ -45,7 +45,6 @@ class EslintConfigurator {
      * @return {Promise} Promise that is resolved when the last rules-set is processed.
      */
     static _installAllRuleSets(ruleSets, onSuccess) {
-        logger.warn('again????');
         return new Promise((resolve, reject) => {
             const ruleSetsToInstall = [];
 
