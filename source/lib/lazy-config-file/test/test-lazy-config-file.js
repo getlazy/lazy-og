@@ -50,12 +50,12 @@ describe('LazyConfigFile', function () {
     });
 
     describe('_getConfigErrors', function () {
-        _.each(configTests, (test) => {
+        _.forEach(configTests, (test) => {
             it(`schema check test ${test.id}`, function () {
                 const errors = LazyConfigFile._getConfigErrors(test.config);
                 if (test.firstErrorMessage) {
                     assert(errors);
-                    assert.equal(_.first(errors).message, test.firstErrorMessage);
+                    assert.equal(_.head(errors).message, test.firstErrorMessage);
                 } else {
                     assert(!errors);
                 }
