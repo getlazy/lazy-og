@@ -4,8 +4,8 @@ Postprocessor for lazy engines pipeline
 This is the engine that should be placed at the end of processing pipeline in the `lazy.yaml`.
 
 The purpose of this engine is to:
-- analyze the source code of a file looking for special directives, 
-- modify the output of engines that are earlier in the pipeline 
+- analyze the source code of a file looking for special directives
+- modify the output of engines that are earlier in the pipeline
 
 Lazy directives are defined as comments in the source code, and always start with `lazy` keyword. For example:
 
@@ -13,7 +13,7 @@ Lazy directives are defined as comments in the source code, and always start wit
 
 or,
 
-`/* lazy ignore no-plusplus`
+`/* lazy ignore no-plusplus */`
 
 or,
 
@@ -32,3 +32,10 @@ Following directives are currently supported:
 * `lazy ignore-all` if found anywhere in the file, this directive will remove all the warnings
 * `lazy ignore-start` disable all warnings from this point to the first `lazy ignore-end` directive, or to the end of the file if no `lazy ignore-end` is found
 * `lazy ignore-end` stop ignoring warnings from now on
+
+## Configuration
+
+Engine accepts the following configuration options:
+
+* `woohoos` - array of strings that you want to be shown whenever after post-processing results there are no warnings left (e.g. `Well done!`, `No way!`, `Maximum effort.`)
+* `ignore-always` - array of rule IDs that should always be ignored
