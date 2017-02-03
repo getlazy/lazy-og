@@ -3,7 +3,7 @@
 
 /* global logger */
 
-const _ = require('lodash');
+const _ = require('lodash'); // lazy ignore-once lodash/import-scope
 const url = require('url');
 const H = require('higher');
 const selectn = require('selectn');
@@ -18,8 +18,7 @@ const Label = {
 /**
  * Manages the engines running in lazy.
  */
-class EngineManager
-{
+class EngineManager {
     constructor(config) {
         this._id = H.isNonEmptyString(config.id) ? config.id : 'default';
         this._config = config;
@@ -113,7 +112,7 @@ class EngineManager
             .then(() => {
                 const createEngineParams = {
                     Image: imageName,
-                    Cmd: engineConfig.command ? engineConfig.command.split(' ') : undefined,
+                    Cmd: _.isString(engineConfig.command) ? engineConfig.command.split(' ') : engineConfig.command,
                     //  Engine's environment consists of the variables set in the config,
                     //  variables imported from lazy's environment and variables created by
                     //  lazy itself.
@@ -155,8 +154,7 @@ class EngineManager
 
                 logger.info('Creating engine', {
                     engine: engineName,
-                    volume: self._volume.Name,
-                    createEngineParams
+                    volume: self._volume.Name
                 });
                 return EngineManager._createContainer(createEngineParams);
             })
