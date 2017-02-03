@@ -46,7 +46,7 @@ class EslintConfigurator {
      */
     static _installAllRuleSets(ruleSets, onSuccess) {
         return new Promise((resolve, reject) => {
-            const ruleSetsToInstall = [];
+            const installedRuleSets = [];
 
             const packages = _.filter(_.map(ruleSets, (configRuleSet) => {
                 const ruleSet = _.cloneDeep(configRuleSet);
@@ -56,7 +56,6 @@ class EslintConfigurator {
                 // Convenient for quick turning on/off of some rule sets
                 if (_.eq(ruleSet.ignore, true)) {
                     logger.info('Ignoring rule set:', rsName);
-                    ruleSet.installed = true;
                     return null;
                 }
                 logger.info('Importing rule set:', rsName);
@@ -64,11 +63,13 @@ class EslintConfigurator {
                 // Some rule sets don't require external packages.
                 // Silently acknowledge them
                 if (_.isNil(ruleSet.package)) {
+                    ruleSet.installed = true;
+                    installedRuleSets.push(ruleSet);
                     return null;
                 }
 
                 ruleSet.installed = true;
-                ruleSetsToInstall.push(ruleSet);
+                installedRuleSets.push(ruleSet);
                 const packageName = _.get(ruleSet, 'package');
                 const packageVersion = _.get(ruleSet, 'package-version') || 'latest';
                 return `${packageName}@${packageVersion}`;
@@ -82,7 +83,7 @@ class EslintConfigurator {
             }
 
             // Apply on success function to all installed rule sets.
-            _.forEach(ruleSetsToInstall, onSuccess);
+            _.forEach(installedRuleSets, onSuccess);
 
             resolve();
         });
