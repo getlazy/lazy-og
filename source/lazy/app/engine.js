@@ -3,7 +3,7 @@
 
 /* global logger */
 
-const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want whole lotta lodash...
+const _ = require('lodash');
 const url = require('url');
 const request = require('request-promise-native');
 const async = require('async');
@@ -224,9 +224,10 @@ class Engine {
                         .then(() => {
                             //  We received an error-less status so assume everything is fine.
                             healthyStatus = true;
+                            logger.info('Engine online', { engine: self.name });
                             next();
                         })
-                        .catch((err) => {
+                        .catch(() => {
                             //  Increment the request counter and wait a bit until trying again.
                             requestCounter += 1;
                             setTimeout(next, ARBITRARY_ENGINE_BOOT_CHECK_DELAY_MS);
