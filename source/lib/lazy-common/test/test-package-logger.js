@@ -3,7 +3,9 @@
 
 /* global describe, it */
 
-const _ = require('lodash');
+// lazy ignore func-names
+// lazy ignore prefer-arrow-callback
+
 const assert = require('assert');
 const PackageLogger = require('../lib/package-logger');
 
