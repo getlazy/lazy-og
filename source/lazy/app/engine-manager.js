@@ -208,7 +208,7 @@ class EngineManager {
         return EngineManager._getContainersForLabel(Label.OrgGetlazyLazyEngineManagerOwner, self._id)
             .then(containers =>
                 Promise.all(_.map(containers, (container) => {
-                    logger.info('Stopping/waiting/deleting engine container',
+                    logger.info('Stopping/waiting/deleting container',
                         { container: _.head(container.Names) });
                     if (container.id === self._container.id) {
                         return Promise.resolve();
