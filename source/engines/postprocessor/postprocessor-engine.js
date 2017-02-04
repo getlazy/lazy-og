@@ -41,7 +41,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
      * @return {Object} Command object
      */
     _parseLine(line) {
-        const regex = /(#|\/\*|\/\/)\W*lazy\s+(\S*)\s*([^;\*]*)\s*;*(.*)/g;
+        const regex = /(#|\/*|\/\/)\W*lazy\s+(\S*)\s*([^;*]*)\s*;*(.*)/g;
 
         const command = {
             commandStr: '',
@@ -320,8 +320,8 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             infoCodeNotChecked.message = `No engine registered for [${language}]. This file has not been checked for language-specific warnings.`;
 
             // Did any engine reported that it has checked the code?
-            const previousStatus = _.get(context, 'previousStepResults.status',{});
-            const isCodeChecked = _.get(previousStatus,'codeChecked', false);
+            const previousStatus = _.get(context, 'previousStepResults.status', {});
+            const isCodeChecked = _.get(previousStatus, 'codeChecked', false);
             if (!isCodeChecked) {
                 filteredWarnings.push(infoCodeNotChecked);
             }
@@ -330,7 +330,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             // then don't bother, just return wooHoo
             if (_.isEmpty(filteredWarnings)) { // nothing from the previos engines
                 logger.metric('woohoo-state');
-                resolve({warnings: [infoWooHoo]});
+                resolve({ warnings: [infoWooHoo] });
                 return;
             }
 
@@ -352,7 +352,7 @@ class PostProcEngineHttpServer extends EngineHttpServer {
                     if (!isCodeChecked) {
                         newFilteredWarnings.push(infoCodeNotChecked);
                     }
-                    resolve ({warnings: newFilteredWarnings});
+                    resolve({ warnings: newFilteredWarnings });
                     return;
                 }
                 self._removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once, lines);
@@ -362,11 +362,11 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             }
 
             // If there are no warnings after processing directives, return wooHoo
-            if (_.isEmpty(filteredWarnings) ) {
+            if (_.isEmpty(filteredWarnings)) {
                 logger.metric('woohoo-state');
                 filteredWarnings.push(infoWooHoo);
             }
-            resolve ({warnings: filteredWarnings});
+            resolve({ warnings: filteredWarnings });
         });
     }
 
