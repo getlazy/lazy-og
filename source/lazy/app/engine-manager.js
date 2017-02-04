@@ -26,13 +26,6 @@ class EngineManager {
         this._volume = null;
         this._isRunning = false;
 
-        // Assign ports to all engines.
-        const ARBITRARY_ENGINE_PORT_RANGE_START = 17127;
-        let nextPort = ARBITRARY_ENGINE_PORT_RANGE_START;
-        _.forEach(_.get(this, '_config.engines'), (engineConfig) => {
-            engineConfig.port = nextPort;
-            ++nextPort;
-        });
         //  Resolve the repository auth since its values are kept in the lazy's process environment.
         this._repositoryAuth = EngineManager._resolveRepositoryAuthValues(this._config);
     }
