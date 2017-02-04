@@ -133,9 +133,9 @@ class EngineManager {
                             `LAZY_ENGINE_URL=${selectn('_config.service_url', self)}/engine/${engineName}`,
                             `LAZY_VOLUME_NAME=${self._volume.Name}`,
                             'LAZY_VOLUME_MOUNT=/lazy',
-                            `LAZY_ENGINE_SANDBOX_DIR=/lazy/sandbox/${engineName}`,
-                            `PORT=${engineConfig.port}`
-                        ]),
+                            `LAZY_ENGINE_SANDBOX_DIR=/lazy/sandbox/${engineName}`
+                        ],
+                        _.isInteger(engineConfig.port) ? [`PORT=${engineConfig.port}`] : []),
                     HostConfig: {
                         //  We only allow volumes to be bound to host.
                         Binds: _.union(engineConfig.volumes, [
