@@ -33,6 +33,8 @@ class EngineManager {
             engineConfig.port = nextPort;
             ++nextPort;
         });
+        //  Resolve the repository auth since its values are kept in the lazy's process environment.
+        this._repositoryAuth = EngineManager._resolveRepositoryAuthValues(this._config);
     }
 
     stop() {
@@ -97,18 +99,8 @@ class EngineManager {
         const self = this;
 
         const imageName = engineConfig.image;
-        //  Get repository auth configuration either from engine or failing that from lazy level.
-        let repositoryAuth = {};
-        if (!_.isEmpty(engineConfig.repository_auth)) {
-            repositoryAuth = engineConfig.repository_auth;
-        } else if (!_.isEmpty(self._config.repository_auth)) {
-            repositoryAuth = self._config.repository_auth;
-        }
-        //  Resolve the repository auth if its values are kept in the lazy's process environment.
-        const resolvedRepositoryAuth = EngineManager._resolveRepositoryAuthValues(repositoryAuth);
-
         logger.info('Pulling image', { engine: engineName, image: imageName });
-        return EngineManager._pullImage(resolvedRepositoryAuth, imageName)
+        return EngineManager._pullImage(self._repositoryAuth, imageName)
             .then(() => {
                 const createEngineParams = {
                     Image: imageName,
