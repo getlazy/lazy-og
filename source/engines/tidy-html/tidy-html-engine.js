@@ -1,12 +1,6 @@
 
 'use strict';
 
-//  TODO:
-//      * Add search for already existing helper engines
-//      * Add re-creation of helper engines when "protocol" version changes (like we do in
-//        StackManager)
-//      * Add cleanup of helper engines once this process is stopped for a while (this obviously
-//        outside of this process)
 
 const _ = require('lodash');
 const H = require('higher');
