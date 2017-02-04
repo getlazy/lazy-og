@@ -6,6 +6,7 @@
 // lazy ignore class-methods-use-this
 
 const _ = require('lodash');
+const fp = require('lodash/fp');
 const EngineHelpers = require('@lazyass/engine-helpers');
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
@@ -340,8 +341,15 @@ class PostProcEngineHttpServer extends EngineHttpServer {
             // Remove all always ignore warnings.
             self._removeIgnoreAlwaysWarnings(filteredWarnings, ignoreAlwaysWarnings);
 
-            // Look for directive only in languages that support either //, / *, or # style comments
-            if (_.includes(supportedLanguages, _.toLower(_.trim(language)))) {
+            // Look for directive only in languages that support either //, / *, or # style comments.
+            // Prepare language and detected language to be in the same format as suppored languages.
+            const isLanguageSupported = _.flow([_.toLower, _.trim, _.filter,
+                // lazy ignore-once lodash/prefer-lodash-method
+                fp.some(languageToCheck => _.includes(supportedLanguages, languageToCheck))]);
+            // Take into consideration both the declared language and detected language
+            const languageSupported = isLanguageSupported([language, _.get(context, 'lazy.detectedLanguage')]);
+
+            if (languageSupported) {
                 const lines = _.split(content, '\n');
                 const directives = self._getLazyDirectives(lines);
 
