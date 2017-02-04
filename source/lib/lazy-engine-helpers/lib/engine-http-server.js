@@ -16,8 +16,7 @@ const bodyParser = require('body-parser');
  * they need to implement. Those methods are: `beforeListening`, `customizeExpressApp`,
  * `afterListening`, `getMeta`.
  */
-class EngineHttpServer
-{
+class EngineHttpServer {
     constructor(port) {
         this._port = port;
         this._isReady = false;
