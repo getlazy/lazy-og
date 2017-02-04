@@ -1,6 +1,7 @@
 
 'use strict';
 
+/* global logger */
 
 const _ = require('lodash');
 const H = require('higher');
@@ -19,8 +20,7 @@ const HELPER_CONTAINER_IMAGE_NAME = 'getlazy/tidy-html:5.2.0';
 
 //  We are implicitly using `this` in overridden methods but eslint keep telling us not to.
 /* eslint class-methods-use-this: off */
-class TidyHtmlHelperContainer extends HelperContainer
-{
+class TidyHtmlHelperContainer extends HelperContainer {
     _getContainerCmd() {
         return ['tidy', '-eq'];
     }
@@ -93,8 +93,7 @@ class TidyHtmlEngineHttpServer extends EngineHttpServer
     }
 }
 
-class Engine
-{
+class Engine {
     start() {
         const port = process.env.PORT || 80;
         this._server = new TidyHtmlEngineHttpServer(port);
