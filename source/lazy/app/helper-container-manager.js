@@ -5,22 +5,21 @@
 
 const _ = require('lodash');
 const errors = require('common-errors');
-
 const HigherDockerManager = require('higher-docker-manager');
 
 const Label = {
-    OrgGetlazyHelperContainerManagerOwned: 'org.getlazy.lazy.helper-container-manager.owned'
+    OrgGetlazyLazyEngineManagerOwner: 'org.getlazy.lazy.engine-manager.owner'
 };
 
 /**
  * Manages helper containers which are created and run as sibling Docker containers to lazy.
  */
-class HelperContainerManager
-{
+class HelperContainerManager {
     /**
      * Creates helper container for the given image name. This function will pull the image:tag,
      * create the container, start it and finally return HelperContainerManager instances constructed
      * with the container.
+     * @param {string} lazyOwnerId ID of the lazy owner of the create helper container.
      * @param {Object} auth Authentication structure per Docker API documentation
      * @param {string} imageName Name of Docker image (including the optional tag) for which
      * helper container should be created.
@@ -28,7 +27,7 @@ class HelperContainerManager
      * to bind `/lazy` dir.
      * @return {Promise} Promise resolving with a new instance of HelperContainerManager.
      */
-    static createContainer(auth, imageName, lazyVolumeName) {
+    static createContainer(lazyOwnerId, auth, imageName, lazyVolumeName) {
         return HelperContainerManager._pullImage(auth, imageName)
             .then(() => {
                 //  Create the helper container.
@@ -53,28 +52,15 @@ class HelperContainerManager
                     WorkingDir: '/lazy',
                     Labels: {}
                 };
-                //  Label the container as owned by HelperContainerManager. With this it can
-                //  refuse all the operations that anybody may request on containers
-                //  not owned by HelperContainerManager.
-                createParams.Labels[Label.OrgGetlazyHelperContainerManagerOwned] = 'true';
+                // Label helper container as owned by lazy with the given ID.
+                // This allows lazy instance to clean up this container either when shutting down
+                // or when starting (if it failed to clean it up during shutdown)
+                createParams.Labels[Label.OrgGetlazyLazyEngineManagerOwner] = lazyOwnerId;
 
                 return HelperContainerManager._createContainer(createParams);
             })
             .then(container => container.start()
-                .then(_.constant(container.id)))
-            .catch(err => Promise.reject(new errors.HttpStatusError(
-                    500, `create failed with ${err && err.message}`)));
-    }
-
-    static deleteContainer(containerId) {
-        return HelperContainerManager._findContainer(containerId)
-            .then(container => container.stop()
-                .then(() => container.wait())
-                .then(() => container.delete())
-                .then(_.constant(container.id))
-            )
-            .catch(err => Promise.reject(new errors.HttpStatusError(
-                    500, `delete failed with ${err && err.message}`)));
+                .then(_.constant(container.id)));
     }
 
     static execInContainer(containerId, execParams) {

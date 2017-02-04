@@ -3,13 +3,14 @@
 
 /* global logger */
 
-const _ = require('lodash'); // lazy ignore-once lodash/import-scope
+const _ = require('lodash');
 const url = require('url');
 const H = require('higher');
 const selectn = require('selectn');
 const HigherDockerManager = require('higher-docker-manager');
 const Engine = require('./engine');
 const ip = require('ip');
+const HelperContainerManager = require('./helper-container-manager');
 
 const Label = {
     OrgGetlazyLazyEngineManagerOwner: 'org.getlazy.lazy.engine-manager.owner'
@@ -33,39 +34,45 @@ class EngineManager {
     stop() {
         const self = this;
 
-        return self._deleteAllEngines()
+        return self._deleteOwnedContainers()
             .then(() => {
                 self._isRunning = false;
             });
     }
 
     start() {
-        const self = this;
-
         return Promise.all([
             EngineManager._getOwnContainer().then(container => container.status()),
-            self._findLazyVolumeOrCreateIt()])
+            this._findLazyVolumeOrCreateIt()])
             .then((results) => {
-                [self._container, self._volume] = results;
-                return self._deleteAllEngines();
+                [this._container, this._volume] = results;
+                return this._deleteOwnedContainers();
             })
-            .then(() => self._installAllEngines())
+            .then(() => this._createHelperContainers())
+            .then((helperContainersPairs) => {
+                this._helperContainers = {};
+                // Convert the array of pairs into a map.
+                _.forEach(helperContainersPairs, ({ containerId, helperId }) => {
+                    this._helperContainers[helperId] = containerId;
+                });
+            })
+            .then(() => this._createEngineContainers())
             .then((engines) => {
-                self._engines = engines;
+                this._engines = engines;
             })
             .then(() => {
                 //  Install ui if one is specified.
-                if (_.isObject(self._config.ui)) {
-                    return self._installEngine('ui', self._config.ui)
+                if (_.isObject(this._config.ui)) {
+                    return this._createEngineContainer('ui', this._config.ui)
                         .then((uiEngine) => {
-                            self._uiEngine = uiEngine;
+                            this._uiEngine = uiEngine;
                         });
                 }
 
                 return Promise.resolve();
             })
             .then(() => {
-                self._isRunning = true;
+                this._isRunning = true;
             });
     }
 
@@ -81,14 +88,20 @@ class EngineManager {
         return this._uiEngine;
     }
 
-    _installAllEngines() {
+    execInHelperContainer(helperId, execParams) {
+        const containerId = this._helperContainers[helperId];
+        // HelperContainerManager handles unknown container IDs.
+        return EngineManager._execInContainer(containerId, execParams);
+    }
+
+    _createEngineContainers() {
         const self = this;
 
         return Promise.all(_.map(self._config.engines,
-            (engineConfig, engineName) => self._installEngine(engineName, engineConfig)));
+            (engineConfig, engineName) => self._createEngineContainer(engineName, engineConfig)));
     }
 
-    _installEngine(engineName, engineConfig, port) {
+    _createEngineContainer(engineName, engineConfig) {
         const self = this;
 
         const imageName = engineConfig.image;
@@ -150,11 +163,26 @@ class EngineManager {
             .then(engine => engine.start().then(_.constant(engine)));
     }
 
-    _findLazyVolumeOrCreateIt() {
-        const self = this;
+    _createHelperContainer(helperId, helperConfig) {
+        const imageName = helperConfig.image;
+        logger.info('Creating helper container', { helper: helperId, image: imageName });
+        return HelperContainerManager.createContainer(this._id, this._repositoryAuth, imageName, this._volume.Name)
+            // lazy ignore arrow-body-style
+            .then((containerId) => {
+                return {
+                    helperId,
+                    containerId
+                };
+            });
+    }
 
-        return EngineManager._getVolumesForLabel(
-                Label.OrgGetlazyLazyEngineManagerOwner, self._id)
+    _createHelperContainers() {
+        return Promise.all(_.map(this._config.helper_containers,
+            (helperConfig, helperId) => this._createHelperContainer(helperId, helperConfig)));
+    }
+
+    _findLazyVolumeOrCreateIt() {
+        return EngineManager._getVolumesForLabel(Label.OrgGetlazyLazyEngineManagerOwner, this._id)
             .then((volumes) => {
                 if (!_.isEmpty(volumes)) {
                     return _.head(volumes);
@@ -162,20 +190,21 @@ class EngineManager {
 
                 const volumeCreateParams = {
                     //  Name it after the unique ID.
-                    name: `lazy-volume-${self._id}`,
+                    name: `lazy-volume-${this._id}`,
                     Labels: {}
                 };
                 //  Add the label to later use it to find this container.
-                volumeCreateParams.Labels[Label.OrgGetlazyLazyEngineManagerOwner] = self._id;
+                volumeCreateParams.Labels[Label.OrgGetlazyLazyEngineManagerOwner] = this._id;
 
                 return EngineManager._createVolume(volumeCreateParams);
             });
     }
 
-    _deleteAllEngines() {
+    _deleteOwnedContainers() {
         const self = this;
 
-        //  Stop/wait/delete all containers owned by this lazy (equivalence determined by ID)
+        // Stop/wait/delete all containers owned by this lazy (equivalence determined by ID)
+        // which includes engines and helper containers.
         return EngineManager._getContainersForLabel(Label.OrgGetlazyLazyEngineManagerOwner, self._id)
             .then(containers =>
                 Promise.all(_.map(containers, (container) => {
@@ -258,6 +287,10 @@ class EngineManager {
      */
     static _getContainersForLabel(...args) {
         return HigherDockerManager.getContainersForLabel(...args);
+    }
+
+    static _execInContainer(...args) {
+        return HelperContainerManager.execInContainer(...args);
     }
 }
 
