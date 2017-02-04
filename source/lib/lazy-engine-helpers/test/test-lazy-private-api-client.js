@@ -33,52 +33,12 @@ describe('LazyPrivateApiClient', function () {
         });
     });
 
-    describe('createHelperContainer', function () {
-        it('works', function () {
-            const client = new LazyPrivateApiClient('x', 'y');
-            td.when(td.replace(client, '_makeRequest')(
-                'POST', 'helper-container/create', undefined, {
-                    auth: {},
-                    imageName: 'test-image',
-                    lazyVolumeName: 'test-volume'
-                })
-            )
-                .thenResolve({
-                    containerId: 'test-container-id'
-                });
-
-            return client.createHelperContainer({}, 'test-image', 'test-volume')
-                .then((containerId) => {
-                    assert.equal(containerId, 'test-container-id');
-                });
-        });
-    });
-
-    describe('deleteHelperContainer', function () {
-        it('works', function () {
-            const client = new LazyPrivateApiClient('x', 'y');
-            td.when(td.replace(client, '_makeRequest')(
-                'POST', 'helper-container/delete', undefined, {
-                    containerId: 'test-container-id'
-                })
-            )
-                .thenResolve({
-                    containerId: 'test-container-id-returned'
-                });
-
-            return client.deleteHelperContainer('test-container-id')
-                .then((containerId) => {
-                    assert.equal(containerId, 'test-container-id-returned');
-                });
-        });
-    });
-
     describe('execInHelperContainer', function () {
         it('works', function () {
             const client = new LazyPrivateApiClient('x', 'y');
             td.when(td.replace(client, '_makeRequest')(
                 'POST', 'helper-container/exec', undefined, {
-                    containerId: 'test-container-id',
+                    helperId: 'test-helper-id',
                     execParams: {
                         test: 'exec'
                     }
@@ -86,7 +46,7 @@ describe('LazyPrivateApiClient', function () {
             )
                 .thenResolve(['test', 'output']);
 
-            return client.execInHelperContainer('test-container-id', { test: 'exec' })
+            return client.execInHelperContainer('test-helper-id', { test: 'exec' })
                 .then((output) => {
                     assert.equal(output[0], 'test');
                     assert.equal(output[1], 'output');
@@ -97,7 +57,7 @@ describe('LazyPrivateApiClient', function () {
     describe('_makeRequest', function () {
         it('correctly uses lazy URL', function () {
             const client = new LazyPrivateApiClient('http://x.y', 'z');
-            td.when(td.replace(client, '_issueRequest')({
+            td.when(td.replace(LazyPrivateApiClient, '_issueRequest')({
                 method: 'POST',
                 url: 'http://x.y/helper-container/exec',
                 json: true,
@@ -105,7 +65,7 @@ describe('LazyPrivateApiClient', function () {
                     Accept: 'application/json'
                 },
                 body: {
-                    containerId: 'test-container-id',
+                    helperId: 'test-helper-id',
                     execParams: {
                         test: 'exec'
                     }
@@ -114,7 +74,7 @@ describe('LazyPrivateApiClient', function () {
             }))
                 .thenResolve(['test', 'output']);
 
-            return client.execInHelperContainer('test-container-id', { test: 'exec' })
+            return client.execInHelperContainer('test-helper-id', { test: 'exec' })
                 .then((output) => {
                     assert.equal(output[0], 'test');
                     assert.equal(output[1], 'output');

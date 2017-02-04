@@ -14,7 +14,7 @@ const LazyPrivateApiClient = require('./lazy-private-api-client');
 //  HACK: We hard-code the path instead of using sandbox path which "belongs"
 const TEMPORARY_DIR_LAZY_PATH = '/lazy/tmp';
 
-/* eslint class-methods-use-this: off */
+// lazy ignore class-methods-use-this
 
 /**
  * Base class for helper containers running as sibil Docker containers.
@@ -23,43 +23,18 @@ const TEMPORARY_DIR_LAZY_PATH = '/lazy/tmp';
  * they need to implement. Those methods are: `_getContainerEntrypoint`,
  * `_getContainerCmd`, `_processContainerOutput`, `_getBaseContainerExecParams`.
  */
-class HelperContainer
-{
+class HelperContainer {
     /**
-     * Creates helper container for the given image name. This function will pull the image:tag,
-     * create the container, start it and finally return HelperContainer instances constructed
-     * with the container.
-     * @param {Object} auth Authentication structure per Docker API documentation
-     * @param {string} imageName Name of Docker image (including the optional tag) for which
-     * helper container should be created.
-     * @param {string} lazyVolumeName Name of Docker volume (or host path when testing) on which
-     * to bind `/lazy` dir.
-     * @return {Promise} Promise resolving with a new instance of HelperContainer.
+     * Constructs a new instance of HelperContainer class.
+     * @param {string} helperId ID of the helper container on which to execute analysis as it
+     * appears in lazy configuration.
      */
-    static createContainer(auth, imageName, lazyVolumeName) {
-        // istanbul ignore next
-        const client = new LazyPrivateApiClient();
-        // istanbul ignore next
-        return client.createHelperContainer(auth, imageName, lazyVolumeName);
-    }
-
-    static deleteContainer(containerId) {
-        // istanbul ignore next
-        const client = new LazyPrivateApiClient();
-        // istanbul ignore next
-        return client.deleteHelperContainer(containerId);
+    constructor(helperId) {
+        this._helperId = helperId;
     }
 
     /**
-     * Constructs a new instance of HelperContainer.
-     * @param {string} containerId ID of the helper container on which to execute analysis.
-     */
-    constructor(containerId) {
-        this._containerId = containerId;
-    }
-
-    /**
-     * Creates temporary file in `/lazy` directory which is (HACK) is mounted to a known shared
+     * Creates temporary file in `/lazy` directory which is (HACK) mounted to a known shared
      * volume.
      * @param {string} content Content of the file to analyze.
      * @param {string} hostPath Path of the file on the client, used to extract the extension
@@ -168,7 +143,7 @@ class HelperContainer
                 execParams.Cmd = execParams.Cmd
                     .concat(`${TEMPORARY_DIR_LAZY_PATH}/${path.basename(temporaryFileInfo.path)}`);
 
-                return HelperContainer._execInContainer(self._containerId, execParams);
+                return HelperContainer._execInContainer(self._helperId, execParams);
             })
             //  Delegate the processing of the output to inheriting classes.
             .then((containerOutput) => {

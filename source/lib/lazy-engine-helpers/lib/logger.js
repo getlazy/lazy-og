@@ -8,6 +8,7 @@ const common = require('@lazyass/common');
 let logger;
 
 const getEngineLogger = () => {
+    // istanbul ignore if
     if (!_.isUndefined(logger)) {
         return logger;
     }
