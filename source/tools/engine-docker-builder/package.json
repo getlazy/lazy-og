@@ -1,0 +1,25 @@
+{
+  "name": "lazy-engine-docker-builder",
+  "version": "1.0.0",
+  "description": "Specialized builder for lazy engine docker images",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getlazy/lazy-engine-docker-builder.git"
+  },
+  "keywords": [
+    "lazy",
+    "engine",
+    "docker",
+    "builder"
+  ],
+  "author": "The lazy Authors",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/getlazy/lazy-engine-docker-builder/issues"
+  },
+  "homepage": "https://github.com/getlazy/lazy-engine-docker-builder#readme"
+}
