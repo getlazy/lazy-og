@@ -38,13 +38,15 @@ fs.readFile('/sources/metadata.json', (err, metadata) => {
         try {
             // lazy ignore no-param-reassign
             metadata = JSON.stringify(JSON.parse(metadata));
+            if (_.includes(metadata, '\'')) {
+                throw new Error('Docker miserably fails to understand correctly single quotes in label values - you cannot use them');
+            }
         } catch (parseErr) {
             console.error('Invalid metadata:', parseErr);
             process.exit(-1);
         }
     }
 
-    // TODO: Use .dockerignore if it exists in sources to ignore the files during compression.
     const tarStream = tar.pack('/sources', {
         ignore: name => dockerIgnore.denies(_.trimStart(name, '/sources/'))
     });
