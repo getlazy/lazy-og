@@ -20,7 +20,6 @@ push:
 bootstrap-build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-v "$(YARN_CACHE_DIR):/usr/local/share/.cache/yarn"
 		-t getlazy/engine-docker-builder:${PACKAGE_VERSION} \
 		-t getlazy/engine-docker-builder:latest \
 		.
