@@ -8,8 +8,10 @@ const Docker = require('node-docker-api').Docker;
 const tar = require('tar-fs');
 const async = require('async');
 const fs = require('fs-extra');
+const parser = require('gitignore-parser');
 
 const tags = process.argv.splice(2);
+const dockerIgnore = parser.compile(fs.readFileSync('/sources/.dockerignore', 'utf8'));
 
 const promisifyStream = stream => new Promise((resolve, reject) => {
     stream.on('data', (buffer) => {
@@ -43,7 +45,9 @@ fs.readFile('/sources/metadata.json', (err, metadata) => {
     }
 
     // TODO: Use .dockerignore if it exists in sources to ignore the files during compression.
-    const tarStream = tar.pack('/sources');
+    const tarStream = tar.pack('/sources', {
+        ignore: name => dockerIgnore.denies(_.trimStart(name, '/sources/'))
+    });
     const buildTag = _.head(tags);
     const buildParams = {
         t: buildTag,
