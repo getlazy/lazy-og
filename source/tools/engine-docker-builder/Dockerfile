@@ -1,0 +1,11 @@
+FROM ierceg/node-dev:6.9.5
+MAINTAINER lazy team <team@getlazy.org>
+
+ENV NODE_ENV=production
+ARG NPM_TOKEN
+COPY . /app
+WORKDIR /app/
+RUN ~/.yarn/bin/yarn
+
+STOPSIGNAL SIGINT
+ENTRYPOINT ["node", "/app/index.js"]
