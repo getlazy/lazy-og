@@ -1,0 +1,7 @@
+{
+    "helper_containers": {
+        "emcc": {
+            "image": "apiaryio/emcc:1.36"
+        }
+    }
+}
