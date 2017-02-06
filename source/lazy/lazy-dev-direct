@@ -8,5 +8,6 @@ docker run -it --rm \
     --stop-signal SIGTERM \
     -w /app \
     --env-file env \
+    -e NPM_TOKEN=${NPM_TOKEN} \
     ierceg/node-dev:6.9.1 \
     node index.js /config/lazy.yaml

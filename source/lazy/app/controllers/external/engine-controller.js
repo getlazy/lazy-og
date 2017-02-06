@@ -2,7 +2,7 @@
 
 /* global logger */
 
-const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want whole lotta lodash...
+const _ = require('lodash');
 const selectn = require('selectn');
 const proxy = require('http-proxy-middleware');
 const PACKAGE_VERSION = require('../../../package.json').version;
@@ -22,7 +22,7 @@ const addEndpoints = (app, options) => {
     app.get('/engines', (req, res) => {
         res.send(_.reduce(engineManager.engines, (engines, engine) => {
             // lazy ignore-once no-param-reassign
-            engines[engine.name] = {
+            engines[engine.id] = {
                 url: engine.url,
                 meta: engine.meta
             };
@@ -32,12 +32,12 @@ const addEndpoints = (app, options) => {
 
     app.post('/file', (req, res) => {
         const language = selectn('body.language', req);
-        if (_.isEmpty(language)) {
+        const hostPath = selectn('body.hostPath', req);
+        const content = selectn('body.content', req);
+        if (_.isEmpty(language) || _.isEmpty(hostPath) || _.isEmpty(content)) {
             return res.status(400).send();
         }
 
-        const hostPath = selectn('body.hostPath', req);
-        const content = selectn('body.content', req);
         const context = selectn('body.context', req);
 
         try {
@@ -56,11 +56,11 @@ const addEndpoints = (app, options) => {
         }
     });
 
-    //  Create proxies to pass all requests that get to /engine/{engine.name}/* paths.
+    //  Create proxies to pass all requests that get to /engine/{engine.id}/* paths.
     _.forEach(engineManager.engine, (engine) => {
-        const enginePath = `/engine/${engine.name}`;
+        const enginePath = `/engine/${engine.id}`;
 
-        //  Proxy all calls from /engine/<engine.name> to the engine.
+        //  Proxy all calls from /engine/<engine.id> to the engine.
         //  Allow websockets upgrade.
         const proxyOptions = {
             target: engine.url,

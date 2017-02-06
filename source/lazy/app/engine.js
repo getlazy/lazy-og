@@ -3,7 +3,7 @@
 
 /* global logger */
 
-const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want whole lotta lodash...
+const _ = require('lodash');
 const url = require('url');
 const request = require('request-promise-native');
 const async = require('async');
@@ -15,16 +15,15 @@ const ARBITRARY_ENGINE_BOOT_CHECK_DELAY_MS = 100;
 /**
  * Engine class.
  */
-class Engine
-{
+class Engine {
     /**
      * Constructs a new instance of Engine with the given name and languages.
-     * @param {string} name Name of the engine
+     * @param {string} engineId ID of the engine
      * @param {Container} container Container in which this engine is running.
      * @param {Object} config Defined configuration of this engine.
      */
-    constructor(name, container, config) {
-        this._name = name;
+    constructor(engineId, container, config) {
+        this._id = engineId;
         this._container = container;
         this._config = config;
     }
@@ -32,8 +31,8 @@ class Engine
     /**
      * @return {string} Name of this engine, used for descriptive purposes.
      */
-    get name() {
-        return this._name;
+    get id() {
+        return this._id;
     }
 
     /**
@@ -71,7 +70,7 @@ class Engine
     start() {
         const self = this;
 
-        logger.info('Starting engine', { engine: self.name });
+        logger.info('Starting engine', { engineId: self.id });
         return self._redirectContainerLogsToLogger()
             .then(() => self._container.status())
             .then((containerStatus) => {
@@ -145,14 +144,14 @@ class Engine
                 if (!_.isEmpty(pendingBuffers)) {
                     const logs = _.map(pendingBuffers, buffer =>
                         HigherDockerManager.containerOutputBuffersToString([buffer]));
-                    logger.error('Dumping non-JSON logs', { engine: self.name, logs });
+                    logger.error('Dumping non-JSON logs', { engineId: self.id, logs });
                     pendingBuffers = [];
                 }
             };
 
             const logEngineMessage = (messageData) => {
                 const meta = messageData.meta || {};
-                meta.engine = self.name; // lazy ignore-once no-param-reassign
+                meta.engineId = self.id;
                 logger.log(messageData.level, messageData.message, messageData.meta);
             };
 
@@ -184,10 +183,10 @@ class Engine
             stream.on('end', () => {
                 //  Before ending dump all the pending buffers as they are.
                 logAndClearPendingBuffers();
-                logger.info('Stopped streaming logs', { engine: self.name });
+                logger.info('Stopped streaming logs', { engineId: self.id });
             });
             stream.on('error', (err) => {
-                logger.error('Error while streaming logs for engine', { err, engine: self.name });
+                logger.error('Error while streaming logs for engine', { err, engineId: self.id });
             });
         };
 
@@ -199,7 +198,7 @@ class Engine
             .then(redirectLogStreamIntoLogger)
             .catch((err) => {
                 logger.error('Error while setting up streaming of logs for engine',
-                    { err, engine: self.name });
+                    { err, engineId: self.id });
                 //  We don't pass the error as streaming of logs is non-critical.
             });
     }
@@ -225,9 +224,10 @@ class Engine
                         .then(() => {
                             //  We received an error-less status so assume everything is fine.
                             healthyStatus = true;
+                            logger.info('Engine online', { engineId: self.id });
                             next();
                         })
-                        .catch((err) => {
+                        .catch(() => {
                             //  Increment the request counter and wait a bit until trying again.
                             requestCounter += 1;
                             setTimeout(next, ARBITRARY_ENGINE_BOOT_CHECK_DELAY_MS);
@@ -242,7 +242,7 @@ class Engine
                     }
 
                     if (requestCounter === maxNumberOfStatusRequests) {
-                        return reject(new Error(`Engine ${self.name} timed out.`));
+                        return reject(new Error(`Engine ${self.id} timed out.`));
                     }
 
                     return resolve();

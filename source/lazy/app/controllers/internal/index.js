@@ -2,11 +2,11 @@
 'use strict';
 
 const ConfigController = require('./config-controller');
-const HelperContainerController = require('./helper-container-controller');
+const ExecController = require('./exec-controller');
 
 const initialize = (app, options) =>
     ConfigController.initialize(app, options)
-        .then(() => HelperContainerController.initialize(app, options));
+        .then(() => ExecController.initialize(app, options));
 
 module.exports = {
     initialize

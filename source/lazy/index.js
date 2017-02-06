@@ -26,19 +26,21 @@ process.on('SIGINT', () => {
 });
 
 const redirectPackageLogEvent = (level, packageName, ...args) => {
-    // In this example we put the package name into meta, if such exists.
-    const argsWithoutMeta = [...args];
-    let meta = argsWithoutMeta.pop();
-    if (_.isObject(meta)) {
-        if (!meta._packageName) {
-            meta._packageName = packageName;
-        }
+    // Either extend the last argument (if it's an object which signals meta)
+    // or add our own meta object.
+    const lastArg = _.last(args);
+    if (_.isObject(lastArg) && !_.isArray(lastArg)) {
+        args.pop();
+        args.push(_.assignIn(_.cloneDeep(lastArg), {
+            packageName
+        }));
     } else {
-        meta = {
-            _packageName: packageName
-        };
+        args.push({
+            packageName
+        });
     }
-    logger.log(level, argsWithoutMeta, meta);
+
+    logger.log(level, ...args);
 };
 
 const redirectPackagesLogEvents = (packageNames) => {
@@ -48,6 +50,10 @@ const redirectPackagesLogEvents = (packageNames) => {
     });
 };
 
+// Capture log events from packages emitting log events.
+redirectPackagesLogEvents(['@lazyass/engine-pipeline',
+    '@lazyass/lazy-config-file']);
+
 // Our 3rd agument is path to lazy.yaml (1st is node, 2nd is index.js)
 const lazyYamlPath = process.argv[2];
 LazyConfigFile.load(lazyYamlPath)
@@ -55,10 +61,6 @@ LazyConfigFile.load(lazyYamlPath)
         .then((logger) => {
             // Initialize the global logger.
             global.logger = logger;
-
-            // Capture log events from packages emitting log events.
-            redirectPackagesLogEvents(['@lazyass/engine-pipeline',
-                '@lazyass/lazy-config-file']);
 
             return Main.main(lazyConfig);
         })
