@@ -18,7 +18,7 @@ class EnginePipeline {
 
     _populateEngineMaps(engines) {
         _.forEach(engines, (engine) => {
-            this._idToEngineMap[_.toLower(engine.name)] = engine;
+            this._idToEngineMap[_.toLower(engine.id)] = engine;
 
             // Clean up languages removing empty ones and non-strings (just in case).
             const engineLanguages = fp.flow([

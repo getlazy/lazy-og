@@ -45,7 +45,7 @@ module.exports = [{
 }, {
     id: 'success #2',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -64,7 +64,7 @@ module.exports = [{
 }, {
     id: 'inexisting engine in sequence #1',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -85,7 +85,7 @@ module.exports = [{
 }, {
     id: 'inexisting engine in sequence #2',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -93,7 +93,7 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: [],
         analyzeFile(hostPath, language, content, context) {
             assert(!_.isUndefined(context.previousStepResults));
@@ -117,7 +117,7 @@ module.exports = [{
 }, {
     id: 'last status survives',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -128,7 +128,7 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: [],
         analyzeFile(hostPath, language, content, context) {
             assert(!_.isUndefined(context.previousStepResults));
@@ -156,7 +156,7 @@ module.exports = [{
 }, {
     id: 'inexisting engine in bundle #1',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -177,7 +177,7 @@ module.exports = [{
 }, {
     id: 'inexisting engine in bundle #2',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -185,7 +185,7 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: [],
         analyzeFile(hostPath, language, content, context) {
             return Promise.resolve({
@@ -213,7 +213,7 @@ module.exports = [{
 }, {
     id: 'last status survives in bundle',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -224,7 +224,7 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -251,7 +251,7 @@ module.exports = [{
 }, {
     id: 'composition defect #1 fixed',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: [],
         analyzeFile(hostPath, language, content, context) {
             return Promise.resolve({
@@ -262,7 +262,7 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: [],
         analyzeFile(hostPath, language, content, context) {
             assert(!_.isUndefined(context.previousStepResults));
@@ -283,7 +283,7 @@ module.exports = [{
             }]
         }]
     },
-    then: (result) => {      
+    then: (result) => {
         assert(_.isArray(result.warnings), 'warnings is an array');
         assert.equal(result.warnings.length, 2);
         assert.equal(_.get(result, 'warnings[0].test'), 'result');
@@ -293,7 +293,7 @@ module.exports = [{
 }, {
     id: 'composition test #1',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -304,7 +304,7 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -337,7 +337,7 @@ module.exports = [{
 }, {
     id: 'composition bug #2 fixed - error in a sequence stops execution',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -348,13 +348,13 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: [],
         analyzeFile() {
             return Promise.reject(new Error('test-error'));
         }
     }, {
-        name: 'engine3',
+        id: 'engine3',
         languages: [],
         analyzeFile() {
             //  This should never be reached but the right way to test it is to return a result
@@ -383,7 +383,7 @@ module.exports = [{
 }, {
     id: 'composition test #4 - error in a bundle does NOT stop execution',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -394,13 +394,13 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: [],
         analyzeFile() {
             return Promise.reject(new Error('test-error'));
         }
     }, {
-        name: 'engine3',
+        id: 'engine3',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -433,7 +433,7 @@ module.exports = [{
 }, {
     id: 'composition test #5',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -444,13 +444,13 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: [],
         analyzeFile() {
             return Promise.reject(new Error('test-error'));
         }
     }, {
-        name: 'engine3',
+        id: 'engine3',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -482,7 +482,7 @@ module.exports = [{
 }, {
     id: 'composition test #6',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -493,7 +493,7 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: [],
         analyzeFile() {
             return Promise.resolve({
@@ -520,7 +520,7 @@ module.exports = [{
 }, {
     id: 'language test #1',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: ['test'],
         analyzeFile() {
             return Promise.resolve({
@@ -531,7 +531,7 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: ['not-test'],
         analyzeFile() {
             return Promise.resolve({
@@ -561,7 +561,7 @@ module.exports = [{
 }, {
     id: 'language test #2',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: ['not-test'],
         analyzeFile() {
             return Promise.resolve({
@@ -572,7 +572,7 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: ['not-test-either'],
         analyzeFile() {
             return Promise.resolve({
@@ -595,12 +595,12 @@ module.exports = [{
     then: (result) => {
         assert (_.isNil(result.warnings), 'no warnings');
         assert (_.isNil(result.status), 'no status');
-        
+
     }
 }, {
     id: 'language test #3',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: ['test'],
         analyzeFile() {
             return Promise.resolve({
@@ -611,7 +611,7 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: ['test'],
         analyzeFile() {
             return Promise.resolve({
@@ -640,7 +640,7 @@ module.exports = [{
 }, {
     id: 'language test #4',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: ['test', 'test2'],
         analyzeFile() {
             return Promise.resolve({
@@ -651,7 +651,7 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: ['test3'],
         analyzeFile() {
             return Promise.resolve({
@@ -680,7 +680,7 @@ module.exports = [{
 }, {
     id: 'language test #5',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: ['test', 1234, ' TEST2 ', null, undefined, { x: 1 }, ['x', '1']],
         analyzeFile() {
             return Promise.resolve({
@@ -691,7 +691,7 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: ['test3'],
         analyzeFile() {
             return Promise.resolve({
@@ -721,7 +721,7 @@ module.exports = [{
 }, {
     id: 'language test #6',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: ['JavaScript'],
         analyzeFile() {
             return Promise.resolve({
@@ -732,7 +732,7 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         languages: ['Babel ES6 JavaScript'],
         analyzeFile(hostPath, language, content, context) {
             assert.equal(context.lazy.detectedLanguage, 'javascript');
@@ -769,7 +769,7 @@ module.exports = [{
 }, {
     id: 'language test #6',
     engines: [{
-        name: 'engine1',
+        id: 'engine1',
         languages: ['JavaScript'],
         analyzeFile() {
             return Promise.resolve({
@@ -780,7 +780,7 @@ module.exports = [{
             });
         }
     }, {
-        name: 'engine2',
+        id: 'engine2',
         analyzeFile() {
             return Promise.resolve({
                 warnings: [{ test: 'result2' }],
