@@ -12,8 +12,8 @@ const asyncWhile = (condition, action) => {
 };
 
 class EnginePipelineRun {
-    constructor(namesToEnginesMap, prefilteredEngines, pipelineRoot, hostPath, language, content, context) {
-        this._namesToEnginesMap = namesToEnginesMap;
+    constructor(idToEngineMap, prefilteredEngines, pipelineRoot, hostPath, language, content, context) {
+        this._idToEngineMap = idToEngineMap;
         this._prefilteredEngines = prefilteredEngines;
         this._pipelineRoot = pipelineRoot;
         this._hostPath = hostPath;
@@ -52,14 +52,12 @@ class EnginePipelineRun {
         return Promise.reject(new Error('Bad engine pipeline config.'));
     }
 
-    _runSingleEngine(engineName, context) {
-        const engine = this._namesToEnginesMap[_.toLower(engineName)];
+    _runSingleEngine(engineId, context) {
+        const engine = this._idToEngineMap[_.toLower(engineId)];
 
         if (_.isNil(engine)) {
             // Engine is present in pipeline, but no definition exists.
-            logger.warn('Skipping inexisting engine', {
-                engine: engineName
-            });
+            logger.warn('Skipping inexisting engine', { engineId });
             // We carry forward the results of the previous engine.
             return Promise.resolve(context.previousStepResults);
         }
@@ -72,15 +70,15 @@ class EnginePipelineRun {
     }
 
     static _getEngineItem(engineDef) {
-        const engineName = _.head(_.keys(engineDef));
+        const engineId = _.head(_.keys(engineDef));
 
-        if (_.includes(['bundle', 'sequence'], engineName)) {
+        if (_.includes(['bundle', 'sequence'], engineId)) {
             return null;
         }
 
         return {
-            engineName,
-            engineParams: _.get(engineDef, engineName, {})
+            engineId,
+            engineParams: _.get(engineDef, engineId, {})
         };
     }
 
@@ -99,7 +97,7 @@ class EnginePipelineRun {
 
                     // Run the engine with its params.
                     newContext.engineParams = engineItem.engineParams;
-                    return this._runSingleEngine(engineItem.engineName, newContext);
+                    return this._runSingleEngine(engineItem.engineId, newContext);
                 })()
                     .catch((err) => {
                         logger.warn('Failure during bundle pipleline run, continuing', {
@@ -161,7 +159,7 @@ class EnginePipelineRun {
 
                 // Run the engine with its params.
                 newContext.engineParams = engineItem.engineParams;
-                return this._runSingleEngine(engineItem.engineName, newContext);
+                return this._runSingleEngine(engineItem.engineId, newContext);
             })()
                 // Process the results no matter if we ran the engine or another pipeline.
                 .then((results) => {

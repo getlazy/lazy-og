@@ -10,15 +10,15 @@ const logger = require('@lazyass/common').createPackageLogger('lazy-engine-pipel
 class EnginePipeline {
     constructor(engines, pipelineRoot) {
         this._pipelineRoot = pipelineRoot;
-        this._namesToEnginesMap = new Map();
-        this._languagesToEnginesMap = new Map();
+        this._idToEngineMap = new Map();
+        this._languageToEnginesMap = new Map();
         this._allLanguagesEngines = [];
         this._populateEngineMaps(engines);
     }
 
     _populateEngineMaps(engines) {
         _.forEach(engines, (engine) => {
-            this._namesToEnginesMap[_.toLower(engine.name)] = engine;
+            this._idToEngineMap[_.toLower(engine.name)] = engine;
 
             // Clean up languages removing empty ones and non-strings (just in case).
             const engineLanguages = fp.flow([
@@ -33,11 +33,11 @@ class EnginePipeline {
                 this._allLanguagesEngines.push(engine);
             } else {
                 _.forEach(engineLanguages, (language) => {
-                    const enginesForLanguage = this._languagesToEnginesMap.get(language);
+                    const enginesForLanguage = this._languageToEnginesMap.get(language);
                     if (enginesForLanguage) {
                         enginesForLanguage.push(engine);
                     } else {
-                        this._languagesToEnginesMap.set(language, [engine]);
+                        this._languageToEnginesMap.set(language, [engine]);
                     }
                 });
             }
@@ -51,7 +51,7 @@ class EnginePipeline {
 
         // Always include engines for all languages and for the declared language.
         const lowerCaseLanguage = _.toLower(language);
-        let engines = _.union(this._languagesToEnginesMap.get(lowerCaseLanguage),
+        let engines = _.union(this._languageToEnginesMap.get(lowerCaseLanguage),
             this._allLanguagesEngines);
 
         if (!_.isEmpty(hostPath) && !_.isEmpty(content)) {
@@ -62,7 +62,7 @@ class EnginePipeline {
                 logger.warn('Detected language mismatches passed language', {
                     detectedLanguage, passedLanguage: lowerCaseLanguage
                 });
-                engines = _.union(engines, this._languagesToEnginesMap.get(detectedLanguage));
+                engines = _.union(engines, this._languageToEnginesMap.get(detectedLanguage));
                 // Add the detected language to context so that engines can potentially make
                 // use of it.
                 // lazy ignore-once no-param-reassign
@@ -78,7 +78,7 @@ class EnginePipeline {
         engines = _.uniq(engines);
 
         // Run the pipleine from the root.
-        const pipelineRun = new EnginePipelineRun(this._namesToEnginesMap, engines,
+        const pipelineRun = new EnginePipelineRun(this._idToEngineMap, engines,
             this._pipelineRoot, hostPath, language, content, context);
         return pipelineRun.run();
     }
