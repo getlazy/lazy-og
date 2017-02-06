@@ -57,7 +57,7 @@ fs.readFile('/sources/metadata.json', (err, metadata) => {
             NPM_TOKEN: process.env.NPM_TOKEN
         },
         labels: {
-            'org.getlazy.lazy.engine.metadata': metadata
+            'org.getlazy.lazy.engine.image-metadata': metadata
         }
     };
     docker.image.build(tarStream, buildParams)
