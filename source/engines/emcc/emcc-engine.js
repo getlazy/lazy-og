@@ -1,26 +1,24 @@
 
 'use strict';
 
+/* global logger */
+
+// lazy ignore class-methods-use-this
+
 const _ = require('lodash');
-const H = require('higher');
 const EngineHelpers = require('@lazyass/engine-helpers');
 
 const HelperContainer = EngineHelpers.HelperContainer;
 const AdaptedAtomLinter = EngineHelpers.AdaptedAtomLinter;
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
-const REPOSITORY_AUTH = JSON.parse(
-    H.unless(H.isNonEmptyString, '{}', process.env.LAZY_REPOSITORY_AUTH_JSON));
-
-const LAZY_VOLUME_NAME = process.env.LAZY_VOLUME_NAME;
-
-const HELPER_CONTAINER_IMAGE_NAME = 'apiaryio/emcc:1.36';
-
 //  As seen in https://github.com/keplersj/linter-emscripten/blob/master/lib/main.js (MIT license)
 
-/* eslint class-methods-use-this: off */
-class EmccHelperContainer extends HelperContainer
-{
+class EmccHelperContainer extends HelperContainer {
+    constructor() {
+        // Per image-metadata our helper container ID is emcc.
+        super('emcc');
+    }
     _getContainerCmd() {
         return ['emcc', '-fsyntax-only', '-fno-caret-diagnostics', '-fno-diagnostics-fixit-info',
             '-fdiagnostics-print-source-range-info', '-fexceptions'];
@@ -33,9 +31,8 @@ class EmccHelperContainer extends HelperContainer
             buffer => buffer && buffer.payload && buffer.payload.toString()
         ).join('');
 
-        /* eslint no-useless-escape: off */
-        const EMCC_OUTPUT_REGEX = '(?<file>.+):(?<line>\\d+):(?<col>\\d+):(\{(?<lineStart>\\d+)' +
-            ':(?<colStart>\\d+)\-(?<lineEnd>\\d+):(?<colEnd>\\d+)}.*:)? (?<type>[\\w \\-]+): ' +
+        const EMCC_OUTPUT_REGEX = '(?<file>.+):(?<line>\\d+):(?<col>\\d+):({(?<lineStart>\\d+)' +
+            ':(?<colStart>\\d+)-(?<lineEnd>\\d+):(?<colEnd>\\d+)}.*:)? (?<type>[\\w \\-]+): ' +
             '(?<message>.*)';
 
         return {
@@ -54,16 +51,10 @@ class EmccHelperContainer extends HelperContainer
     }
 }
 
-class EmccEngineHttpServer extends EngineHttpServer
-{
+class EmccEngineHttpServer extends EngineHttpServer {
     beforeListening() {
-        return HelperContainer
-            .createContainer(REPOSITORY_AUTH, HELPER_CONTAINER_IMAGE_NAME, LAZY_VOLUME_NAME)
-            .then((containerId) => {
-                //  Assume that the container has started correctly.
-                this._containerId = containerId;
-                this._helperContainer = new EmccHelperContainer(containerId);
-            });
+        this._helperContainer = new EmccHelperContainer();
+        return Promise.resolve();
     }
 
     getMeta() {
@@ -74,7 +65,16 @@ class EmccEngineHttpServer extends EngineHttpServer
 
     analyzeFile(...args) {
         //  Pass forward the arguments to the helper container.
-        return this._helperContainer.analyzeFile(...args);
+        return this._helperContainer.analyzeFile(...args)
+            .then((result) => {
+                // Mark the code as checked.
+                _.assignIn(result, {
+                    status: {
+                        codeChecked: true
+                    }
+                });
+                return result;
+            });
     }
 
     afterListening() {
@@ -91,8 +91,7 @@ class EmccEngineHttpServer extends EngineHttpServer
     }
 }
 
-class Engine
-{
+class Engine {
     start() {
         const port = process.env.PORT || 80;
         this._server = new EmccEngineHttpServer(port);
