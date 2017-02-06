@@ -1,0 +1,7 @@
+{
+    "helper_containers": {
+        "php-l": {
+            "image": "php:7.0.13-cli"
+        }
+    }
+}
