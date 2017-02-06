@@ -38,7 +38,7 @@
   },
   "homepage": "https://github.com/getlazy/lazy-npm-task-engine#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^3.2.1",
+    "@lazyass/engine-helpers": "^6.0.0",
     "lodash": "^4.17.4",
     "npmi": "^2.0.1"
   }
