@@ -10,11 +10,15 @@ const EngineHelpers = require('@lazyass/engine-helpers');
 
 const HelperContainer = EngineHelpers.HelperContainer;
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
-const LazyPrivateApiClient = EngineHelpers.LazyPrivateApiClient;
 
 //  We are implicitly using `this` in overridden methods but eslint keep telling us not to.
 /* eslint class-methods-use-this: off */
 class TidyHtmlHelperContainer extends HelperContainer {
+    constructor() {
+        // Per image-metadata our helper container ID is tidy_html.
+        super('tidy_html');
+    }
+
     _getContainerCmd() {
         return ['tidy', '-eq'];
     }
@@ -52,15 +56,8 @@ class TidyHtmlHelperContainer extends HelperContainer {
 
 class TidyHtmlEngineHttpServer extends EngineHttpServer {
     beforeListening() {
-        const client = new LazyPrivateApiClient();
-        return client.getEngineConfig()
-            .then((configuration) => {
-                this._helperContainer = new TidyHtmlHelperContainer(_.get(configuration, 'config.helper_container'));
-            })
-            .catch((err) => {
-                logger.error('Failed to configure engine', err);
-                process.exit(-1);
-            });
+        this._helperContainer = new TidyHtmlHelperContainer();
+        return Promise.resolve();
     }
 
     getMeta() {
