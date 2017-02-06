@@ -1,6 +1,6 @@
 {
   "name": "lazy-npm-task-engine",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Engine capable of running simple tasks from external NPMs",
   "main": "index.js",
   "scripts": {
