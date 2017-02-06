@@ -1408,6 +1408,102 @@ module.exports = [{
         }
     }
 }, {
+    id: 'test engine.labels #1',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b',
+                labels: null
+            }
+        }
+    },
+    firstErrorMessage: 'should be object'
+}, {
+    id: 'test engine.labels #2',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b',
+                labels: {}
+            }
+        }
+    },
+    firstErrorMessage: 'should NOT have less than 1 properties'
+}, {
+    id: 'test engine.labels #3',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b',
+                labels: {
+                    whatever: 'we want'
+                }
+            }
+        }
+    }
+}, {
+    id: 'test engine.labels #4',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b',
+                labels: {
+                    whatever: 'we want',
+                    as: ['much', 'as', 'we', 'want']
+                }
+            }
+        }
+    },
+    firstErrorMessage: 'should be string'
+}, {
+    id: 'test engine.labels #5',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                image: 'a:b',
+                labels: {
+                    whatever: 'we want',
+                    as: 'much as we want'
+                }
+            }
+        }
+    }
+}, {
     id: 'test repository_auth #1',
     config: {
         version: 1,

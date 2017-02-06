@@ -1,7 +1,7 @@
 
 'use strict';
 
-const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want whole lotta lodash...
+const _ = require('lodash');
 const fs = require('fs-promise');
 const path = require('path');
 const yaml = require('js-yaml');
@@ -305,9 +305,7 @@ LAZY_CONFIG_SCHEMA = {
                 },
                 env: {
                     type: 'array',
-                    items: {
-                        $ref: '#/definitions/env_item'
-                    },
+                    items: { $ref: '#/definitions/env_item' },
                     minItems: 1,
                     uniqueItems: true
                 },
@@ -322,6 +320,16 @@ LAZY_CONFIG_SCHEMA = {
                 },
                 config: {
                     type: 'object'
+                },
+                labels: {
+                    type: 'object',
+                    minProperties: 1,
+                    patternProperties: {
+                        '^.+$': {
+                            type: 'string'
+                        }
+                    },
+                    additionalProperties: false
                 }
             },
             required: ['image'],
