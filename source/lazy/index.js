@@ -50,6 +50,10 @@ const redirectPackagesLogEvents = (packageNames) => {
     });
 };
 
+// Capture log events from packages emitting log events.
+redirectPackagesLogEvents(['@lazyass/engine-pipeline',
+    '@lazyass/lazy-config-file']);
+
 // Our 3rd agument is path to lazy.yaml (1st is node, 2nd is index.js)
 const lazyYamlPath = process.argv[2];
 LazyConfigFile.load(lazyYamlPath)
@@ -57,10 +61,6 @@ LazyConfigFile.load(lazyYamlPath)
         .then((logger) => {
             // Initialize the global logger.
             global.logger = logger;
-
-            // Capture log events from packages emitting log events.
-            redirectPackagesLogEvents(['@lazyass/engine-pipeline',
-                '@lazyass/lazy-config-file']);
 
             return Main.main(lazyConfig);
         })
