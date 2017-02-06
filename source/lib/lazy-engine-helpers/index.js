@@ -10,7 +10,7 @@ const initialize = () => {
 
     // Setup uncaught exception and unhandled promise rejection handling.
     process.on('uncaughtException', (err) => {
-        global.logger.error('Uncaught exception', { err: err && err.toString() }, () => {
+        global.logger.error('Uncaught exception', err, { err: err && err.toString() }, () => {
             process.exit(-1001);
         });
     });
