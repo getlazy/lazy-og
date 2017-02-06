@@ -20,8 +20,8 @@ describe('LazyPrivateApiClient', function () {
 
     describe('getEngineConfig', function () {
         it('works', function () {
-            const client = new LazyPrivateApiClient('x', 'y');
-            td.when(td.replace(client, '_makeRequest')('GET', 'config', { engineId: 'y' }))
+            const client = new LazyPrivateApiClient('test-engine-id', 'test-lazy-url');
+            td.when(td.replace(client, '_makeRequest')('GET', 'config', { engineId: 'test-engine-id' }))
                 .thenResolve({
                     test: 'config'
                 });
@@ -35,7 +35,7 @@ describe('LazyPrivateApiClient', function () {
 
     describe('execInEngineHelperContainer', function () {
         it('works', function () {
-            const client = new LazyPrivateApiClient('http://getlazy.org', 'test-engine-id');
+            const client = new LazyPrivateApiClient('test-engine-id', 'http://getlazy.org');
             td.when(td.replace(client, '_makeRequest')(
                 'POST', 'exec-in-engine-helper-container', undefined, {
                     engineId: 'test-engine-id',
@@ -57,7 +57,7 @@ describe('LazyPrivateApiClient', function () {
 
     describe('_makeRequest', function () {
         it('correctly uses lazy URL', function () {
-            const client = new LazyPrivateApiClient('http://getlazy.org', 'test-engine-id');
+            const client = new LazyPrivateApiClient('test-engine-id', 'http://getlazy.org');
             td.when(td.replace(LazyPrivateApiClient, '_issueRequest')({
                 method: 'POST',
                 url: 'http://getlazy.org/exec-in-engine-helper-container',

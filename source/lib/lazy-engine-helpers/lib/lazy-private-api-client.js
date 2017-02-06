@@ -5,10 +5,10 @@ const url = require('url');
 const request = require('request-promise-native');
 
 class LazyPrivateApiClient {
-    constructor(lazyPrivateApiUrl = process.env.LAZY_PRIVATE_API_URL,
-        engineId = process.env.LAZY_ENGINE_ID) {
-        this._apiUrl = lazyPrivateApiUrl;
+    constructor(engineId = process.env.LAZY_ENGINE_ID,
+        lazyPrivateApiUrl = process.env.LAZY_PRIVATE_API_URL) {
         this._engineId = engineId;
+        this._apiUrl = lazyPrivateApiUrl;
     }
 
     getEngineConfig() {
