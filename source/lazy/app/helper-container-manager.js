@@ -60,7 +60,9 @@ class HelperContainerManager {
                 return HelperContainerManager._createContainer(createParams);
             })
             .then(container => container.start()
-                .then(_.constant(container.id)));
+                .then(_.constant(container.id)))
+                .catch(err => Promise.reject(new errors.HttpStatusError(
+                        500, `create failed with ${err && err.message}`)));
     }
 
     static execInContainer(containerId, execParams) {

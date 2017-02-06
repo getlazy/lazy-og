@@ -29,12 +29,12 @@ describe('HelperContainerManager', function () {
                 assert.equal(params.Image, 'test-image');
                 assert.deepEqual(_.get(params, 'HostConfig.Binds'), ['test-volume:/lazy']);
                 assert.deepEqual(_.get(params, 'Labels'), {
-                    'org.getlazy.lazy.helper-container-manager.owned': 'true'
+                    'org.getlazy.lazy.engine-manager.owner.lazy-id': 'test-lazy-id'
                 });
                 return true;
             }))).thenResolve(container);
 
-            return HelperContainerManager.createContainer({}, 'test-image', 'test-volume')
+            return HelperContainerManager.createContainer('test-lazy-id', {}, 'test-image', 'test-volume')
                 .then((createdContainerId) => {
                     assert.equal(createdContainerId, containerId);
                 });
@@ -50,71 +50,20 @@ describe('HelperContainerManager', function () {
                 assert.equal(params.Image, 'test-image');
                 assert.deepEqual(_.get(params, 'HostConfig.Binds'), ['test-volume:/lazy']);
                 assert.deepEqual(_.get(params, 'Labels'), {
-                    'org.getlazy.lazy.helper-container-manager.owned': 'true'
+                    'org.getlazy.lazy.engine-manager.owner.lazy-id': 'test-lazy-id'
                 });
                 return true;
             }))).thenResolve(container);
 
-            HelperContainerManager.createContainer({}, 'test-image', 'test-volume')
+            HelperContainerManager.createContainer('test-lazy-id', {}, 'test-image', 'test-volume')
                 .catch((err) => {
+                    console.log(err);
                     assert.equal(err.statusCode, 500);
                     assert.equal(err.message, 'create failed with test-error');
                     //  Use done to ensure that catch was invoked.
                     done();
-                });
-        });
-    });
-
-    describe('deleteContainer', function () {
-        it('works', function () {
-            const containerId = 'test-container-id';
-            const container = td.object(['status', 'stop', 'wait', 'delete']);
-            td.when(container.status()).thenResolve({
-                Config: {
-                    Labels: {
-                        'org.getlazy.lazy.helper-container-manager.owned': 'true'
-                    }
-                }
-            });
-            td.when(container.stop()).thenResolve();
-            td.when(container.wait()).thenResolve();
-            td.when(container.delete()).thenResolve();
-            container.id = containerId;
-
-            td.when(td.replace(HelperContainerManager, '_getContainerForNameOrId')(containerId))
-                .thenResolve(container);
-
-            return HelperContainerManager.deleteContainer(containerId)
-                .then((deletedContainerId) => {
-                    assert.equal(deletedContainerId, containerId);
-                });
-        });
-
-        it('returns 500 on any error', function (done) {
-            const containerId = 'test-container-id';
-            const container = td.object(['status', 'stop', 'wait', 'delete']);
-            td.when(container.status()).thenResolve({
-                Config: {
-                    Labels: {
-                        'org.getlazy.lazy.helper-container-manager.owned': 'true'
-                    }
-                }
-            });
-            td.when(container.stop()).thenResolve();
-            td.when(container.wait()).thenResolve();
-            td.when(container.delete()).thenReject(new Error('test-error'));
-            container.id = containerId;
-
-            td.when(td.replace(HelperContainerManager, '_getContainerForNameOrId')(containerId))
-                .thenResolve(container);
-
-            HelperContainerManager.deleteContainer(containerId)
-                .catch((err) => {
-                    assert.equal(err.statusCode, 500);
-                    assert.equal(err.message, 'delete failed with test-error');
-                    //  Use done to ensure that catch was invoked.
-                    done();
-                });
+                })
+                .catch(done);
         });
     });
 
@@ -125,7 +74,7 @@ describe('HelperContainerManager', function () {
             td.when(container.status()).thenResolve({
                 Config: {
                     Labels: {
-                        'org.getlazy.lazy.helper-container-manager.owned': 'true'
+                        'org.getlazy.lazy.engine-manager.owner.lazy-id': 'true'
                     }
                 }
             });
@@ -154,7 +103,7 @@ describe('HelperContainerManager', function () {
             td.when(container.status()).thenResolve({
                 Config: {
                     Labels: {
-                        'org.getlazy.lazy.helper-container-manager.owned': 'true'
+                        'org.getlazy.lazy.engine-manager.owner.lazy-id': 'true'
                     }
                 }
             });
@@ -176,7 +125,8 @@ describe('HelperContainerManager', function () {
                     assert.equal(err.message, 'exec failed with test-error');
                     //  Use done to ensure that catch was invoked.
                     done();
-                });
+                })
+                .catch(done);
         });
     });
 
@@ -191,28 +141,8 @@ describe('HelperContainerManager', function () {
                     assert.equal(err.statusCode, 404);
                     //  Use done to ensure that catch was invoked.
                     done();
-                });
-        });
-
-        it('returns 403 on unowned container ID', function (done) {
-            const containerId = 'test-container-id';
-            const container = td.object(['status']);
-            td.when(container.status()).thenResolve({
-                Config: {
-                    Labels: {
-                        'org.getlazy.lazy.helper-container-manager.owned': 'corrupted'
-                    }
-                }
-            });
-            td.when(td.replace(HelperContainerManager, '_getContainerForNameOrId')(containerId))
-                .thenResolve(container);
-
-            HelperContainerManager._findContainer(containerId)
-                .catch((err) => {
-                    assert.equal(err.statusCode, 403);
-                    //  Use done to ensure that catch was invoked.
-                    done();
-                });
+                })
+                .catch(done);
         });
     });
 });
