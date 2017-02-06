@@ -125,8 +125,6 @@ And in the engine code we then monitor for `SIGTERM` signal and try to gracefull
 
 ### Helper containers
 
-lazy binds Docker socket to all engines it is running so all engines have full access to Docker daemon on the process. This is clearly a security concern but considering that lazy on its own is meant to be run only locally and that all engines running on it are fully controlled by the user, this lessens the concerns.
-
 To create helper containers (which we often do in our official engines), you can use [lazy-engine-helpers](https://github.com/getlazy/lazy-engine-helpers) Node module.
 
 ## lazy.yaml
