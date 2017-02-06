@@ -32,7 +32,7 @@ const promisifyStream = stream => new Promise((resolve, reject) => {
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
-fs.readFile('/sources/metadata.json', (err, metadata) => {
+fs.readFile('/sources/image-metadata.json', (err, metadata) => {
     if (!err && metadata) {
         // Normalize JSON.
         try {
