@@ -68,7 +68,16 @@ class PhpLEngineHttpServer extends EngineHttpServer {
 
     analyzeFile(...args) {
         //  Pass forward the arguments to the engine.
-        return this._helperContainer.analyzeFile(...args);
+        return this._helperContainer.analyzeFile(...args)
+            .then((result) => {
+                // Mark the code as checked.
+                _.assignIn(result, {
+                    status: {
+                        codeChecked: true
+                    }
+                });
+                return result;
+            });
     }
 
     afterListening() {
