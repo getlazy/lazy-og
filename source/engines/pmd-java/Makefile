@@ -3,7 +3,7 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 YARN_CACHE_DIR=$(shell yarn cache dir || echo $(shell pwd)/.yarn-cache)
 
 build:
-	docker run --rm -it \
+	docker run --rm \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v "$(shell pwd):/sources" \
 		-v "$(YARN_CACHE_DIR):/usr/local/share/.cache/yarn" \
