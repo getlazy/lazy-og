@@ -16,11 +16,18 @@ const errorResponse = (res, err) => {
 const initialize = (app, options) => {
     engineManager = options.engineManager;
 
-    app.post('/helper-container/exec', (req, res) => {
+    app.post('/exec-in-engine-helper-container', (req, res) => {
+        const engineId = _.get(req, 'body.engineId');
         const helperId = _.get(req, 'body.helperId');
         const execParams = _.get(req, 'body.execParams');
 
-        engineManager.execInHelperContainer(helperId, execParams)
+        if (_.isEmpty(engineId) || _.isEmpty(helperId) || _.isEmpty(execParams)) {
+            logger.error('Bad exec-in-engine-helper-container request', { params: { engineId, helperId, execParams } });
+            res.status(400).send();
+            return;
+        }
+
+        engineManager.execInEngineHelperContainer(engineId, helperId, execParams)
             .then(output => res.send(output))
             .catch(_.curry(errorResponse)(res));
     });

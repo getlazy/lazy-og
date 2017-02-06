@@ -9,8 +9,8 @@ const initialize = (app, options) => {
     //  TODO: See https://github.com/getlazy/lazy/issues/44 for proposal to change
     //  this endpoint.
     app.get('/config', (req, res) => {
-        const engineName = _.toLower(_.get(req, 'query.engine'));
-        const engineConfig = _.get(options, `config.engines.${engineName}`);
+        const engineId = _.toLower(_.get(req, 'query.engineId'));
+        const engineConfig = _.get(options, `config.engines.${engineId}`);
 
         if (_.isNil(engineConfig)) {
             res.sendStatus(404);
