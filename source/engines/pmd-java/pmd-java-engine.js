@@ -11,17 +11,14 @@ const EngineHelpers = require('@lazyass/engine-helpers');
 const HelperContainer = EngineHelpers.HelperContainer;
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
-const REPOSITORY_AUTH = JSON.parse(
-    H.unless(H.isNonEmptyString, '{}', process.env.LAZY_REPOSITORY_AUTH_JSON));
-
-const LAZY_VOLUME_NAME = process.env.LAZY_VOLUME_NAME;
-
-const HELPER_CONTAINER_IMAGE_NAME = 'codacy/codacy-pmdjava:1.0.114';
-
 //  We are implicitly using `this` in overridden methods but eslint keep telling us not to.
-/* eslint class-methods-use-this: off */
-class PmdJavaHelperContainer extends HelperContainer
-{
+// lazy ignore class-methods-use-this
+class PmdJavaHelperContainer extends HelperContainer {
+    constructor() {
+        // Per image-metadata our helper container ID is pmd-java.
+        super('pmd-java');
+    }
+
     _getBaseContainerExecParams() {
         return {
             User: 'root',
@@ -73,16 +70,10 @@ class PmdJavaHelperContainer extends HelperContainer
     }
 }
 
-class PmdJavaEngineHttpServer extends EngineHttpServer
-{
+class PmdJavaEngineHttpServer extends EngineHttpServer {
     beforeListening() {
-        return HelperContainer
-            .createContainer(REPOSITORY_AUTH, HELPER_CONTAINER_IMAGE_NAME, LAZY_VOLUME_NAME)
-            .then((containerId) => {
-                //  Assume that the container has started correctly.
-                this._containerId = containerId;
-                this._helperContainer = new PmdJavaHelperContainer(containerId);
-            });
+        this._helperContainer = new PmdJavaHelperContainer();
+        return Promise.resolve();
     }
 
     getMeta() {
@@ -93,25 +84,25 @@ class PmdJavaEngineHttpServer extends EngineHttpServer
 
     analyzeFile(...args) {
         //  Pass forward the arguments to the engine.
-        return this._helperContainer.analyzeFile(...args);
+        return this._helperContainer.analyzeFile(...args)
+            .then((result) => {
+                // Mark the code as checked.
+                _.assignIn(result, {
+                    status: {
+                        codeChecked: true
+                    }
+                });
+                return result;
+            });
     }
 
     afterListening() {
         this._helperContainer = null;
-
-        //  Prevent trying to stop the same container twice.
-        if (this._containerId) {
-            const containerId = this._containerId;
-            this._containerId = null;
-            return HelperContainer.deleteContainer(containerId);
-        }
-
         return Promise.resolve();
     }
 }
 
-class Engine
-{
+class Engine {
     start() {
         const port = process.env.PORT || 80;
         this._server = new PmdJavaEngineHttpServer(port);
