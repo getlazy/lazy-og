@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/getlazy/lazy-yaml-engine#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^3.2.1",
+    "@lazyass/engine-helpers": "^6.0.0",
     "js-yaml": "^3.7.0",
     "lodash": "^4.17.3",
     "path": "^0.12.7"
