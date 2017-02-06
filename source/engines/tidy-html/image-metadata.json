@@ -1,0 +1,7 @@
+{
+    "helper_containers": {
+        "tidy_html": {
+            "image": "getlazy/tidy-html:5.2.0"
+        }
+    }
+}

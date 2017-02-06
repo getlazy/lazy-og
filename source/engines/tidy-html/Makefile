@@ -1,12 +1,16 @@
 
 PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
+YARN_CACHE_DIR=$(shell yarn cache dir || echo $(shell pwd)/.yarn-cache)
 
 build:
-	docker build \
-		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t getlazy/tidy-html-engine:$(PACKAGE_VERSION) \
-		-t getlazy/tidy-html-engine:latest \
-		.
+	docker run --rm -it \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v "$(shell pwd):/sources" \
+		-v "$(YARN_CACHE_DIR):/usr/local/share/.cache/yarn" \
+		--env NPM_TOKEN=${NPM_TOKEN} \
+		getlazy/engine-docker-builder:latest \
+		getlazy/tidy-html-engine:$(PACKAGE_VERSION) \
+		getlazy/tidy-html-engine:latest
 
 push:
 	docker push getlazy/tidy-html-engine:$(PACKAGE_VERSION)
