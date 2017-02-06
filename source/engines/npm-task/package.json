@@ -4,8 +4,7 @@
   "description": "Engine capable of running simple tasks from external NPMs",
   "main": "index.js",
   "scripts": {
-    "test": "mocha -r test/bootstrap",
-    "preversion": "make build"
+    "test": "mocha -r test/bootstrap"
   },
   "repository": {
     "type": "git",
