@@ -48,7 +48,11 @@ fs.readFile('/sources/metadata.json', (err, metadata) => {
     }
 
     const tarStream = tar.pack('/sources', {
-        ignore: name => dockerIgnore.denies(_.trimStart(name, '/sources/'))
+        ignore: (name) => {
+            const relativeName = _.trimStart(name, '/sources/');
+            // Never ignore Dockerfile - we need it.
+            return relativeName !== 'Dockerfile' && dockerIgnore.denies(relativeName);
+        }
     });
     const buildTag = _.head(tags);
     const buildParams = {
