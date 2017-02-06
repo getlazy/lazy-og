@@ -11,8 +11,7 @@ const LAZY_API_VERSION = 'v20161217';
 /**
  * Client for lazy API v20161217.
  */
-class LazyClientv20161217 extends LazyClient
-{
+class LazyClientv20161217 extends LazyClient {
     /**
      * Returns the lazy API version with which this client works.
      */
@@ -25,15 +24,15 @@ class LazyClientv20161217 extends LazyClient
      * @param {string} serviceUrl URL to lazy service.
      * @param {string} client Name of the client (e.g. "atom") which is instantiating this object.
      * @param {string} stackId ID of lazy stack assined to this client by lazy service.
-     * @param {string} host Optional name of the host on which this object is running, defaults to
+     * @param {string} hostname Optional name of the host on which this object is running, defaults to
      * `os.hostname()`
      */
-    constructor(serviceUrl, client, stackId, host) {
+    constructor(serviceUrl, client, stackId, hostname) {
         super();
         this._serviceUrl = serviceUrl;
         this._client = client;
         this._stackId = stackId;
-        this._host = host || os.hostname();
+        this._hostname = hostname || os.hostname();
     }
 
     /**
@@ -61,7 +60,7 @@ class LazyClientv20161217 extends LazyClient
                 language,
                 content,
                 context: {
-                    host: self._host,
+                    hostname: self._hostname,
                     client: self._client
                 }
             }
