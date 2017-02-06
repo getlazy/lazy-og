@@ -21,7 +21,7 @@ describe('LazyPrivateApiClient', function () {
     describe('getEngineConfig', function () {
         it('works', function () {
             const client = new LazyPrivateApiClient('x', 'y');
-            td.when(td.replace(client, '_makeRequest')('GET', 'config', { engine: 'y' }))
+            td.when(td.replace(client, '_makeRequest')('GET', 'config', { engineId: 'y' }))
                 .thenResolve({
                     test: 'config'
                 });
@@ -33,11 +33,12 @@ describe('LazyPrivateApiClient', function () {
         });
     });
 
-    describe('execInHelperContainer', function () {
+    describe('execInEngineHelperContainer', function () {
         it('works', function () {
-            const client = new LazyPrivateApiClient('x', 'y');
+            const client = new LazyPrivateApiClient('http://getlazy.org', 'test-engine-id');
             td.when(td.replace(client, '_makeRequest')(
-                'POST', 'helper-container/exec', undefined, {
+                'POST', 'exec-in-engine-helper-container', undefined, {
+                    engineId: 'test-engine-id',
                     helperId: 'test-helper-id',
                     execParams: {
                         test: 'exec'
@@ -46,7 +47,7 @@ describe('LazyPrivateApiClient', function () {
             )
                 .thenResolve(['test', 'output']);
 
-            return client.execInHelperContainer('test-helper-id', { test: 'exec' })
+            return client.execInEngineHelperContainer('test-helper-id', { test: 'exec' })
                 .then((output) => {
                     assert.equal(output[0], 'test');
                     assert.equal(output[1], 'output');
@@ -56,15 +57,16 @@ describe('LazyPrivateApiClient', function () {
 
     describe('_makeRequest', function () {
         it('correctly uses lazy URL', function () {
-            const client = new LazyPrivateApiClient('http://x.y', 'z');
+            const client = new LazyPrivateApiClient('http://getlazy.org', 'test-engine-id');
             td.when(td.replace(LazyPrivateApiClient, '_issueRequest')({
                 method: 'POST',
-                url: 'http://x.y/helper-container/exec',
+                url: 'http://getlazy.org/exec-in-engine-helper-container',
                 json: true,
                 headers: {
                     Accept: 'application/json'
                 },
                 body: {
+                    engineId: 'test-engine-id',
                     helperId: 'test-helper-id',
                     execParams: {
                         test: 'exec'
@@ -74,7 +76,7 @@ describe('LazyPrivateApiClient', function () {
             }))
                 .thenResolve(['test', 'output']);
 
-            return client.execInHelperContainer('test-helper-id', { test: 'exec' })
+            return client.execInEngineHelperContainer('test-helper-id', { test: 'exec' })
                 .then((output) => {
                     assert.equal(output[0], 'test');
                     assert.equal(output[1], 'output');

@@ -6,17 +6,17 @@ const request = require('request-promise-native');
 
 class LazyPrivateApiClient {
     constructor(lazyPrivateApiUrl = process.env.LAZY_PRIVATE_API_URL,
-        engineName = process.env.LAZY_ENGINE_NAME) {
+        engineId = process.env.LAZY_ENGINE_ID) {
         this._apiUrl = lazyPrivateApiUrl;
-        this._engineName = engineName;
+        this._engineId = engineId;
     }
 
     getEngineConfig() {
-        return this._makeGetRequest('config', { engine: this._engineName });
+        return this._makeGetRequest('config', { engineId: this._engineId });
     }
 
-    execInHelperContainer(helperId, execParams) {
-        return this._makePostRequest('helper-container/exec', { helperId, execParams });
+    execInEngineHelperContainer(helperId, execParams) {
+        return this._makePostRequest('exec-in-engine-helper-container', { engineId: this._engineId, helperId, execParams });
     }
 
     _makePostRequest(path, body, qs) {

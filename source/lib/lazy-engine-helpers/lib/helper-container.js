@@ -29,7 +29,8 @@ class HelperContainer {
      * @param {string} helperId ID of the helper container on which to execute analysis as it
      * appears in lazy configuration.
      */
-    constructor(helperId) {
+    constructor(engineId, helperId) {
+        this._engineId = engineId;
         this._helperId = helperId;
     }
 
@@ -143,7 +144,7 @@ class HelperContainer {
                 execParams.Cmd = execParams.Cmd
                     .concat(`${TEMPORARY_DIR_LAZY_PATH}/${path.basename(temporaryFileInfo.path)}`);
 
-                return HelperContainer._execInContainer(self._helperId, execParams);
+                return HelperContainer._execInContainer(self._engineId, self._helperId, execParams);
             })
             //  Delegate the processing of the output to inheriting classes.
             .then((containerOutput) => {
@@ -195,7 +196,7 @@ class HelperContainer {
         // istanbul ignore next
         const client = new LazyPrivateApiClient();
         // istanbul ignore next
-        return client.execInHelperContainer(...args);
+        return client.execInEngineHelperContainer(...args);
     }
 
     /**

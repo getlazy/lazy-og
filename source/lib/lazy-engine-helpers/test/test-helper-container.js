@@ -22,15 +22,14 @@ describe('HelperContainer', function () {
     describe('Object methods', function () {
         describe('analyzeFile', function () {
             it('ensures Cmd params are an array', function () {
-                const container = td.object({});
-                const helperContainer = new HelperContainer(container);
+                const helperContainer = new HelperContainer('test-engine-id', 'test-helper-id');
                 let _execInContainerInvoked = false;
                 td.when(td.replace(HelperContainer, '_mkdirp')()).thenResolve();
                 td.when(td.replace(HelperContainer, '_createTempFileWithContent')(
                     'content', 'hostPath')).thenResolve({
                         path: 'temp-test-path'
                     });
-                td.when(td.replace(HelperContainer, '_execInContainer')(container, td.matchers.argThat((execParams) => {
+                td.when(td.replace(HelperContainer, '_execInContainer')('test-engine-id', 'test-helper-id', td.matchers.argThat((execParams) => {
                     assert(execParams);
                     assert(_.isArray(execParams.Cmd));
                     _execInContainerInvoked = true;
@@ -46,8 +45,6 @@ describe('HelperContainer', function () {
             });
 
             it('uses _getBaseContainerExecParams if available', function () {
-                const container = td.object({});
-
                 class TestHelperContainer extends HelperContainer {
                     _getBaseContainerExecParams() {
                         return {
@@ -57,14 +54,14 @@ describe('HelperContainer', function () {
                     }
                 }
 
-                const helperContainer = new TestHelperContainer(container);
+                const helperContainer = new TestHelperContainer('test-engine-id', 'test-helper-id');
                 let _execInContainerInvoked = false;
                 td.when(td.replace(HelperContainer, '_mkdirp')()).thenResolve();
                 td.when(td.replace(HelperContainer, '_createTempFileWithContent')(
                     'content', 'hostPath')).thenResolve({
                         path: 'temp-test-path'
                     });
-                td.when(td.replace(HelperContainer, '_execInContainer')(container, td.matchers.argThat((execParams) => {
+                td.when(td.replace(HelperContainer, '_execInContainer')('test-engine-id', 'test-helper-id', td.matchers.argThat((execParams) => {
                     assert(execParams);
                     assert.equal(execParams.Entrypoint, 'test-entrypoint');
                     assert(_.isArray(execParams.Cmd));
@@ -85,22 +82,20 @@ describe('HelperContainer', function () {
             });
 
             it('uses _getContainerEntrypoint if available', function () {
-                const container = td.object({});
-
                 class TestHelperContainer extends HelperContainer {
                     _getContainerEntrypoint() {
                         return 'test-entrypoint';
                     }
                 }
 
-                const helperContainer = new TestHelperContainer(container);
+                const helperContainer = new TestHelperContainer('test-engine-id', 'test-helper-id');
                 let _execInContainerInvoked = false;
                 td.when(td.replace(HelperContainer, '_mkdirp')()).thenResolve();
                 td.when(td.replace(HelperContainer, '_createTempFileWithContent')(
                     'content', 'hostPath')).thenResolve({
                         path: 'temp-test-path'
                     });
-                td.when(td.replace(HelperContainer, '_execInContainer')(container, td.matchers.argThat((execParams) => {
+                td.when(td.replace(HelperContainer, '_execInContainer')('test-engine-id', 'test-helper-id', td.matchers.argThat((execParams) => {
                     assert(execParams);
                     assert.equal(execParams.Entrypoint, 'test-entrypoint');
                     assert(_.isArray(execParams.Cmd));
@@ -119,22 +114,20 @@ describe('HelperContainer', function () {
             });
 
             it('uses _getContainerCmd if available', function () {
-                const container = td.object({});
-
                 class TestHelperContainer extends HelperContainer {
                     _getContainerCmd() {
                         return ['test-arg0', 'test-arg1'];
                     }
                 }
 
-                const helperContainer = new TestHelperContainer(container);
+                const helperContainer = new TestHelperContainer('test-engine-id', 'test-helper-id');
                 let _execInContainerInvoked = false;
                 td.when(td.replace(HelperContainer, '_mkdirp')()).thenResolve();
                 td.when(td.replace(HelperContainer, '_createTempFileWithContent')(
                     'content', 'hostPath')).thenResolve({
                         path: 'temp-test-path'
                     });
-                td.when(td.replace(HelperContainer, '_execInContainer')(container, td.matchers.argThat((execParams) => {
+                td.when(td.replace(HelperContainer, '_execInContainer')('test-engine-id', 'test-helper-id', td.matchers.argThat((execParams) => {
                     assert(execParams);
                     assert(_.isUndefined(execParams.Entrypoint));
                     assert(_.isArray(execParams.Cmd));
@@ -155,8 +148,6 @@ describe('HelperContainer', function () {
             });
 
             it('uses _processContainerOutput if available', function () {
-                const container = td.object({});
-
                 class TestHelperContainer extends HelperContainer {
                     _processContainerOutput() {
                         return {
@@ -169,14 +160,14 @@ describe('HelperContainer', function () {
                     }
                 }
 
-                const helperContainer = new TestHelperContainer(container);
+                const helperContainer = new TestHelperContainer('test-engine-id', 'test-helper-id');
                 td.when(td.replace(HelperContainer, '_mkdirp')()).thenResolve();
                 td.when(td.replace(HelperContainer, '_createTempFileWithContent')(
                     'content', 'hostPath')).thenResolve({
                         path: 'test-path'
                     });
                 td.when(td.replace(HelperContainer, '_execInContainer')(
-                    container, td.matchers.anything())).thenResolve([]);
+                    'test-engine-id', 'test-helper-id', td.matchers.anything())).thenResolve([]);
 
                 return helperContainer.analyzeFile('hostPath', 'language', 'content')
                     .then((results) => {
@@ -190,15 +181,14 @@ describe('HelperContainer', function () {
         });
 
         it('handles failures', function () {
-            const container = td.object({});
-            const helperContainer = new HelperContainer(container);
+            const helperContainer = new HelperContainer('test-engine-id', 'test-helper-id');
             td.when(td.replace(HelperContainer, '_mkdirp')()).thenResolve();
             td.when(td.replace(HelperContainer, '_createTempFileWithContent')(
                 'content', 'hostPath')).thenResolve({
                     path: 'temp-test-path'
                 });
             td.when(td.replace(HelperContainer, '_execInContainer')(
-                container, td.matchers.anything())).thenReject(new Error('test-error'));
+                'test-engine-id', 'test-helper-id', td.matchers.anything())).thenReject(new Error('test-error'));
 
             return helperContainer.analyzeFile('hostPath', 'language', 'content')
                 .catch((err) => {
