@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/getlazy/lazy-file-stats-engine#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^3.2.1",
+    "@lazyass/engine-helpers": "^6.0.0",
     "lodash": "^4.17.2",
     "lowdb": "^0.14.0",
     "mkdirp": "^0.5.1"
