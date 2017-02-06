@@ -1,6 +1,6 @@
 {
     "helper_containers": {
-        "tidy_html": {
+        "tidy-html": {
             "image": "getlazy/tidy-html:5.2.0"
         }
     }

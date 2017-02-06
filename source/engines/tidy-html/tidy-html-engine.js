@@ -12,11 +12,11 @@ const HelperContainer = EngineHelpers.HelperContainer;
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
 //  We are implicitly using `this` in overridden methods but eslint keep telling us not to.
-/* eslint class-methods-use-this: off */
+// lazy ignore class-methods-use-this
 class TidyHtmlHelperContainer extends HelperContainer {
     constructor() {
-        // Per image-metadata our helper container ID is tidy_html.
-        super('tidy_html');
+        // Per image-metadata our helper container ID is tidy-html.
+        super('tidy-html');
     }
 
     _getContainerCmd() {
@@ -82,14 +82,6 @@ class TidyHtmlEngineHttpServer extends EngineHttpServer {
 
     afterListening() {
         this._helperContainer = null;
-
-        //  Prevent trying to stop the same container twice.
-        if (this._containerId) {
-            const containerId = this._containerId;
-            this._containerId = null;
-            return HelperContainer.deleteContainer(containerId);
-        }
-
         return Promise.resolve();
     }
 }
