@@ -11,9 +11,11 @@ const HigherDockerManager = require('higher-docker-manager');
 const Engine = require('./engine');
 const ip = require('ip');
 const HelperContainerManager = require('./helper-container-manager');
+const JSONparse = require('try-json-parse');
 
 const Label = {
-    OrgGetlazyLazyEngineManagerOwner: 'org.getlazy.lazy.engine-manager.owner'
+    OrgGetlazyLazyEngineManagerOwnerLazyId: 'org.getlazy.lazy.engine-manager.owner.lazy-id',
+    OrgGetlazyLazyEngineImageMetadataJson: 'org.getlazy.lazy.engine.image-metadata.json'
 };
 
 /**
@@ -26,6 +28,7 @@ class EngineManager {
         this._container = null;
         this._volume = null;
         this._isRunning = false;
+        this._engineHelperContainers = {};
 
         //  Resolve the repository auth since its values are kept in the lazy's process environment.
         this._repositoryAuth = EngineManager._resolveRepositoryAuthValues(this._config);
@@ -41,20 +44,17 @@ class EngineManager {
     }
 
     start() {
+        if (this._isRunning) {
+            logger.warn('EngineManager is already running.');
+            return Promise.resolve();
+        }
+
         return Promise.all([
             EngineManager._getOwnContainer().then(container => container.status()),
             this._findLazyVolumeOrCreateIt()])
             .then((results) => {
                 [this._container, this._volume] = results;
                 return this._deleteOwnedContainers();
-            })
-            .then(() => this._createHelperContainers())
-            .then((helperContainersPairs) => {
-                this._helperContainers = {};
-                // Convert the array of pairs into a map.
-                _.forEach(helperContainersPairs, ({ containerId, helperId }) => {
-                    this._helperContainers[helperId] = containerId;
-                });
             })
             .then(() => this._createEngineContainers())
             .then((engines) => {
@@ -88,8 +88,8 @@ class EngineManager {
         return this._uiEngine;
     }
 
-    execInHelperContainer(helperId, execParams) {
-        const containerId = this._helperContainers[helperId];
+    execInEngineHelperContainer(engineId, helperId, execParams) {
+        const containerId = _.get(this._engineHelperContainers, `${engineId}.${helperId}`);
         // HelperContainerManager handles unknown container IDs.
         return EngineManager._execInContainer(containerId, execParams);
     }
@@ -98,15 +98,33 @@ class EngineManager {
         const self = this;
 
         return Promise.all(_.map(self._config.engines,
-            (engineConfig, engineName) => self._createEngineContainer(engineName, engineConfig)));
+            (engineConfig, engineId) => self._createEngineContainer(engineId, engineConfig)));
     }
 
-    _createEngineContainer(engineName, engineConfig) {
+    _createEngineContainer(engineId, engineConfig) {
         const self = this;
 
         const imageName = engineConfig.image;
-        logger.info('Pulling image', { engine: engineName, image: imageName });
+        logger.info('Pulling image', { engineId, image: imageName });
         return EngineManager._pullImage(self._repositoryAuth, imageName)
+            .then((image) => {
+                // Create engine's helper containers from the labels the image has and any additional ones
+                // specified in the engine's configuration.
+                const imageMetadata = _.assign(
+                    JSONparse(_.get(image, `Config.Labels.${Label.OrgGetlazyLazyEngineImageMetadataJson}`)),
+                    JSONparse(_.get(engineConfig.labels, Label.OrgGetlazyLazyEngineImageMetadataJson)));
+                if (_.isObject(imageMetadata) && _.isObject(imageMetadata.helper_containers)) {
+                    return this._createHelperContainers(imageMetadata.helper_containers)
+                        .then((helperContainersPairs) => {
+                            // Convert the array of pairs into a map.
+                            _.forEach(helperContainersPairs, ({ containerId, helperId }) => {
+                                _.set(this._engineHelperContainers, `${engineId}.${helperId}`, containerId);
+                            });
+                        });
+                }
+
+                return Promise.resolve();
+            })
             .then(() => {
                 const createEngineParams = {
                     Image: imageName,
@@ -120,7 +138,7 @@ class EngineManager {
                             importEnvvar => `${importEnvvar}=${process.env[importEnvvar]}`),
                         [
                             `LAZY_HOSTNAME=${_.get(self._container, 'Config.Hostname')}`,
-                            `LAZY_ENGINE_NAME=${engineName}`,
+                            `LAZY_ENGINE_ID=${engineId}`,
                             `LAZY_SERVICE_URL=${selectn('_config.service_url', self)}`,
                             `LAZY_PRIVATE_API_URL=${url.format({
                                 protocol: 'http',
@@ -128,10 +146,10 @@ class EngineManager {
                                 port: self._config.privateApiPort
                             })}`,
                             //  TODO: Fix this as special engines like UI don't follow this URL pattern.
-                            `LAZY_ENGINE_URL=${selectn('_config.service_url', self)}/engine/${engineName}`,
+                            `LAZY_ENGINE_URL=${selectn('_config.service_url', self)}/engine/${engineId}`,
                             `LAZY_VOLUME_NAME=${self._volume.Name}`,
                             'LAZY_VOLUME_MOUNT=/lazy',
-                            `LAZY_ENGINE_SANDBOX_DIR=/lazy/sandbox/${engineName}`
+                            `LAZY_ENGINE_SANDBOX_DIR=/lazy/sandbox/${engineId}`
                         ],
                         _.isInteger(engineConfig.port) ? [`PORT=${engineConfig.port}`] : []),
                     HostConfig: {
@@ -146,19 +164,16 @@ class EngineManager {
                         }
                     },
                     WorkingDir: engineConfig.working_dir,
-                    Labels: {}
+                    Labels: H.unless(_.isObject, {}, engineConfig.labels)
                 };
-                createEngineParams.Labels[Label.OrgGetlazyLazyEngineManagerOwner] = self._id;
+                createEngineParams.Labels[Label.OrgGetlazyLazyEngineManagerOwnerLazyId] = self._id;
 
-                logger.info('Creating engine', {
-                    engine: engineName,
-                    volume: self._volume.Name
-                });
+                logger.info('Creating engine', { engineId, volume: self._volume.Name });
                 return EngineManager._createContainer(createEngineParams);
             })
             .then(engineContainer =>
                 engineContainer.start()
-                    .then(() => new Engine(engineName, engineContainer, engineConfig))
+                    .then(() => new Engine(engineId, engineContainer, engineConfig))
             )
             .then(engine => engine.start().then(_.constant(engine)));
     }
@@ -176,13 +191,13 @@ class EngineManager {
             });
     }
 
-    _createHelperContainers() {
-        return Promise.all(_.map(this._config.helper_containers,
+    _createHelperContainers(helperContainers) {
+        return Promise.all(_.map(helperContainers,
             (helperConfig, helperId) => this._createHelperContainer(helperId, helperConfig)));
     }
 
     _findLazyVolumeOrCreateIt() {
-        return EngineManager._getVolumesForLabel(Label.OrgGetlazyLazyEngineManagerOwner, this._id)
+        return EngineManager._getVolumesForLabel(Label.OrgGetlazyLazyEngineManagerOwnerLazyId, this._id)
             .then((volumes) => {
                 if (!_.isEmpty(volumes)) {
                     return _.head(volumes);
@@ -194,7 +209,7 @@ class EngineManager {
                     Labels: {}
                 };
                 //  Add the label to later use it to find this container.
-                volumeCreateParams.Labels[Label.OrgGetlazyLazyEngineManagerOwner] = this._id;
+                volumeCreateParams.Labels[Label.OrgGetlazyLazyEngineManagerOwnerLazyId] = this._id;
 
                 return EngineManager._createVolume(volumeCreateParams);
             });
@@ -205,7 +220,7 @@ class EngineManager {
 
         // Stop/wait/delete all containers owned by this lazy (equivalence determined by ID)
         // which includes engines and helper containers.
-        return EngineManager._getContainersForLabel(Label.OrgGetlazyLazyEngineManagerOwner, self._id)
+        return EngineManager._getContainersForLabel(Label.OrgGetlazyLazyEngineManagerOwnerLazyId, self._id)
             .then(containers =>
                 Promise.all(_.map(containers, (container) => {
                     logger.info('Stopping/waiting/deleting container',

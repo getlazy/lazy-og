@@ -8,7 +8,7 @@ const errors = require('common-errors');
 const HigherDockerManager = require('higher-docker-manager');
 
 const Label = {
-    OrgGetlazyLazyEngineManagerOwner: 'org.getlazy.lazy.engine-manager.owner'
+    OrgGetlazyLazyEngineManagerOwnerLazyId: 'org.getlazy.lazy.engine-manager.owner.lazy-id'
 };
 
 /**
@@ -55,7 +55,7 @@ class HelperContainerManager {
                 // Label helper container as owned by lazy with the given ID.
                 // This allows lazy instance to clean up this container either when shutting down
                 // or when starting (if it failed to clean it up during shutdown)
-                createParams.Labels[Label.OrgGetlazyLazyEngineManagerOwner] = lazyOwnerId;
+                createParams.Labels[Label.OrgGetlazyLazyEngineManagerOwnerLazyId] = lazyOwnerId;
 
                 return HelperContainerManager._createContainer(createParams);
             })
@@ -78,19 +78,7 @@ class HelperContainerManager {
                         404, 'container not found'));
                 }
 
-                return container.status()
-                    .then((containerStatus) => {
-                        //  If the container hasn't been created by HelperContainerManager
-                        //  refuse to execute anything on it.
-                        const labels = _.get(containerStatus, 'Config.Labels');
-                        if (!labels ||
-                            labels[Label.OrgGetlazyHelperContainerManagerOwned] !== 'true') {
-                            return Promise.reject(new errors.HttpStatusError(
-                                403, 'container not owned'));
-                        }
-
-                        return container;
-                    });
+                return Promise.resolve(container);
             });
     }
 
