@@ -9,7 +9,7 @@
   "author": "Nebojsa Lazic",
   "license": "MIT",
   "dependencies": {
-    "@lazyass/engine-helpers": "^3.2.2",
+    "@lazyass/engine-helpers": "^6.0.0",
     "lodash": "^4.17.4",
     "rewire": "^2.5.2"
   },
