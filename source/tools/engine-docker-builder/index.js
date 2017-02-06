@@ -13,6 +13,10 @@ const parser = require('gitignore-parser');
 const tags = process.argv.splice(2);
 const dockerIgnore = parser.compile(fs.readFileSync('/sources/.dockerignore', 'utf8'));
 
+process.on('uncaughtException', (err) => {
+    console.error(err);
+});
+
 const promisifyStream = stream => new Promise((resolve, reject) => {
     stream.on('data', (buffer) => {
         try {
@@ -61,7 +65,7 @@ fs.readFile('/sources/image-metadata.json', (err, metadata) => {
             NPM_TOKEN: process.env.NPM_TOKEN
         },
         labels: {
-            'org.getlazy.lazy.engine.image-metadata': metadata
+            'org.getlazy.lazy.engine.image-metadata.json': metadata
         }
     };
     docker.image.build(tarStream, buildParams)
