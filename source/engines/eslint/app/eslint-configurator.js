@@ -6,7 +6,7 @@
 const _ = require('lodash');
 const fs = require('fs');
 const yaml = require('js-yaml');
-const npmi = require('npmi');
+const yarnInstall = require('yarn-install');
 const process = require('process');
 
 //  Since we might dynamically install npm packages we need to ensure that NPM_TOKEN is set in the
@@ -39,75 +39,54 @@ class EslintConfigurator {
     }
 
     /**
-     * Import a single rule set defined in the configuration
-     * @param {object} configRuleSet A rule-set object.
-     * @return {Promise} Promise that is resolved when the rule set is processed
-     *                   (including the instalation of external NPM's)
-     */
-    static _importRuleSet(configRuleSet) {
-        const ruleSet = _.cloneDeep(configRuleSet);
-        const rsName = _.get(ruleSet, 'rule-set');
-
-        // If there is ignore:true in configuration then just skip the whole rule-set
-        // Convenient for quick turning on/off of some rule sets
-        if (_.eq(ruleSet.ignore, true)) {
-            logger.info('Ignoring ruleset:', rsName);
-            return Promise.resolve(null);
-        }
-        logger.info('Importing rule set:', rsName);
-
-        // Some rule sets don't require external packages.
-        // Silently acknowledge them
-        if (_.isNil(ruleSet.package)) {
-            ruleSet.installed = true;
-            return Promise.resolve(ruleSet);
-        }
-
-        // Process rule sets that require installation of external packages (npm modules)
-        // Return the promise that will be resolved when the NPM module is downloaded & installed
-        return new Promise((resolve) => {
-            const packageName = _.get(ruleSet, 'package');
-            const packageVersion = _.get(ruleSet, 'package-version') || 'latest';
-            const options = {
-                name: packageName,
-                version: packageVersion,
-                // path: '.', // installation path [default: '.']
-                forceInstall: false,
-                npmLoad: {
-                    loglevel: 'silent'
-                }
-            };
-
-            logger.info('Installing NPM package:', options.name, '@', options.version);
-            npmi(options, function (err, result) {
-                if (err) {
-                    logger.warn(ruleSet.package, 'NPM error', err);
-                } else {
-                    // installed
-                    logger.info('Package', options.name, '@', options.version, 'installed successfully');
-                    ruleSet.installed = true;
-                }
-                resolve(ruleSet);
-            });
-        });
-    }
-
-    /**
      * Process rule sets one by one any invoking onSuccess function for each rule set.
      * @param {object} ruleSets Set of rule sets loaded from configuration
      * @param {function} onSuccess Function to call for each rule set once it is successfully processed
      * @return {Promise} Promise that is resolved when the last rules-set is processed.
      */
     static _installAllRuleSets(ruleSets, onSuccess) {
-        //  Builds a chain of promises importing rule sets. Last rule is resolved and accepted
-        //  by the caller.
-        return _.reduce(ruleSets, (prom, oneRuleSet) =>
-            prom.then((rSet) => {
-                onSuccess(rSet);
-                return EslintConfigurator._importRuleSet(oneRuleSet);
-            }),
-            //  Start reducing from a promise resolving to empty.
-            Promise.resolve());
+        return new Promise((resolve, reject) => {
+            const installedRuleSets = [];
+
+            const packages = _.filter(_.map(ruleSets, (configRuleSet) => {
+                const ruleSet = _.cloneDeep(configRuleSet);
+                const rsName = _.get(ruleSet, 'rule-set');
+
+                // If there is ignore:true in configuration then just skip the whole rule-set
+                // Convenient for quick turning on/off of some rule sets
+                if (_.eq(ruleSet.ignore, true)) {
+                    logger.info('Ignoring rule set:', rsName);
+                    return null;
+                }
+                logger.info('Importing rule set:', rsName);
+
+                // Some rule sets don't require external packages.
+                // Silently acknowledge them
+                if (_.isNil(ruleSet.package)) {
+                    ruleSet.installed = true;
+                    installedRuleSets.push(ruleSet);
+                    return null;
+                }
+
+                ruleSet.installed = true;
+                installedRuleSets.push(ruleSet);
+                const packageName = _.get(ruleSet, 'package');
+                const packageVersion = _.get(ruleSet, 'package-version') || 'latest';
+                return `${packageName}@${packageVersion}`;
+            }));
+
+            logger.info('Installing packages:', packages);
+            const spawnSyncResult = yarnInstall(packages);
+            if (spawnSyncResult.status !== 0) {
+                reject(new Error(`yarn failed with ${spawnSyncResult.status}`));
+                return;
+            }
+
+            // Apply on success function to all installed rule sets.
+            _.forEach(installedRuleSets, onSuccess);
+
+            resolve();
+        });
     }
 
     /**
@@ -180,8 +159,7 @@ class EslintConfigurator {
             const packs = _.get(eslintConfiguration, 'rule-sets');
 
             EslintConfigurator._installAllRuleSets(packs, onSuccessF)
-                .then((lastRuleSet) => {
-                    onSuccessF(lastRuleSet);
+                .then(() => {
                     logger.info('Finished installation of packages.');
                     resolve({
                         rules,
