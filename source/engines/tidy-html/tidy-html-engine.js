@@ -70,9 +70,10 @@ class TidyHtmlEngineHttpServer extends EngineHttpServer {
     }
 
     analyzeFile(...args) {
-        //  Pass forward the arguments to the engine.
+        //  Pass forward the arguments to the helper container.
         return this._helperContainer.analyzeFile(...args)
             .then((result) => {
+                // Mark the code as checked.
                 _.assignIn(result, {
                     status: {
                         codeChecked: true
