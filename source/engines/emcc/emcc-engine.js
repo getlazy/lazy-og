@@ -19,6 +19,7 @@ class EmccHelperContainer extends HelperContainer {
         // Per image-metadata our helper container ID is emcc.
         super('emcc');
     }
+
     _getContainerCmd() {
         return ['emcc', '-fsyntax-only', '-fno-caret-diagnostics', '-fno-diagnostics-fixit-info',
             '-fdiagnostics-print-source-range-info', '-fexceptions'];
@@ -79,14 +80,6 @@ class EmccEngineHttpServer extends EngineHttpServer {
 
     afterListening() {
         this._helperContainer = null;
-
-        //  Prevent trying to stop the same container twice.
-        if (this._containerId) {
-            const containerId = this._containerId;
-            this._containerId = null;
-            return HelperContainer.deleteContainer(containerId);
-        }
-
         return Promise.resolve();
     }
 }
