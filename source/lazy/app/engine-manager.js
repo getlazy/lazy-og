@@ -137,7 +137,6 @@ class EngineManager {
                         _.map(engineConfig.import_env,
                             importEnvvar => `${importEnvvar}=${process.env[importEnvvar]}`),
                         [
-                            `LAZY_HOSTNAME=${_.get(self._container, 'Config.Hostname')}`,
                             `LAZY_ENGINE_ID=${engineId}`,
                             `LAZY_SERVICE_URL=${selectn('_config.service_url', self)}`,
                             `LAZY_PRIVATE_API_URL=${url.format({
@@ -147,7 +146,6 @@ class EngineManager {
                             })}`,
                             //  TODO: Fix this as special engines like UI don't follow this URL pattern.
                             `LAZY_ENGINE_URL=${selectn('_config.service_url', self)}/engine/${engineId}`,
-                            `LAZY_VOLUME_NAME=${self._volume.Name}`,
                             'LAZY_VOLUME_MOUNT=/lazy',
                             `LAZY_ENGINE_SANDBOX_DIR=/lazy/sandbox/${engineId}`
                         ],
