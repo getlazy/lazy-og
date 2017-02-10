@@ -71,7 +71,7 @@ class Engine
     start() {
         const self = this;
 
-        logger.info('Starting engine', { engine: self.name });
+        logger.info('starting engine', { engine: self.name });
         return self._redirectContainerLogsToLogger()
             .then(() => self._container.status())
             .then((containerStatus) => {

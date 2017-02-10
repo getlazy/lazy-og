@@ -18,8 +18,7 @@ const Label = {
 /**
  * Manages the engines running in lazy.
  */
-class EngineManager
-{
+class EngineManager {
     constructor(config) {
         this._id = H.isNonEmptyString(config.id) ? config.id : 'default';
         this._config = config;
@@ -94,7 +93,7 @@ class EngineManager
             (engineConfig, engineName) => self._installEngine(engineName, engineConfig)));
     }
 
-    _installEngine(engineName, engineConfig, port) {
+    _installEngine(engineName, engineConfig) {
         const self = this;
 
         const imageName = engineConfig.image;
@@ -108,12 +107,12 @@ class EngineManager
         //  Resolve the repository auth if its values are kept in the lazy's process environment.
         const resolvedRepositoryAuth = EngineManager._resolveRepositoryAuthValues(repositoryAuth);
 
-        logger.info('Pulling image', { engine: engineName, image: imageName });
+        logger.info('pulling image', { engine: engineName, image: imageName });
         return EngineManager._pullImage(resolvedRepositoryAuth, imageName)
             .then(() => {
                 const createEngineParams = {
                     Image: imageName,
-                    Cmd: engineConfig.command ? engineConfig.command.split(' ') : undefined,
+                    Cmd: _.isString(engineConfig.command) ? engineConfig.command.split(' ') : undefined,
                     //  Engine's environment consists of the variables set in the config,
                     //  variables imported from lazy's environment and variables created by
                     //  lazy itself.
@@ -134,9 +133,9 @@ class EngineManager
                             `LAZY_ENGINE_URL=${selectn('_config.service_url', self)}/engine/${engineName}`,
                             `LAZY_VOLUME_NAME=${self._volume.Name}`,
                             'LAZY_VOLUME_MOUNT=/lazy',
-                            `LAZY_ENGINE_SANDBOX_DIR=/lazy/sandbox/${engineName}`,
-                            `PORT=${engineConfig.port}`
-                        ]),
+                            `LAZY_ENGINE_SANDBOX_DIR=/lazy/sandbox/${engineName}`
+                        ],
+                        _.isString(engineConfig.port) ? [`PORT=${engineConfig.port}`] : []),
                     HostConfig: {
                         //  We only allow volumes to be bound to host.
                         Binds: _.union(engineConfig.volumes, [
@@ -153,10 +152,9 @@ class EngineManager
                 };
                 createEngineParams.Labels[Label.OrgGetlazyLazyEngineManagerOwner] = self._id;
 
-                logger.info('Creating engine', {
+                logger.info('creating engine', {
                     engine: engineName,
-                    volume: self._volume.Name,
-                    createEngineParams
+                    volume: self._volume.Name
                 });
                 return EngineManager._createContainer(createEngineParams);
             })
@@ -196,7 +194,7 @@ class EngineManager
         return EngineManager._getContainersForLabel(Label.OrgGetlazyLazyEngineManagerOwner, self._id)
             .then(containers =>
                 Promise.all(_.map(containers, (container) => {
-                    logger.info('Stopping/waiting/deleting engine container',
+                    logger.info('stopping/waiting/deleting engine container',
                         { container: _.head(container.Names) });
                     if (container.id === self._container.id) {
                         return Promise.resolve();

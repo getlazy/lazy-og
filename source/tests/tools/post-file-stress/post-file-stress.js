@@ -1,9 +1,8 @@
 
 'use strict';
 
-const TOTAL = 200;
-const LIMIT = 20;
-const NUMBER_OF_ENDPOINTS = 2;
+const TOTAL = 200000;
+const LIMIT = 40;
 const LAZY_API_VERSION = 'v20161217';
 
 const _ = require('lodash');
@@ -13,21 +12,25 @@ const glob = require('glob');
 const fs = require('fs-extra');
 const os = require('os');
 
+// lazy ignore no-console
+
 const testFiles = _.map(glob.sync('./tests/*'), (testFileName) => {
     return {
         hostPath: testFileName,
         content: fs.readFileSync(testFileName)
-    }
+    };
 });
 
 const start = Date.now();
+let totalTime = 0;
+let counter = 0;
 
 async.timesLimit(TOTAL, LIMIT, (n, next) => {
-    const testFile = _.sample(testFiles);
+    const testFile = testFiles[n % testFiles.length];
 
     const requestParams = {
         method: 'POST',
-        url: `http://lazy-${_.random(NUMBER_OF_ENDPOINTS - 1)}.getlazy.io:8000/file`,
+        url: 'http://35.185.27.20/file',
         json: true,
         headers: {
             Accept: 'application/json',
@@ -44,7 +47,19 @@ async.timesLimit(TOTAL, LIMIT, (n, next) => {
         }
     };
 
+    const startN = Date.now();
     request(requestParams, (err, response, body) => {
+        const endN = Date.now();
+
+        totalTime += endN - startN;
+
+        ++counter;
+        if (counter % 25 === 0) {
+            console.log('Response #', counter);
+            console.log('Total runtime', (Date.now() - start));
+            console.log('Avg reply', totalTime / n);
+        }
+
         if (err) {
             console.log(err);
             next();
@@ -60,5 +75,7 @@ async.timesLimit(TOTAL, LIMIT, (n, next) => {
         next();
     });
 }, (err) => {
+    console.log(err);
     console.log('Total runtime', (Date.now() - start));
+    console.log('Avg reply', totalTime / TOTAL);
 });
