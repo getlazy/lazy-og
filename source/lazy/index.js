@@ -20,7 +20,7 @@ process.on('SIGINT', () => {
             process.exit(0);
         })
         .catch((err) => {
-            logger.error('Error occurred during stopping', { err: err && err.toString() });
+            logger.error('Error occurred during stopping', err, { err: err && err.toString() });
             process.exit(-1);
         });
 });
@@ -68,7 +68,7 @@ LazyConfigFile.load(lazyYamlPath)
             logger.info('lazy initialized');
         })
         .catch((err) => {
-            logger.error('Failed to initialize lazy', { err: err && err.toString() });
+            logger.error('Failed to initialize lazy', err, { err: err && err.toString() });
             process.exit(-2);
         })
     )
