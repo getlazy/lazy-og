@@ -1,3 +1,4 @@
+
 'use strict';
 
 const _ = require('lodash');
@@ -30,9 +31,7 @@ class LazyConfigFile {
                     return resolvedConfig;
                 }
 
-                logger.error('Errors in lazy configuration', {
-                    err: configErrors
-                });
+                logger.error('Errors in lazy configuration', { err: configErrors });
                 return Promise.reject(new Error('invalid lazy configuration'));
             });
     }
@@ -118,7 +117,7 @@ class LazyConfigFile {
         return ajv.errors;
     }
 
-    static _issueWarnings( /* config */ ) {
+    static _issueWarnings(/* config */) {
         //  Nothing to do yet.
     }
 
@@ -169,11 +168,10 @@ LAZY_CONFIG_SCHEMA = {
         },
         repository_auth: {
             type: 'object',
-            oneOf: [{
-                $ref: '#/definitions/repository_auth_env'
-            }, {
-                $ref: '#/definitions/repository_auth_token'
-            }]
+            oneOf: [
+                { $ref: '#/definitions/repository_auth_env' },
+                { $ref: '#/definitions/repository_auth_token' }
+            ]
         },
         port: {
             type: 'integer',
@@ -190,12 +188,8 @@ LAZY_CONFIG_SCHEMA = {
             minProperties: 1,
             maxProperties: 1,
             properties: {
-                bundle: {
-                    $ref: '#/definitions/engine_pipeline_array'
-                },
-                sequence: {
-                    $ref: '#/definitions/engine_pipeline_array'
-                }
+                bundle: { $ref: '#/definitions/engine_pipeline_array' },
+                sequence: { $ref: '#/definitions/engine_pipeline_array' }
             },
             additionalProperties: false
         },
@@ -255,21 +249,22 @@ LAZY_CONFIG_SCHEMA = {
         engine: {
             type: 'object',
             properties: {
-                image: {
-                    $ref: '#/definitions/docker_image'
-                },
+                image: { $ref: '#/definitions/docker_image' },
                 command: {
-                    oneOf: [{
-                        type: 'string',
-                        minLength: 1
-                    }, {
-                        type: 'array',
-                        minItems: 1,
-                        items: {
+                    oneOf: [
+                        {
                             type: 'string',
                             minLength: 1
+                        },
+                        {
+                            type: 'array',
+                            minItems: 1,
+                            items: {
+                                type: 'string',
+                                minLength: 1
+                            }
                         }
-                    }]
+                    ]
                 },
                 working_dir: {
                     type: 'string',
@@ -286,31 +281,6 @@ LAZY_CONFIG_SCHEMA = {
                 port: {
                     type: 'integer',
                     minimum: 1
-                },
-                url: {
-                    type: 'string',
-                    minLength: 1
-                },
-                packageNPM: {
-                    type: 'string',
-                    minLength: 1
-                },
-                packageName: {
-                    type: 'string',
-                    minLength: 1
-                },
-                packageVersion: {
-                    type: 'string',
-                    minLength: 1
-                },
-                langauages: {
-                    type: 'array',
-                    items: {
-                        type: 'string',
-                        minLength: 1
-                    },
-                    minItems: 1,
-                    uniqueItems: true
                 },
                 boot_wait: {
                     type: 'boolean'
@@ -335,9 +305,7 @@ LAZY_CONFIG_SCHEMA = {
                 },
                 env: {
                     type: 'array',
-                    items: {
-                        $ref: '#/definitions/env_item'
-                    },
+                    items: { $ref: '#/definitions/env_item' },
                     minItems: 1,
                     uniqueItems: true
                 },
@@ -364,8 +332,8 @@ LAZY_CONFIG_SCHEMA = {
                     additionalProperties: false
                 }
             },
-            required: ['packageName','packageNPM'],
-            additionalProperties: true
+            required: ['image'],
+            additionalProperties: false
         },
         env_item: {
             type: 'string',
@@ -383,27 +351,22 @@ LAZY_CONFIG_SCHEMA = {
             items: {
                 $ref: '#/definitions/engine_pipeline_item'
             },
-            uniqueItems: false // allow engines to appear multiple times in pipeline
+            uniqueItems: false  // allow engines to appear multiple times in pipeline
         },
         engine_pipeline_item: {
             type: 'object',
             minProperties: 1,
             maxProperties: 1,
             properties: {
-                bundle: {
-                    $ref: '#/definitions/engine_pipeline_array'
-                },
-                sequence: {
-                    $ref: '#/definitions/engine_pipeline_array'
-                }
+                bundle: { $ref: '#/definitions/engine_pipeline_array' },
+                sequence: { $ref: '#/definitions/engine_pipeline_array' }
             },
             patternProperties: {
                 '^((?!(bundle|sequence)).)+$': {
-                    oneOf: [{
-                        type: 'object'
-                    }, {
-                        type: 'null'
-                    }]
+                    oneOf: [
+                        { type: 'object' },
+                        { type: 'null' }
+                    ]
                 }
             },
             additionalProperties: false
@@ -418,9 +381,7 @@ LAZY_CONFIG_SCHEMA = {
             minProperties: 1,
             maxProperties: 1,
             properties: {
-                image: {
-                    $ref: '#/definitions/docker_image'
-                }
+                image: { $ref: '#/definitions/docker_image' }
             },
             additionalProperties: false
         }

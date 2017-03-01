@@ -491,7 +491,7 @@ module.exports = [{
             test: {}
         }
     },
-    firstErrorMessage: 'should have required property \'packageNPM\''
+    firstErrorMessage: 'should have required property \'image\''
 }, {
     id: '#45',
     config: {
@@ -556,11 +556,11 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageNPM: 'null'
+                test: null
             }
         }
     },
-    firstErrorMessage: 'should have required property \'packageName\''
+    firstErrorMessage: 'should NOT have additional properties'
 }, {
     id: 'test engine.command #1',
     config: {
@@ -610,8 +610,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 command: 'x'
             }
         }
@@ -629,8 +627,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 command: []
             }
         }
@@ -667,8 +663,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 command: ['x']
             }
         }
@@ -740,8 +734,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 working_dir: 'x'
             }
         }
@@ -831,8 +823,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 volumes: ['1:2']
             }
         }
@@ -904,8 +894,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 port: 123
             }
         }
@@ -923,8 +911,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 boot_wait: null
             }
         }
@@ -943,8 +929,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 boot_wait: true
             }
         }
@@ -962,8 +946,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 boot_timeout: null
             }
         }
@@ -982,8 +964,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 boot_timeout: 0
             }
         }
@@ -1002,8 +982,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 boot_timeout: 123
             }
         }
@@ -1021,8 +999,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 meta: null
             }
         }
@@ -1041,8 +1017,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 meta: {}
             }
         }
@@ -1060,8 +1034,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 meta: {
                     languages: 'test'
                 }
@@ -1082,8 +1054,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 meta: {
                     languages: []
                 }
@@ -1103,8 +1073,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 meta: {
                     languages: [123]
                 }
@@ -1125,8 +1093,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 meta: {
                     languages: ['123']
                 }
@@ -1146,8 +1112,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 meta: {
                     languages: ['123'],
                     additional: 'property-test'
@@ -1168,8 +1132,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 env: 'test'
             }
         }
@@ -1188,8 +1150,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 env: []
             }
         }
@@ -1208,8 +1168,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 env: [123]
             }
         }
@@ -1228,8 +1186,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 env: ['12']
             }
         }
@@ -1248,8 +1204,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 env: ['1=']
             }
         }
@@ -1267,8 +1221,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 env: ['1=', '1=']
             }
         }
@@ -1287,8 +1239,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 import_env: 'test'
             }
         }
@@ -1307,8 +1257,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 import_env: []
             }
         }
@@ -1327,8 +1275,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 import_env: [123]
             }
         }
@@ -1347,8 +1293,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 import_env: ['']
             }
         }
@@ -1367,8 +1311,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 import_env: ['x']
             }
         }
@@ -1386,8 +1328,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 import_env: ['x', 'x']
             }
         }
@@ -1406,8 +1346,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 config: null
             }
         }
@@ -1426,8 +1364,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 config: {}
             }
         }
@@ -1445,8 +1381,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 config: {
                     whatever: 'we want'
                 }
@@ -1466,8 +1400,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 config: {
                     whatever: 'we want',
                     as: ['much', 'as', 'we', 'want']
@@ -1488,8 +1420,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 labels: null
             }
         }
@@ -1508,8 +1438,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 labels: {}
             }
         }
@@ -1528,8 +1456,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 labels: {
                     whatever: 'we want'
                 }
@@ -1549,8 +1475,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 labels: {
                     whatever: 'we want',
                     as: ['much', 'as', 'we', 'want']
@@ -1572,8 +1496,6 @@ module.exports = [{
         engines: {
             test: {
                 image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module',
                 labels: {
                     whatever: 'we want',
                     as: 'much as we want'
@@ -1594,9 +1516,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     },
@@ -1614,9 +1534,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     },
@@ -1636,9 +1554,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     },
@@ -1658,9 +1574,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     },
@@ -1681,9 +1595,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     },
@@ -1704,9 +1616,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     }
@@ -1727,9 +1637,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     },
@@ -1751,9 +1659,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     },
@@ -1775,9 +1681,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     },
@@ -1799,9 +1703,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     }
@@ -1820,9 +1722,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     },
@@ -1842,9 +1742,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     },
@@ -1864,9 +1762,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     }
@@ -1907,13 +1803,11 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     },
-    firstErrorMessage: 'should have required property \'packageNPM\''
+    firstErrorMessage: 'should have required property \'image\''
 }, {
     id: 'test ui #3',
     config: {
@@ -1923,9 +1817,7 @@ module.exports = [{
         },
         service_url: 'http://getlazy.org',
         ui: {
-            image: 'a:b',
-            packageName: 'module',
-            packageNPM: 'npm-module'
+            image: 'a:b'
         },
         engine_pipeline: {
             sequence: [{
@@ -1934,9 +1826,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     }
@@ -1956,9 +1846,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     },
@@ -1979,9 +1867,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     },
@@ -2002,9 +1888,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         }
     }
@@ -2020,9 +1904,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         },
         helper_containers: null
@@ -2040,9 +1922,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         },
         helper_containers: {}
@@ -2060,9 +1940,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         },
         helper_containers: {
@@ -2082,9 +1960,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         },
         helper_containers: {
@@ -2104,9 +1980,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         },
         helper_containers: {
@@ -2126,9 +2000,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         },
         helper_containers: {
@@ -2150,9 +2022,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         },
         helper_containers: {
@@ -2174,9 +2044,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         },
         helper_containers: {
@@ -2197,9 +2065,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         },
         helper_containers: {
@@ -2222,9 +2088,7 @@ module.exports = [{
         },
         engines: {
             test: {
-                image: 'a:b',
-                packageName: 'module',
-                packageNPM: 'npm-module'
+                image: 'a:b'
             }
         },
         helper_containers: {
