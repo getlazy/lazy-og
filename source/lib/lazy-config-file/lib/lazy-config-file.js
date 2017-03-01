@@ -167,7 +167,6 @@ LAZY_CONFIG_SCHEMA = {
             minLength: 1
         },
         repository_auth: {
-            type: 'object',
             oneOf: [
                 { $ref: '#/definitions/repository_auth_env' },
                 { $ref: '#/definitions/repository_auth_token' }
@@ -178,7 +177,7 @@ LAZY_CONFIG_SCHEMA = {
             minimum: 1
         },
         ui: {
-            $ref: '#/definitions/engine'
+            $ref: '#/definitions/engine_image_item'
         },
         config: {
             type: 'object'
@@ -198,7 +197,7 @@ LAZY_CONFIG_SCHEMA = {
             minProperties: 1,
             patternProperties: {
                 '^.+$': {
-                    $ref: '#/definitions/engine'
+                    $ref: '#/definitions/engine_item'
                 }
             },
             additionalProperties: false
@@ -246,7 +245,13 @@ LAZY_CONFIG_SCHEMA = {
             required: ['token'],
             additionalProperties: false
         },
-        engine: {
+        engine_item: {
+            oneOf: [
+                { $ref: '#/definitions/engine_image_item' },
+                { $ref: '#/definitions/engine_host_item' }
+            ]
+        },
+        engine_image_item: {
             type: 'object',
             properties: {
                 image: { $ref: '#/definitions/docker_image' },
@@ -277,10 +282,6 @@ LAZY_CONFIG_SCHEMA = {
                     },
                     minItems: 1,
                     uniqueItems: true
-                },
-                port: {
-                    type: 'integer',
-                    minimum: 1
                 },
                 boot_wait: {
                     type: 'boolean'
@@ -334,6 +335,38 @@ LAZY_CONFIG_SCHEMA = {
             },
             required: ['image'],
             additionalProperties: false
+        },
+        engine_host_item: {
+            type: 'object',
+            properties: {
+                host: {
+                    type: 'string',
+                    minLength: 1
+                },
+                port: {
+                    type: 'integer',
+                    minimum: 1
+                },
+                meta: {
+                    $ref: '#/definitions/engine_meta'
+                }
+            },
+            required: ['host'],
+            additionalProperties: false
+        },
+        engine_meta: {
+            type: 'object',
+            properties: {
+                languages: {
+                    type: 'array',
+                    minLength: 0,
+                    items: {
+                        type: 'string',
+                        minLength: 1
+                    }
+                }
+            },
+            additionalProperties: true
         },
         env_item: {
             type: 'string',

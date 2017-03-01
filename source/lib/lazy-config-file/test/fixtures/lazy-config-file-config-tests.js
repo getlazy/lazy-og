@@ -476,7 +476,7 @@ module.exports = [{
             test: 'test'
         }
     },
-    firstErrorMessage: 'should be object'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: '#44',
     config: {
@@ -491,7 +491,7 @@ module.exports = [{
             test: {}
         }
     },
-    firstErrorMessage: 'should have required property \'image\''
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: '#45',
     config: {
@@ -508,7 +508,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be string'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: '#46',
     config: {
@@ -525,7 +525,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should NOT be shorter than 3 characters'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: '#47',
     config: {
@@ -542,7 +542,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match pattern "^.+:.+$"'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: '#48',
     config: {
@@ -560,7 +560,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should NOT have additional properties'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.command #1',
     config: {
@@ -578,7 +578,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be string'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.command #2',
     config: {
@@ -702,7 +702,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be string'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.working_dir #2',
     config: {
@@ -720,7 +720,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should NOT be shorter than 1 characters'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.working_dir #3',
     config: {
@@ -755,7 +755,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be array'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.volumes #2',
     config: {
@@ -773,7 +773,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should NOT have less than 1 items'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.volumes #3',
     config: {
@@ -791,7 +791,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be string'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.volumes #4',
     config: {
@@ -809,7 +809,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match pattern "^.*:.*$"'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.volumes #5',
     config: {
@@ -844,60 +844,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should NOT have duplicate items (items ## 0 and 1 are identical)'
-}, {
-    id: 'test engine.port #1',
-    config: {
-        version: 1,
-        service_url: 'http://getlazy.org',
-        engine_pipeline: {
-            sequence: [{
-                test: {}
-            }]
-        },
-        engines: {
-            test: {
-                image: 'a:b',
-                port: null
-            }
-        }
-    },
-    firstErrorMessage: 'should be integer'
-}, {
-    id: 'test engine.port #2',
-    config: {
-        version: 1,
-        service_url: 'http://getlazy.org',
-        engine_pipeline: {
-            sequence: [{
-                test: {}
-            }]
-        },
-        engines: {
-            test: {
-                image: 'a:b',
-                port: 0
-            }
-        }
-    },
-    firstErrorMessage: 'should be >= 1'
-}, {
-    id: 'test engine.port #3',
-    config: {
-        version: 1,
-        service_url: 'http://getlazy.org',
-        engine_pipeline: {
-            sequence: [{
-                test: {}
-            }]
-        },
-        engines: {
-            test: {
-                image: 'a:b',
-                port: 123
-            }
-        }
-    }
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.boot_wait #1',
     config: {
@@ -915,7 +862,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be boolean'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.boot_wait #2',
     config: {
@@ -950,7 +897,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be integer'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.boot_timeout #2',
     config: {
@@ -968,7 +915,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be >= 1'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.boot_timeout #3',
     config: {
@@ -1003,7 +950,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be object'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.meta #2',
     config: {
@@ -1040,7 +987,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be array'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.meta #4',
     config: {
@@ -1079,7 +1026,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be string'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.meta #6',
     config: {
@@ -1136,7 +1083,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be array'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.env #2',
     config: {
@@ -1154,7 +1101,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should NOT have less than 1 items'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.env #3',
     config: {
@@ -1172,7 +1119,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be string'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.env #4',
     config: {
@@ -1190,7 +1137,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match pattern "^.+=.*$"'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.env #5',
     config: {
@@ -1225,7 +1172,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should NOT have duplicate items (items ## 0 and 1 are identical)'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.import_env #1',
     config: {
@@ -1243,7 +1190,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be array'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.import_env #2',
     config: {
@@ -1261,7 +1208,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should NOT have less than 1 items'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.import_env #3',
     config: {
@@ -1279,7 +1226,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be string'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.import_env #4',
     config: {
@@ -1297,7 +1244,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should NOT be shorter than 1 characters'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.import_env #5',
     config: {
@@ -1332,7 +1279,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should NOT have duplicate items (items ## 0 and 1 are identical)'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.config #1',
     config: {
@@ -1350,7 +1297,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be object'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.config #2',
     config: {
@@ -1424,7 +1371,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be object'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.labels #2',
     config: {
@@ -1442,7 +1389,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should NOT have less than 1 properties'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.labels #3',
     config: {
@@ -1482,7 +1429,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should be string'
+    firstErrorMessage: 'should match exactly one schema in oneOf'
 }, {
     id: 'test engine.labels #5',
     config: {
@@ -2097,6 +2044,109 @@ module.exports = [{
             },
             test2: {
                 image: 'a/b/c:123'
+            }
+        }
+    }
+}, {
+    id: 'test engine.host #1',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                host: null
+            }
+        }
+    },
+    firstErrorMessage: 'should match exactly one schema in oneOf'
+}, {
+    id: 'test engine.host #2',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                host: ''
+            }
+        }
+    },
+    firstErrorMessage: 'should match exactly one schema in oneOf'
+}, {
+    id: 'test engine.host #3',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                host: 'whatever'
+            }
+        }
+    }
+}, {
+    id: 'test engine.port #1',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                host: 'whatever',
+                port: null
+            }
+        }
+    },
+    firstErrorMessage: 'should match exactly one schema in oneOf'
+}, {
+    id: 'test engine.port #2',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                host: 'whatever',
+                port: 0
+            }
+        }
+    },
+    firstErrorMessage: 'should match exactly one schema in oneOf'
+}, {
+    id: 'test engine.port #3',
+    config: {
+        version: 1,
+        service_url: 'http://getlazy.org',
+        engine_pipeline: {
+            sequence: [{
+                test: {}
+            }]
+        },
+        engines: {
+            test: {
+                host: 'whatever',
+                port: 123
             }
         }
     }
