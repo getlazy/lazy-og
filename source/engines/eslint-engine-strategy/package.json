@@ -1,0 +1,29 @@
+{
+  "name": "@lazyass/lazy-engineimpl-eslint",
+  "version": "1.0.0",
+  "description": "Implementation of Lazy Eslint engine",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getlazy/lazy-engineimpl-eslint.git"
+  },
+  "keywords": [
+    "lazy",
+    "engine",
+    "eslint"
+  ],
+  "author": "The lazy Authors",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/getlazy/lazy-engineimpl-eslint/issues"
+  },
+  "homepage": "https://github.com/getlazy/lazy-engineimpl-eslint#readme",
+  "dependencies": {
+    "eslint-rule-documentation": "^1.0.6",
+    "lodash": "^4.17.4",
+    "yarn-install": "^0.2.1"
+  }
+}
