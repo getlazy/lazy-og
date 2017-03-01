@@ -1,0 +1,27 @@
+{
+  "name": "@lazyass/lazy-engineimpl-postprocessor",
+  "version": "1.0.0",
+  "description": "Implementation of Lazy postprocessor engine",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getlazy/lazy-engineimpl-postprocessor.git"
+  },
+  "keywords": [
+    "lazy",
+    "engine",
+    "postprocessor"
+  ],
+  "author": "The lazy Authors",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/getlazy/lazy-engineimpl-postprocessor/issues"
+  },
+  "homepage": "https://github.com/getlazy/lazy-engineimpl-postprocessor#readme",
+  "dependencies": {
+    "lodash": "^4.17.4"
+  }
+}
