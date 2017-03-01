@@ -1,6 +1,6 @@
 {
   "name": "@lazyass/lazy-config-file",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Reads and processes lazy configuration files",
   "main": "index.js",
   "scripts": {
