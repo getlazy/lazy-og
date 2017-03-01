@@ -6,3 +6,6 @@ engine_pipeline:
 engines:
     test:
         image: 'a:b'
+        packageName: module
+        packageNPM: npm-module
+

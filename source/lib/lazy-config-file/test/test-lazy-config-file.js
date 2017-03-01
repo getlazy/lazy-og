@@ -32,7 +32,9 @@ describe('LazyConfigFile', function () {
                 },
                 engines: {
                     test: {
-                        image: 'a:b'
+                        image: 'a:b',
+                        packageName: 'module',
+                        packageNPM: 'npm-module'
                     }
                 }
             };
