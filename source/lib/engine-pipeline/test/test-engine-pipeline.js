@@ -101,7 +101,8 @@ describe('EnginePipeline', function () {
             };
             const enginePipeline = new EnginePipeline(engines, pipeline);
             let metricsIssuedCounter = 0;
-            enginePipeline.on('metrics', (metrics) => {
+            enginePipeline.on('metrics', (engineId, metrics) => {
+                assert.equal(engineId, 'engine1');
                 assert(_.isArray(metrics));
                 assert.equal(_.size(metrics), 1);
                 assert.equal(_.head(metrics).language, 'JavaScript');

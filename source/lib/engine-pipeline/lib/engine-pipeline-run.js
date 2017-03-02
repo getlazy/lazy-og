@@ -74,8 +74,9 @@ class EnginePipelineRun {
                     // in which we are running has a chance to store them.
                     if (res.metrics) {
                         // Emit the event on the run's EnginePipeline object.
-                        this._enginePipeline.emit('metrics', res.metrics);
+                        this._enginePipeline.emit('metrics', engineId, res.metrics);
                         // Delete the metrics, they shouldn't be accumulated or merged through engine calls.
+                        // lazy ignore-once no-param-reassign
                         delete res.metrics;
                     }
 
