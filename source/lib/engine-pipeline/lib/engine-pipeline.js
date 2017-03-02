@@ -1,7 +1,7 @@
 
 'use strict';
 
-const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want whole lotta lodash...
+const _ = require('lodash');
 const fp = require('lodash/fp');
 const detect = require('language-detect');
 const EnginePipelineRun = require('./engine-pipeline-run');
@@ -77,7 +77,7 @@ class EnginePipeline {
         // Eliminate duplicate engines.
         engines = _.uniq(engines);
 
-        // Run the pipleine from the root.
+        // Run the pipeline from the root.
         const pipelineRun = new EnginePipelineRun(this._idToEngineMap, engines,
             this._pipelineRoot, hostPath, language, content, context);
         return pipelineRun.run();

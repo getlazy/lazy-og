@@ -1,7 +1,7 @@
 
 'use strict';
 
-const _ = require('lodash'); // lazy ignore-once lodash/import-scope ; we want whole lotta lodash...
+const _ = require('lodash');
 const logger = require('@lazyass/common').createPackageLogger('lazy-engine-pipeline');
 
 // Keep running the promises returned by the given action while the given condition returns true.
