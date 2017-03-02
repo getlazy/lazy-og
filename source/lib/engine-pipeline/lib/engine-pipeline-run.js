@@ -11,8 +11,13 @@ const asyncWhile = (condition, action) => {
     return whilst();
 };
 
+/**
+ * Class implementing details of a single pipeline run. This class is used by EnginePipeline and
+ * shouldn't be used on its own (which is why it's not exposed in the public interface)
+ */
 class EnginePipelineRun {
-    constructor(idToEngineMap, prefilteredEngines, pipelineRoot, hostPath, language, content, context) {
+    constructor(enginePipeline, idToEngineMap, prefilteredEngines, pipelineRoot, hostPath, language, content, context) {
+        this._enginePipeline = enginePipeline;
         this._idToEngineMap = idToEngineMap;
         this._prefilteredEngines = prefilteredEngines;
         this._pipelineRoot = pipelineRoot;
@@ -63,7 +68,19 @@ class EnginePipelineRun {
         }
 
         if (_.includes(this._prefilteredEngines, engine)) {
-            return engine.analyzeFile(this._hostPath, this._language, this._content, context);
+            return engine.analyzeFile(this._hostPath, this._language, this._content, context)
+                .then((res) => {
+                    // If engine returned the metrics then emit metrics event so that environment
+                    // in which we are running has a chance to store them.
+                    if (res.metrics) {
+                        // Emit the event on the run's EnginePipeline object.
+                        this._enginePipeline.emit('metrics', res.metrics);
+                        // Delete the metrics, they shouldn't be accumulated or merged through engine calls.
+                        delete res.metrics;
+                    }
+
+                    return Promise.resolve(res);
+                });
         }
 
         return Promise.resolve();
@@ -132,9 +149,6 @@ class EnginePipelineRun {
     _runSequence(sequence, context) {
         const newContext = _.cloneDeep(context) || {};
 
-        let i = 0;
-        let error;
-
         // In sequencing engines (seq A -> Seq B), we need to accumulate results of each engine,
         // in such a way that output from seq B overrides output from seq A,
         // while the parts of seq A that are not modified by seq B remain the same
@@ -142,6 +156,8 @@ class EnginePipelineRun {
 
         // Run engines sequentially until we have through all of them or one has returned
         // en error.
+        let i = 0;
+        let error;
         return asyncWhile(
             () => i < sequence.length && _.isNil(error),
             // Execute the actual sequence item and return the promise for the execution.

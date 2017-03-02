@@ -149,7 +149,6 @@ module.exports = [{
             engine2: {}
         }]
     },
-    // lazy ignore-once no-unused-vars
     then: (result) => {
         assert.equal(_.get(result, 'status.test'), 2);
     }
@@ -187,6 +186,7 @@ module.exports = [{
     }, {
         id: 'engine2',
         languages: [],
+        // lazy ignore-once no-unused-vars
         analyzeFile(hostPath, language, content, context) {
             return Promise.resolve({
                 warnings: [{ test: 'result2' }]
@@ -244,7 +244,6 @@ module.exports = [{
             engine2: {}
         }]
     },
-    // lazy ignore-once no-unused-vars
     then: (result) => {
         assert.equal(_.get(result, 'status.test'), 2);
     }
@@ -253,6 +252,7 @@ module.exports = [{
     engines: [{
         id: 'engine1',
         languages: [],
+        // lazy ignore-once no-unused-vars
         analyzeFile(hostPath, language, content, context) {
             return Promise.resolve({
                 warnings: [{ test: 'result' }],
@@ -593,9 +593,8 @@ module.exports = [{
         language: 'test'
     },
     then: (result) => {
-        assert (_.isNil(result.warnings), 'no warnings');
-        assert (_.isNil(result.status), 'no status');
-
+        assert(_.isNil(result.warnings), 'no warnings');
+        assert(_.isNil(result.status), 'no status');
     }
 }, {
     id: 'language test #3',

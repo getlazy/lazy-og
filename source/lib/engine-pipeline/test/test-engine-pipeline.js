@@ -4,14 +4,14 @@
 /* global describe, it, before, after, afterEach */
 
 //  To set some properties we need `this` of `describe` and `it` callback functions.
-// lazy ignore prefer-arrow-callback
-// lazy ignore func-names
+// lazy ignore prefer-arrow-callback func-names no-console
 
 const td = require('testdouble');
 
 const _ = require('lodash');
 const EnginePipeline = require('../lib/engine-pipeline');
 const testCases = require('./fixtures/engine-pipeline-test-cases');
+const assert = require('assert');
 
 const resolveIfUndefined = result => (_.isUndefined(result) ? Promise.resolve() : result);
 
@@ -33,7 +33,7 @@ describe('EnginePipeline', function () {
 
                 const pipeline = new EnginePipeline(test.engines, test.pipeline);
 
-                //  This could be done more elegantly but something is screwed up eithe with
+                //  This could be done more elegantly but something is screwed up either with
                 //  promises or mocha and continuations don't work correctly unless defined
                 //  in the same statement with `.analyzeFile()`.
                 const engineStatuses = [];
@@ -75,6 +75,49 @@ describe('EnginePipeline', function () {
                         return Promise.reject(new Error(`Test '${test.id}' is testing for success, not ${err}`));
                     });
             });
+        });
+
+        it('metrics are emitted', function () {
+            const engines = [{
+                id: 'engine1',
+                languages: ['JavaScript'],
+                analyzeFile() {
+                    return Promise.resolve({
+                        warnings: [{ test: 'result' }],
+                        metrics: [{
+                            language: 'JavaScript',
+                            rule: 'test'
+                        }],
+                        status: {
+                            test: 1
+                        }
+                    });
+                }
+            }];
+            const pipeline = {
+                sequence: [{
+                    engine1: {}
+                }]
+            };
+            const enginePipeline = new EnginePipeline(engines, pipeline);
+            let metricsIssuedCounter = 0;
+            enginePipeline.on('metrics', (metrics) => {
+                assert(_.isArray(metrics));
+                assert.equal(_.size(metrics), 1);
+                assert.equal(_.head(metrics).language, 'JavaScript');
+                assert.equal(_.head(metrics).rule, 'test');
+                metricsIssuedCounter += 1;
+            });
+            const engineStatuses = [];
+            return enginePipeline.analyzeFile('test.js', 'JavaScript', '\'use strict\'', {}, engineStatuses)
+                .then((result) => {
+                    assert(_.isArray(result.warnings));
+                    assert.equal(_.size(result.warnings), 1);
+                    assert(result.status);
+                    assert.equal(result.status.test, 1);
+                    assert(!result.metrics);
+                    assert.equal(metricsIssuedCounter, 1);
+                });
         });
     });
 });

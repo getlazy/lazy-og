@@ -6,9 +6,15 @@ const fp = require('lodash/fp');
 const detect = require('language-detect');
 const EnginePipelineRun = require('./engine-pipeline-run');
 const logger = require('@lazyass/common').createPackageLogger('lazy-engine-pipeline');
+const EventEmitter = require('events');
 
-class EnginePipeline {
+/**
+ * Class implementing public interface of the module. Internally it uses EnginePipelineRun for
+ * each run.
+ */
+class EnginePipeline extends EventEmitter {
     constructor(engines, pipelineRoot) {
+        super();
         this._pipelineRoot = pipelineRoot;
         this._idToEngineMap = new Map();
         this._languageToEnginesMap = new Map();
@@ -78,7 +84,7 @@ class EnginePipeline {
         engines = _.uniq(engines);
 
         // Run the pipeline from the root.
-        const pipelineRun = new EnginePipelineRun(this._idToEngineMap, engines,
+        const pipelineRun = new EnginePipelineRun(this, this._idToEngineMap, engines,
             this._pipelineRoot, hostPath, language, content, context);
         return pipelineRun.run();
     }
