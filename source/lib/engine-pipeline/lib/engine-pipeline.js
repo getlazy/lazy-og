@@ -13,6 +13,11 @@ const EventEmitter = require('events');
  * each run.
  */
 class EnginePipeline extends EventEmitter {
+    /**
+     * Constructs EnginePipeline object and prepares it for running.
+     * @param {Array} `engines` An array of engine objects on which the requested task can be performed.
+     * @param {Object} `pipelineRoot` An object holding the root of execution pipeline with all its branches.
+     */
     constructor(engines, pipelineRoot) {
         super();
         this._pipelineRoot = pipelineRoot;
@@ -69,24 +74,117 @@ class EnginePipeline extends EventEmitter {
                     detectedLanguage, passedLanguage: lowerCaseLanguage
                 });
                 engines = _.union(engines, this._languageToEnginesMap.get(detectedLanguage));
-                // Add the detected language to context so that engines can potentially make
-                // use of it.
-                // lazy ignore-once no-param-reassign
-                context = _.assignIn(context || {}, {
-                    lazy: {
-                        detectedLanguage
-                    }
-                });
             }
+
+            // Add the detected language to context so that engines can potentially make
+            // use of it.
+            // lazy ignore-once no-param-reassign
+            context = context || {};
+            // lazy ignore-once no-param-reassign
+            context.lazy = _.assignIn(context.lazy || {}, { detectedLanguage });
         }
 
         // Eliminate duplicate engines.
         engines = _.uniq(engines);
 
-        // Run the pipeline from the root.
-        const pipelineRun = new EnginePipelineRun(this, this._idToEngineMap, engines,
+        // Create the pipeline.
+        const pipelineRun = new EnginePipelineRun(this._idToEngineMap, engines,
             this._pipelineRoot, hostPath, language, content, context);
+
+        // Prepare to log metrics.
+        const metricBase = EnginePipeline._getMetricBase(hostPath, lowerCaseLanguage, context);
+        pipelineRun.on('metrics', (engineId, metrics) => {
+            this.emit('metrics', _.map(metrics, metric => _.assignIn(metric, metricBase, { engineId })));
+        });
+
         return pipelineRun.run();
+    }
+
+    // TODO: Move this to lazy-common as it was copied from pullreq engine.
+    static _getRepositoryNameFromFetch(remote) {
+        if (!_.isString(remote)) {
+            return remote;
+        }
+
+        const httpProtocolRegex = /^https:\/\/github.com\/(.+)\/(.+)\.git/g;
+        const httpFetch = httpProtocolRegex.exec(remote);
+        if (httpFetch) {
+            return {
+                owner: httpFetch[1],
+                name: httpFetch[2]
+            };
+        }
+
+        const sshProtocolRegex = /^git@github.com:(.+)\/(.+)\.git/g;
+        const sshFetch = sshProtocolRegex.exec(remote);
+        if (sshFetch) {
+            return {
+                owner: sshFetch[1],
+                name: sshFetch[2]
+            };
+        }
+
+        return remote;
+    }
+
+    static _getMetricBase(hostPath, language, context) {
+        return {
+            hostname: context && context.hostname,
+            hostPath,
+            language,
+            detectedLanguage: _.get(context, 'lazy.detectedLanguage'),
+            client: context && context.client,
+            repository: EnginePipeline._getRepositoryNameFromFetch(
+                EnginePipeline._getBestRepositoryFetchFromRemotes(_.get(context, 'repositoryInformation.remotes'))),
+            branch: _.get(context, 'repositoryInformation.status.current')
+        };
+    }
+
+    static _getBestRepositoryFetchFromRemotes(remotes) {
+        // lazy ignore-once lodash/chaining
+        return _.chain(remotes)
+            // Sort remotes in origin, upstream, alphabetical order
+            .sortWithComparator(EnginePipeline._remotesComparator)
+            .head()
+            .get('refs.fetch')
+            .value();
+    }
+
+    static _remotesComparator(remote1, remote2) {
+        const name1 = _.get(remote1, 'name');
+        const name2 = _.get(remote2, 'name');
+        if (!name1) {
+            if (!name2) {
+                return 0;
+            }
+
+            return 1;
+        }
+
+        if (!name2) {
+            return -1;
+        }
+
+        if (name1 === name2) {
+            return 0;
+        }
+        if (name1 === 'origin') {
+            return -1;
+        }
+        if (name2 === 'origin') {
+            return 1;
+        }
+        if (name1 === 'upstream') {
+            return -1;
+        }
+        if (name2 === 'upstream') {
+            return 1;
+        }
+
+        if (name1 < name2) {
+            return -1;
+        }
+        return 1;
     }
 }
 

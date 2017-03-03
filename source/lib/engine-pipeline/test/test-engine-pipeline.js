@@ -101,16 +101,49 @@ describe('EnginePipeline', function () {
             };
             const enginePipeline = new EnginePipeline(engines, pipeline);
             let metricsIssuedCounter = 0;
-            enginePipeline.on('metrics', (engineId, metrics) => {
-                assert.equal(engineId, 'engine1');
+            enginePipeline.on('metrics', (metrics) => {
                 assert(_.isArray(metrics));
                 assert.equal(_.size(metrics), 1);
-                assert.equal(_.head(metrics).language, 'JavaScript');
-                assert.equal(_.head(metrics).rule, 'test');
+                const metric = _.head(metrics);
+                assert.equal(metric.engineId, 'engine1');
+                assert.equal(metric.hostPath, 'test.js');
+                assert.equal(metric.language, 'javascript');
+                assert.equal(metric.detectedLanguage, 'javascript');
+                assert.equal(metric.rule, 'test');
+                assert.equal(metric.hostname, 'test-hostname');
+                assert.equal(metric.repository.owner, 'test-owner');
+                assert.equal(metric.repository.name, 'test-repository');
+                assert.equal(metric.branch, 'test-branch');
+                assert.equal(metric.client, 'test-client');
                 metricsIssuedCounter += 1;
             });
             const engineStatuses = [];
-            return enginePipeline.analyzeFile('test.js', 'JavaScript', '\'use strict\'', {}, engineStatuses)
+            return enginePipeline.analyzeFile('test.js', 'JavaScript', '\'use strict\'', {
+                hostname: 'test-hostname',
+                client: 'test-client',
+                repositoryInformation: {
+                    status: {
+                        current: 'test-branch'
+                    },
+                    remotes: [{
+                        name: 'test1',
+                        refs: {
+                            fetch: 'test1-repo'
+                        }
+                    }, {
+                        name: 'upstream',
+                        refs: {
+                            fetch: 'test-upstream-repo'
+                        }
+                    },
+                    {
+                        name: 'origin',
+                        refs: {
+                            fetch: 'https://github.com/test-owner/test-repository.git'
+                        }
+                    }]
+                }
+            }, engineStatuses)
                 .then((result) => {
                     assert(_.isArray(result.warnings));
                     assert.equal(_.size(result.warnings), 1);
@@ -120,5 +153,69 @@ describe('EnginePipeline', function () {
                     assert.equal(metricsIssuedCounter, 1);
                 });
         });
+    });
+
+    it('_remotesComparator', function () {
+        const test1 = {
+            name: 'test1',
+            refs: {
+                fetch: 'test1-repo'
+            }
+        };
+        const test2 = {
+            name: 'test2',
+            refs: {
+                fetch: 'test2-repo'
+            }
+        };
+        const upstream = {
+            name: 'upstream',
+            refs: {
+                fetch: 'test-upstream-repo'
+            }
+        };
+        const origin = {
+            name: 'origin',
+            refs: {
+                fetch: 'test-origin-repo'
+            }
+        };
+        const empty = {};
+        assert.equal(EnginePipeline._remotesComparator(test1, origin), 1);
+        assert.equal(EnginePipeline._remotesComparator(test2, origin), 1);
+        assert.equal(EnginePipeline._remotesComparator(empty, origin), 1);
+        assert.equal(EnginePipeline._remotesComparator(upstream, origin), 1);
+        assert.equal(EnginePipeline._remotesComparator(origin, origin), 0);
+        assert.equal(EnginePipeline._remotesComparator(test1, upstream), 1);
+        assert.equal(EnginePipeline._remotesComparator(test2, upstream), 1);
+        assert.equal(EnginePipeline._remotesComparator(empty, upstream), 1);
+        assert.equal(EnginePipeline._remotesComparator(origin, upstream), -1);
+        assert.equal(EnginePipeline._remotesComparator(upstream, upstream), 0);
+        assert.equal(EnginePipeline._remotesComparator(upstream, test1), -1);
+        assert.equal(EnginePipeline._remotesComparator(test2, test1), 1);
+        assert.equal(EnginePipeline._remotesComparator(empty, test1), 1);
+        assert.equal(EnginePipeline._remotesComparator(origin, test1), -1);
+        assert.equal(EnginePipeline._remotesComparator(test1, test1), 0);
+        assert.equal(EnginePipeline._remotesComparator(upstream, test2), -1);
+        assert.equal(EnginePipeline._remotesComparator(test1, test2), -1);
+        assert.equal(EnginePipeline._remotesComparator(empty, test2), 1);
+        assert.equal(EnginePipeline._remotesComparator(origin, test2), -1);
+        assert.equal(EnginePipeline._remotesComparator(test2, test2), 0);
+        assert.equal(EnginePipeline._remotesComparator(test1, empty), -1);
+        assert.equal(EnginePipeline._remotesComparator(test2, empty), -1);
+        assert.equal(EnginePipeline._remotesComparator(upstream, empty), -1);
+        assert.equal(EnginePipeline._remotesComparator(origin, empty), -1);
+        assert.equal(EnginePipeline._remotesComparator(empty, empty), 0);
+    });
+
+    it('_getRepositoryNameFromFetch', function () {
+        assert.equal(EnginePipeline._getRepositoryNameFromFetch(), undefined);
+        assert.equal(EnginePipeline._getRepositoryNameFromFetch(null), null);
+        assert.equal(EnginePipeline._getRepositoryNameFromFetch(1), 1);
+        assert.equal(EnginePipeline._getRepositoryNameFromFetch('test'), 'test');
+        assert.deepEqual(EnginePipeline._getRepositoryNameFromFetch(
+            'https://github.com/test-owner/test-repo.git'), { owner: 'test-owner', name: 'test-repo' });
+        assert.deepEqual(EnginePipeline._getRepositoryNameFromFetch(
+            'git@github.com:test-owner/test-repo.git'), { owner: 'test-owner', name: 'test-repo' });
     });
 });

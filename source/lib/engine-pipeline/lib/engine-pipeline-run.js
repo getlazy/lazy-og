@@ -3,6 +3,7 @@
 
 const _ = require('lodash');
 const logger = require('@lazyass/common').createPackageLogger('lazy-engine-pipeline');
+const EventEmitter = require('events');
 
 // Keep running the promises returned by the given action while the given condition returns true.
 const asyncWhile = (condition, action) => {
@@ -15,9 +16,9 @@ const asyncWhile = (condition, action) => {
  * Class implementing details of a single pipeline run. This class is used by EnginePipeline and
  * shouldn't be used on its own (which is why it's not exposed in the public interface)
  */
-class EnginePipelineRun {
-    constructor(enginePipeline, idToEngineMap, prefilteredEngines, pipelineRoot, hostPath, language, content, context) {
-        this._enginePipeline = enginePipeline;
+class EnginePipelineRun extends EventEmitter {
+    constructor(idToEngineMap, prefilteredEngines, pipelineRoot, hostPath, language, content, context) {
+        super();
         this._idToEngineMap = idToEngineMap;
         this._prefilteredEngines = prefilteredEngines;
         this._pipelineRoot = pipelineRoot;
@@ -74,7 +75,7 @@ class EnginePipelineRun {
                     // in which we are running has a chance to store them.
                     if (res.metrics) {
                         // Emit the event on the run's EnginePipeline object.
-                        this._enginePipeline.emit('metrics', engineId, res.metrics);
+                        this.emit('metrics', engineId, res.metrics);
                         // Delete the metrics, they shouldn't be accumulated or merged through engine calls.
                         // lazy ignore-once no-param-reassign
                         delete res.metrics;
