@@ -24,8 +24,7 @@ const PRIVATE_API_PORT = 17013;
 /**
  * Main lazy process class.
  */
-class Main
-{
+class Main {
     /**
      * Starts the stack by first initializing engines and other services
      * and then starting Express HTTP server.

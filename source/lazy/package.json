@@ -40,7 +40,7 @@
   "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
     "@lazyass/common": "^1.1.0",
-    "@lazyass/engine-pipeline": "^2.0.0",
+    "@lazyass/engine-pipeline": "^2.2.0",
     "@lazyass/lazy-config-file": "^1.2.0",
     "async": "^2.1.4",
     "body-parser": "^1.15.2",

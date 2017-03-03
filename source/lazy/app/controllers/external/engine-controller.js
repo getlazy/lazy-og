@@ -87,6 +87,10 @@ const initialize = (app, options) => {
     engineManager = options.engineManager;
     enginePipeline = new EnginePipeline(
         engineManager.engines, _.get(options, 'config.engine_pipeline'));
+    enginePipeline.on('metrics', (metrics) => {
+        // Log all metrics through logger.metric mechanism.
+        _.forEach(metrics, metric => logger.metric(metric));
+    });
     addEndpoints(app, options);
     return Promise.resolve();
 };
