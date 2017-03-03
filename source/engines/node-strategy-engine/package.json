@@ -1,6 +1,6 @@
 {
   "name": "lazy-engine-container",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Container for Lazy engines.",
   "main": "index.js",
   "scripts": {
