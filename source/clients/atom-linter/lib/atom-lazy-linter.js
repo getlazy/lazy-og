@@ -33,7 +33,12 @@ module.exports = {
         serviceUrl: {
             type: 'string',
             default: 'http://localhost:16827',
-            description: 'URL of lazy'
+            description: 'URL of lazy.'
+        },
+        lazyToken: {
+            type: 'string',
+            default: '',
+            description: 'Get your token at http://beta.getlazy.io and paste it here.'
         }
     },
 
@@ -47,6 +52,9 @@ module.exports = {
         this.subscriptions = new CompositeDisposable();
         this.subscriptions.add(atom.config.observe('atom-lazy-linter.serviceUrl', (serviceUrl) => {
             self.serviceUrl = serviceUrl;
+        }));
+        this.subscriptions.add(atom.config.observe('atom-lazy-linter.lazyToken', (lazyToken) => {
+            self.lazyToken = lazyToken;
         }));
     },
 
@@ -238,14 +246,21 @@ module.exports = {
     makeRequest(path, grammar, fileContents, repoInfo) {
         const self = this;
 
+        let proxyPath = '';
+        let apikeyHeader = '';
+        if (!_.isEmpty(self.lazyToken)) {
+            proxyPath = 'golazy/';
+            apikeyHeader = self.lazyToken;
+        }
         return new Promise((resolve) => {
             const requestParams = {
                 method: 'POST',
-                url: `${self.serviceUrl}/file`,
+                url: `${self.serviceUrl}/${proxyPath}file`,
                 json: true,
                 headers: {
                     Accept: 'application/json',
-                    'X-LazyApi-Version': 'v20161217'
+                    'X-LazyApi-Version': 'v20161217',
+                    apikey: apikeyHeader
                 },
                 body: {
                     hostPath: path,
