@@ -39,22 +39,26 @@ class EnginePipelineRun extends EventEmitter {
         return this._runPipeline(this._pipelineRoot, this._context);
     }
 
-    _runPipeline(pipeline, context) {
-        const bundle = _.get(pipeline, 'bundle');
-        const sequence = _.get(pipeline, 'sequence');
+    _runPipeline(pipelineNode, context) {
+        // Only valid configuration of a node is exactly one non-empty array property named either `bundle` or
+        // `sequence`.
+        if (_.size(pipelineNode) === 1) {
+            try {
+                const bundle = _.get(pipelineNode, 'bundle');
+                if (_.isArray(bundle) && !_.isEmpty(bundle)) {
+                    return this._runBundle(bundle, context);
+                }
 
-        try {
-            if (!_.isNil(bundle)) {
-                return this._runBundle(bundle, context);
+                const sequence = _.get(pipelineNode, 'sequence');
+                if (_.isArray(sequence) && !_.isEmpty(sequence)) {
+                    return this._runSequence(sequence, context);
+                }
+            } catch (err) {
+                // istanbul ignore next
+                return Promise.reject(err);
             }
-
-            if (!_.isNil(sequence)) {
-                return this._runSequence(sequence, context);
-            }
-        } catch (err) {
-            // istanbul ignore next
-            return Promise.reject(err);
         }
+
         return Promise.reject(new Error('Bad engine pipeline config.'));
     }
 
@@ -89,7 +93,16 @@ class EnginePipelineRun extends EventEmitter {
     }
 
     static _getEngineItem(engineDef) {
+        if (_.size(engineDef) !== 1) {
+            logger.warn('Ambiguous pipeline definition');
+            return null;
+        }
+
         const engineId = _.head(_.keys(engineDef));
+        if (!_.isObject(engineDef[engineId])) {
+            logger.warn('Bad engine definition');
+            return null;
+        }
 
         if (_.includes(['bundle', 'sequence'], engineId)) {
             return null;
@@ -130,12 +143,13 @@ class EnginePipelineRun extends EventEmitter {
                 // Since we are running engines in parallel,
                 // we need to collect and accumulate output of all engines.
                 _.assignInWith(accum, oneResult, (accumValue, resultValue) => {
-                    // do not allow undefined value to overwrite something that is defined
+                    // Do not allow undefined value to overwrite something that is defined
+                    // istanbul ignore next
                     if (_.isUndefined(resultValue)) {
                         return accumValue;
                     }
 
-                    // if the property is array, then merge them instead of overwriting
+                    // If the property is array, then merge them instead of overwriting
                     if (_.isArray(resultValue)) {
                         return _.union(accumValue, resultValue);
                     }

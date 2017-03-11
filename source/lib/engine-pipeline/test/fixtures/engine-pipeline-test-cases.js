@@ -34,9 +34,99 @@ module.exports = [{
         assert.equal(err.message, 'Bad engine pipeline config.');
     }
 }, {
+    id: 'failure #5',
+    pipeline: {
+        bundle: null
+    },
+    catch: (err) => {
+        assert(err);
+        assert.equal(err.message, 'Bad engine pipeline config.');
+    }
+}, {
+    id: 'failure #6',
+    pipeline: {
+        bundle: {}
+    },
+    catch: (err) => {
+        assert(err);
+        assert.equal(err.message, 'Bad engine pipeline config.');
+    }
+}, {
+    id: 'failure #7',
+    pipeline: {
+        sequence: 1234
+    },
+    catch: (err) => {
+        assert(err);
+        assert.equal(err.message, 'Bad engine pipeline config.');
+    }
+}, {
+    id: 'failure #8',
+    pipeline: {
+        sequence: {}
+    },
+    catch: (err) => {
+        assert(err);
+        assert.equal(err.message, 'Bad engine pipeline config.');
+    }
+}, {
+    id: 'failure #9',
+    pipeline: {
+        sequence: [{}],
+        bundle: [{}]
+    },
+    catch: (err) => {
+        assert(err);
+        assert.equal(err.message, 'Bad engine pipeline config.');
+    }
+}, {
+    id: 'failure #10',
+    pipeline: {
+        test: 1234
+    },
+    catch: (err) => {
+        assert(err);
+        assert.equal(err.message, 'Bad engine pipeline config.');
+    }
+}, {
+    id: 'failure #11',
+    pipeline: {
+        sequence: [{}],
+        test: 1234
+    },
+    catch: (err) => {
+        assert(err);
+        assert.equal(err.message, 'Bad engine pipeline config.');
+    }
+}, {
+    id: 'failure #12',
+    pipeline: {
+        sequence: [{
+            engine1: 'test'
+        }]
+    },
+    catch: (err) => {
+        assert(err);
+        assert.equal(err.message, 'Bad engine pipeline config.');
+    }
+}, {
+    id: 'failure #12',
+    pipeline: {
+        sequence: [{
+            engine1: {},
+            engine2: {}
+        }]
+    },
+    catch: (err) => {
+        assert(err);
+        assert.equal(err.message, 'Bad engine pipeline config.');
+    }
+}, {
     id: 'success #1',
     pipeline: {
-        sequence: []
+        sequence: [{
+            engine1: {}
+        }]
     },
     then: (result) => {
         assert(!_.isUndefined(result));
@@ -766,7 +856,7 @@ module.exports = [{
         assert.equal(_.get(result, 'status.test'), 2);
     }
 }, {
-    id: 'language test #6',
+    id: 'language test #7',
     engines: [{
         id: 'engine1',
         languages: ['JavaScript'],
