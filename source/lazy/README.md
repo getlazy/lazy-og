@@ -98,16 +98,43 @@ lazy responds with the following body:
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `warnings` | array | Array of warnings objects that are the result of the analysis. |
+| `warnings` | array | Array of warning objects that are the result of the analysis. |
+| `metrics` | array | Array of metric objects that are the metrics of the analysis. |
 
-Each warning object consists may contain:
+Each `warning` object consists of:
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `type` | string | `Error`, `Warning` or `Info` value describing the level of the warning. |
-| `message` | string | The message of the warning. |
-| `line` | number | The line with which the message is associated. |
-| `column` | number | The column with which the message is associated. |
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `type` | string | yes | `Error`, `Warning` or `Info` value describing the level of the warning. |
+| `message` | string | yes | The message of the warning. |
+| `line` | number | yes | The line with which the message is associated. |
+| `column` | number | no | The column with which the message is associated. |
+
+Each `metric` object consists of:
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `timestamp` | number | yes | Timestamp of the moment the metric was measured. |
+| `category` | string | yes | The category of the metric, for example `file-analysis`. |
+| `action` | string | yes | The action of the metric, for example `warning-ignored`. |
+| `value` | number | no | Value of the metric. Unless specified it's assumed to be `1` as in single occurrence. |
+
+There can be any number of other properties and all of them will be included in the stored metric as they are. Notice however that lazy **will** overwrite them if their property names match built-in properties (see below)
+
+lazy will add the following built-in properties to each metric before storing it:
+
+| Property | Type | Always | Description |
+|----------|------|----------|-------------|
+| `engineId` | string | yes | Name of the engine as specified in the lazy.yaml. |
+| `language` | string | yes | The specified language for which the analysis was supposed to be performed. |
+| `detectedLanguage` | string | yes | The detected language for which the analysis was actually performed. |
+| `hostname` | string | yes | The name of the host from which the analysis was invoked. |
+| `hostPath` | string | yes | The path on the host of the file which was analyzed. |
+| `client` | string | yes | The client (e.g. `atom`) which requested the analysis. |
+| `repository` | string | no | The `origin` repository, if available, otherwise `upstream`, otherwise first remote repository. |
+| `branch` | string | no | The current repository branch, if available. |
+
+Other properties may be added in the future but `custom` property name is reserved for exclusive engine use and will never be overwritten by lazy. In it you can thus store deeper structures that need to be tracked.
 
 ### Conventions
 
