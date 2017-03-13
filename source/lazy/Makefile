@@ -41,4 +41,12 @@ coverage:
 	    ierceg/node-dev:6.9.1 \
 	    istanbul report text
 
+bash:
+	docker run --rm -it \
+		-v "$(shell pwd):/app" \
+		-w /app \
+		--env NPM_TOKEN=${NPM_TOKEN} \
+		node:6.10-alpine \
+		sh
+
 .PHONY: *
