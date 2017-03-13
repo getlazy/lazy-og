@@ -33,11 +33,11 @@ const addEndpoints = (app, options) => {
     app.post('/file', (req, res) => {
         const language = selectn('body.language', req);
         const hostPath = selectn('body.hostPath', req);
-        const content = selectn('body.content', req);
-        if (_.isEmpty(language) || _.isEmpty(hostPath) || _.isEmpty(content)) {
+        if (_.isEmpty(language) || _.isEmpty(hostPath)) {
             return res.status(400).send();
         }
 
+        const content = selectn('body.content', req);
         const context = selectn('body.context', req);
 
         try {
