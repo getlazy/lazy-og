@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/getlazy/lazy-engineimpl-eslint#readme",
   "dependencies": {
+    "babel-eslint": "^7.2.0",
     "eslint": "^3.10.2",
     "eslint-rule-documentation": "^1.0.6",
     "lodash": "^4.17.4",
