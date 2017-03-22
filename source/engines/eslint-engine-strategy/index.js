@@ -3,6 +3,7 @@
 /* global logger */
 
 const _ = require('lodash');
+const CLIEngine = require('eslint').CLIEngine;
 const yarnInstall = require('yarn-install');
 const getRuleURI = require('eslint-rule-documentation');
 
