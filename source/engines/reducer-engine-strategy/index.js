@@ -1,5 +1,6 @@
 'use strict'
 
+const _ = require('lodash');
 
 const _reduceWarnings = (allWarnings, maxWarningsPerRule, maxWarningsPerFile) => {
 	const allEnginesResults = {
