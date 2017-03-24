@@ -25,6 +25,11 @@ type Linter$Provider = Object
 //  (line, column) coordinates.
 const ARBITRARILY_VERY_LARGE_COLUMN_NUMBER = 100000;
 const LAZY_HOMEPAGE = 'http://beta.getlazy.io';
+const LAZY_ICONS = {
+  info: 'beer',
+  warning: 'alert',
+  error: 'bug'
+};
 
 //  Map of hashes of running requests and their promises.
 const runningRequests = new Map();
@@ -190,7 +195,7 @@ module.exports = {
                 resolve(atom.project.repositoryForDirectory(directory));
               })
               .then((repository) => self._processResults(
-                filePath, fileContents, body.warnings, repository));
+                filePath, fileContents, body.warnings, repository, editor.buffer));
           })
           .then((result) => {
             //  Delete the request from the map of running requests.
@@ -302,7 +307,7 @@ module.exports = {
     });
   },
 
-  _processResults(path, fileContents, warnings, repository) {
+  _processResults(path, fileContents, warnings, repository, buffer) {
     const self = this;
 
     // For warnings that are comming from Pull Requests
@@ -317,13 +322,40 @@ module.exports = {
       return updatedWarning;
     });
 
+    // If we have fixes, we add them as 'solutions'
+    // But, we must make sure to add only one - first solutions
+    // because fixes cannot be applied in bulk: fix #1 may render fix #2 incorrect
+    // and potentially damage the code.
+    // So, we can have only 1 solution.
+    let areSolutionsEmpty = true;
+
     const results = _.map(updatedWarnings, (warn) => {
       const screenLine = _.toNumber(_.get(warn, 'line', 1)) - 1;
       const screenCol = _.toNumber(_.get(warn, 'column', 1)) - 1;
-      return {
-        severity: _.toLower(_.get(warn, 'type', 'warning')),
-        excerpt: escape(_.get(warn, 'message', 'n/a')),
+
+      const solutions = [];
+      
+      let description;
+      if (!_.isNil(buffer) && !_.isNil(_.get(warn, 'fix.text',))) {
+          const fixFrom = buffer.positionForCharacterIndex(warn.fix.range[0]);
+          const fixTo = buffer.positionForCharacterIndex(warn.fix.range[1]);
+          const replaceWith = _.get(warn, 'fix.text');
+          replaceWhat = buffer.getTextInRange([fixFrom, fixTo]);
+          description = `Consider replacing:<br>\`${replaceWhat}\`<br>with<br>\`${replaceWith}\``;
+        solutions.push({
+          title: `Fix [${warn.ruleId}]`,
+          position: [fixFrom, fixTo],
+          replaceWith
+        });
+      }
+      
+      const severity = _.toLower(_.get(warn, 'type', 'warning'));
+      const oneResult = {
+        severity,
+        excerpt: _.get(warn, 'message', 'n/a'),
         url: _.get(warn, 'moreInfo', LAZY_HOMEPAGE),
+        icon: _.get(LAZY_ICONS, severity, 'arrow-small-right'),
+        description,
         location: {
           file: path,
           position: [
@@ -331,7 +363,13 @@ module.exports = {
             [screenLine, ARBITRARILY_VERY_LARGE_COLUMN_NUMBER]
           ]
         }
+      };
+
+      if (!_.isEmpty(solutions) && areSolutionsEmpty) {
+        _.set(oneResult, 'solutions', solutions);
+        areSolutionsEmpty = false;
       }
+      return oneResult;
     });
     return Promise.resolve(results);
   }
