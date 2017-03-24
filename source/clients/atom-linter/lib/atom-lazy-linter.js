@@ -317,7 +317,7 @@ module.exports = {
       return updatedWarning;
     });
 
-    const re = _.map(updatedWarnings, (warn) => {
+    const results = _.map(updatedWarnings, (warn) => {
       const screenLine = _.toNumber(_.get(warn, 'line', 1)) - 1;
       const screenCol = _.toNumber(_.get(warn, 'column', 1)) - 1;
       return {
@@ -333,6 +333,6 @@ module.exports = {
         }
       }
     });
-    return Promise.resolve(re);
+    return Promise.resolve(results);
   }
 };
