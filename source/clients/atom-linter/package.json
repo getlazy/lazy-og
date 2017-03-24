@@ -1,7 +1,7 @@
 {
   "name": "atom-lazy-linter",
   "main": "./lib/atom-lazy-linter",
-  "version": "0.4.2",
+  "version": "0.6.0",
   "description": "lazy plugin for Atom Linter",
   "keywords": [
     "lazy",
@@ -23,7 +23,7 @@
   "providedServices": {
     "linter": {
       "versions": {
-        "1.0.0": "provideLinter"
+        "2.0.0": "provideLinter"
       }
     }
   },
