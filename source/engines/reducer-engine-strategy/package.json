@@ -1,6 +1,6 @@
 {
   "name": "@lazyass/lazy-engineimpl-reducer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Implementation of Lazy reducer engine",
   "main": "index.js",
   "scripts": {
