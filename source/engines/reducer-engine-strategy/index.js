@@ -23,6 +23,7 @@ const _reduceWarnings = (allWarnings, maxWarningsPerRule, maxWarningsPerFile) =>
 			//  of warnings left for the same rule.
 			return [firstWarning, _.assignIn(_.clone(firstWarning), {
 				type: 'Info',
+        fix: {}, // Remove fixes as they cannot be applied in bulk
 				message: `+ ${warnings.length - 1} other warnings of [${ruleId}] rule`
 			})];
 		})
