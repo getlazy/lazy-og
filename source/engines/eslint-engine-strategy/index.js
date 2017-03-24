@@ -99,6 +99,7 @@ module.exports = {
 						rWarning.moreInfo = moreInfoUrl;
 					}
 
+          rWarning.fix = _.get(warning, 'fix', {});
 					return rWarning;
 				})
 				.filter()
