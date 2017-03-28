@@ -1,6 +1,9 @@
+
 'use strict';
 
 /* global logger */
+
+// lazy ignore global-require import/no-dynamic-require
 
 const _ = require('lodash');
 const spawn = require('cross-spawn');
@@ -15,7 +18,9 @@ class EngineContainerHttpServer extends EngineHttpServer {
         super(port);
         this._config = _.get(config, 'packageConfig', {});
 
-        const npmToken = _.get(config, 'npmToken', 'public');
+        // NPM_TOKEN is read from the environment because it shouldn't be hard-coded in the config
+        // due to security concerns.
+        const npmToken = _.get(process.env, 'NPM_TOKEN', 'public');
         const npmRegistry = _.get(config, 'npmRegistry', 'registry.npmjs.org');
         if (_.eq(npmToken, 'public')) {
             process.env.NPM_TOKEN = npmToken;
@@ -25,7 +30,7 @@ class EngineContainerHttpServer extends EngineHttpServer {
             // the only way we can tell npm (or yarn) to use it is to configure it
             // through CLI.
             const configResult = spawn.sync('npm', ['config', 'set', `//${npmRegistry}/:_authToken`, npmToken], {
-                stdio: 'ignore' //ignore stdio to avoid dumping npmToken to logs!
+                stdio: 'ignore' // ignore stdio to avoid dumping npmToken to logs!
             });
             if (configResult.status !== 0) {
                 this._engine = {};
@@ -94,7 +99,6 @@ class EngineContainerHttpServer extends EngineHttpServer {
 
 class Engine {
     constructor(engineConfig) {
-
         // get the port to listen on
         const port = process.env.PORT || 80;
         this._server = new EngineContainerHttpServer(port, engineConfig);
