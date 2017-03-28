@@ -29,6 +29,7 @@ const LAZY_ICONS = {
     info: 'beer',
     warning: 'alert',
     error: 'bug',
+    pull_request: 'person',
     _fixable: 'tools-small'
 };
 
@@ -342,7 +343,6 @@ module.exports = {
                 const replaceWith = _.get(warn, 'fix.text');
                 const replaceWhat = buffer.getTextInRange([fixFrom, fixTo]);
                 description = `Consider replacing:<br> <pre>${replaceWhat} </pre> <br> with: <br> <pre>${replaceWith}</pre>`;
-                console.log(description);
                 solutions.push({
                     title: `Fix [${warn.ruleId}]`,
                     position: [fixFrom, fixTo],
@@ -365,6 +365,11 @@ module.exports = {
                     ]
                 }
             };
+
+            if (_.eq(severity, 'pr')) {
+              oneResult.severity = 'info';
+              oneResult.icon = LAZY_ICONS.pull_request;
+            }
 
             if (!_.isEmpty(solutions) && areSolutionsEmpty) {
                 _.set(oneResult, 'solutions', solutions);
