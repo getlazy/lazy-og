@@ -1,6 +1,6 @@
 {
   "name": "@lazyass/engine-pipeline",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "Runs tasks through lazy engine pipeline",
   "main": "index.js",
   "scripts": {
