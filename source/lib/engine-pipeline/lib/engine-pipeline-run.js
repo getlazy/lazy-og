@@ -67,7 +67,7 @@ class EnginePipelineRun extends EventEmitter {
 
         if (_.isNil(engine)) {
             // Engine is present in pipeline, but no definition exists.
-            logger.warn('Skipping inexisting engine', { engineId });
+            logger.warn('Skipping inexistent engine', { engineId });
             // We carry forward the results of the previous engine.
             return Promise.resolve(context.previousStepResults);
         }
@@ -118,10 +118,11 @@ class EnginePipelineRun extends EventEmitter {
         const newContext = _.cloneDeep(context) || {};
 
         // Process engines asynchronously but ignore each separate failure.
+        let engineItem;
         return Promise.all(
             _.map(bundle, bundleItem =>
                 (() => {
-                    const engineItem = EnginePipelineRun._getEngineItem(bundleItem);
+                    engineItem = EnginePipelineRun._getEngineItem(bundleItem);
 
                     if (_.isNil(engineItem)) {
                         return this._runPipeline(bundleItem, newContext);
@@ -133,7 +134,8 @@ class EnginePipelineRun extends EventEmitter {
                 })()
                     .catch((err) => {
                         logger.warn('Failure during bundle pipleline run, continuing', {
-                            err
+                            err: _.get(err, 'message'),
+                            engineId: _.get(engineItem, 'engineId')
                         });
                     })
             )
@@ -174,6 +176,7 @@ class EnginePipelineRun extends EventEmitter {
         // en error.
         let i = 0;
         let error;
+        let engineItem;
         return asyncWhile(
             () => i < sequence.length && _.isNil(error),
             // Execute the actual sequence item and return the promise for the execution.
@@ -181,7 +184,7 @@ class EnginePipelineRun extends EventEmitter {
             () => (() => {
                 // Get the current engine item in sequence.
                 const sequenceItem = sequence[i];
-                const engineItem = EnginePipelineRun._getEngineItem(sequenceItem);
+                engineItem = EnginePipelineRun._getEngineItem(sequenceItem);
 
                 // If there is no engine item then it's either a sequence or a bundle
                 // so continue running there.
@@ -202,7 +205,10 @@ class EnginePipelineRun extends EventEmitter {
                 // Capture the error if it happens. Note that an engine could reject the promise
                 // with a nil error in which case we will continue onto the next engine.
                 .catch((err) => {
-                    logger.error('Failure during sequence pipleline run, stopping', { err: err && err.toString() });
+                    logger.error('Failure during sequence pipleline run, stopping', {
+                        err: _.get(err, 'message'),
+                        engineId: _.get(engineItem, 'engineId')
+                    });
                     error = err;
                 })
                 // Error or not increment the index in the sequence to get the next engine.

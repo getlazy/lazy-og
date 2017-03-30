@@ -152,7 +152,7 @@ module.exports = [{
         assert.equal(_.get(result, 'warnings[0].test'), 'result');
     }
 }, {
-    id: 'inexisting engine in sequence #1',
+    id: 'inexistent engine in sequence #1',
     engines: [{
         id: 'engine1',
         languages: [],
@@ -166,14 +166,14 @@ module.exports = [{
         sequence: [{
             engine1: {}
         }, {
-            'inexisting-engine': {}
+            'inexistent-engine': {}
         }]
     },
     then: (result) => {
         assert.equal(_.get(result, 'warnings[0].test'), 'result');
     }
 }, {
-    id: 'inexisting engine in sequence #2',
+    id: 'inexistent engine in sequence #2',
     engines: [{
         id: 'engine1',
         languages: [],
@@ -196,7 +196,7 @@ module.exports = [{
         sequence: [{
             engine1: {}
         }, {
-            'inexisting-engine': {}
+            'inexistent-engine': {}
         }, {
             engine2: {}
         }]
@@ -234,7 +234,7 @@ module.exports = [{
         sequence: [{
             engine1: {}
         }, {
-            'inexisting-engine': {}
+            'inexistent-engine': {}
         }, {
             engine2: {}
         }]
@@ -243,7 +243,7 @@ module.exports = [{
         assert.equal(_.get(result, 'status.test'), 2);
     }
 }, {
-    id: 'inexisting engine in bundle #1',
+    id: 'inexistent engine in bundle #1',
     engines: [{
         id: 'engine1',
         languages: [],
@@ -257,14 +257,14 @@ module.exports = [{
         bundle: [{
             engine1: {}
         }, {
-            'inexisting-engine': {}
+            'inexistent-engine': {}
         }]
     },
     then: (result) => {
         assert.equal(_.get(result, 'warnings[0].test'), 'result');
     }
 }, {
-    id: 'inexisting engine in bundle #2',
+    id: 'inexistent engine in bundle #2',
     engines: [{
         id: 'engine1',
         languages: [],
@@ -287,7 +287,7 @@ module.exports = [{
         bundle: [{
             engine1: {}
         }, {
-            'inexisting-engine': {}
+            'inexistent-engine': {}
         }, {
             engine2: {}
         }]
@@ -329,7 +329,7 @@ module.exports = [{
         bundle: [{
             engine1: {}
         }, {
-            'inexisting-engine': {}
+            'inexistent-engine': {}
         }, {
             engine2: {}
         }]
