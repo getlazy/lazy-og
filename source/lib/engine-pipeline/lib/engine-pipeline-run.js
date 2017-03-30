@@ -94,13 +94,13 @@ class EnginePipelineRun extends EventEmitter {
 
     static _getEngineItem(engineDef) {
         if (_.size(engineDef) !== 1) {
-            logger.warn('Ambiguous pipeline definition');
+            logger.warn('Ambiguous pipeline definition', { engineDef });
             return null;
         }
 
         const engineId = _.head(_.keys(engineDef));
         if (!_.isObject(engineDef[engineId])) {
-            logger.warn('Bad engine definition');
+            logger.warn('Bad engine definition', { engineId });
             return null;
         }
 
