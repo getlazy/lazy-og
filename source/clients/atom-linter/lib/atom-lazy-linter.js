@@ -271,16 +271,14 @@ module.exports = {
     makeRequest(path, grammar, fileContents, repoInfo) {
         const self = this;
 
-        let proxyPath = '';
         let apikeyHeader = '';
         if (!_.isEmpty(self.lazyToken)) {
-            proxyPath = 'golazy/';
             apikeyHeader = self.lazyToken;
         }
         return new Promise((resolve) => {
             const requestParams = {
                 method: 'POST',
-                url: `${self.serviceUrl}/${proxyPath}file`,
+                url: `${self.serviceUrl}/file`,
                 json: true,
                 headers: {
                     Accept: 'application/json',
