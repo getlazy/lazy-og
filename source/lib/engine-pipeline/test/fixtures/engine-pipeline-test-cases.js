@@ -152,6 +152,25 @@ module.exports = [{
         assert.equal(_.get(result, 'warnings[0].test'), 'result');
     }
 }, {
+    id: 'success #3',
+    engines: [{
+        id: 'engine1',
+        languages: [],
+        analyzeFile() {
+            return Promise.resolve({
+                warnings: [{ test: 'result' }]
+            });
+        }
+    }],
+    pipeline: {
+        sequence: [{
+            engine1: null
+        }]
+    },
+    then: (result) => {
+        assert.equal(_.get(result, 'warnings[0].test'), 'result');
+    }
+}, {
     id: 'inexistent engine in sequence #1',
     engines: [{
         id: 'engine1',

@@ -99,7 +99,15 @@ class EnginePipelineRun extends EventEmitter {
         }
 
         const engineId = _.head(_.keys(engineDef));
-        if (!_.isObject(engineDef[engineId])) {
+
+        // We accept undefined, null or an object for engineParams.
+        // If undefined or null, we use an empty object for engineParams.
+        let engineParams = _.get(engineDef, engineId, {});
+        if (_.isNull(engineParams)) {
+            engineParams = {};
+        }
+
+        if (!_.isObject(engineParams)) {
             logger.warn('Bad engine definition', { engineId });
             return null;
         }
@@ -110,7 +118,7 @@ class EnginePipelineRun extends EventEmitter {
 
         return {
             engineId,
-            engineParams: _.get(engineDef, engineId, {})
+            engineParams
         };
     }
 
