@@ -25,10 +25,12 @@ const _configure = (eslintConfiguration) => {
         const plugins = _.get(eslintConfiguration, 'plugins', []);
         if (!_.isEmpty(plugins)) {
             _.forEach(plugins, (onePlugin) => {
-                const packageName = _.get(onePlugin, 'packageName', '');
-                const packageVersion = _.get(onePlugin, 'packageVersion', 'latest');
+                const packageName = _.get(onePlugin, 'package', '');
+                if (!_.isEmpty(packageName)) {
+                    const packageVersion = _.get(onePlugin, 'package-version', 'latest');
+                    packages.push(`${packageName}@${packageVersion}`);
+                }
                 const pluginName = _.get(onePlugin, 'name', '');
-                packages.push(`${packageName}@${packageVersion}`);
                 if (!_.isEmpty(pluginName)) {
                     installedPlugins.push(pluginName);
                 }
@@ -61,7 +63,6 @@ const _getEslintCli = (localConfig) => {
 };
 
 module.exports = {
-
     configure: (config) => {
         return _configure(config)
             .then((cfg) => {
@@ -74,7 +75,6 @@ module.exports = {
     },
 
     handleRequest: (hostPath, language, content, context) => {
-
         const localConfig = _.get(context, 'engineParams.config', {});
 
         return new Promise((resolve) => {
@@ -119,5 +119,4 @@ module.exports = {
             languages: ['JavaScript']
         };
     },
-
 };
