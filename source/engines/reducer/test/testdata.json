@@ -1,0 +1,149 @@
+{
+  "host": "MacNebojsa.local",
+  "client": "atom@1.12.7",
+  "repositoryInformation": null,
+  "engineParams": { "maxWarningsPerRule": 1000, "maxWarningsPerFile": 3 },
+  "previousStepResults": {
+    "warnings": [{
+      "type": "Warning",
+      "message": "Hey hey!",
+      "line": 2,
+      "column": 1,
+      "ruleId": "YamlRule1",
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Info",
+      "message": "+ 3 other warnings of [YamlRule1] rule",
+      "line": 2,
+      "column": 1,
+      "ruleId": "YamlRule1",
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Error",
+      "message": "[indent]: Expected indentation of 4 spaces but found 1 tab.",
+      "ruleId": "indent",
+      "line": 12,
+      "column": 2,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Info",
+      "message": "+ 242 other warnings of [indent] rule",
+      "ruleId": "indent",
+      "line": 12,
+      "column": 2,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Error",
+      "message": "[no-tabs]: Unexpected tab character.",
+      "ruleId": "no-tabs",
+      "line": 12,
+      "column": 2,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Info",
+      "message": "+ 302 other warnings of [no-tabs] rule",
+      "ruleId": "no-tabs",
+      "line": 12,
+      "column": 2,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Error",
+      "message": "[quote-props]: Unnecessarily quoted property 'v' found.",
+      "ruleId": "quote-props",
+      "line": 12,
+      "column": 2,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Info",
+      "message": "+ 22 other warnings of [quote-props] rule",
+      "ruleId": "quote-props",
+      "line": 12,
+      "column": 2,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Error",
+      "message": "[quotes]: Strings must use singlequote.",
+      "ruleId": "quotes",
+      "line": 19,
+      "column": 18,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Info",
+      "message": "+ 89 other warnings of [quotes] rule",
+      "ruleId": "quotes",
+      "line": 19,
+      "column": 18,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Error",
+      "message": "[spaced-comment]: Expected exception block, space or tab after '//' in comment.",
+      "ruleId": "spaced-comment",
+      "line": 23,
+      "column": 1,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Info",
+      "message": "+ 4 other warnings of [spaced-comment] rule",
+      "ruleId": "spaced-comment",
+      "line": 23,
+      "column": 1,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Error",
+      "message": "[no-var]: Unexpected var, use let or const instead.",
+      "ruleId": "no-var",
+      "line": 24,
+      "column": 1,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Info",
+      "message": "+ 29 other warnings of [no-var] rule",
+      "ruleId": "no-var",
+      "line": 24,
+      "column": 1,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Error",
+      "message": "[camelcase]: Identifier 'f_sessions' is not in camel case.",
+      "ruleId": "camelcase",
+      "line": 24,
+      "column": 5,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Error",
+      "message": "[camelcase]: Identifier 'init_new_session' is not in camel case.",
+      "ruleId": "camelcase",
+      "line": 73,
+      "column": 10,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Error",
+      "message": "[camelcase]: Identifier 'f_sessions' is not in camel case.",
+      "ruleId": "camelcase",
+      "line": 375,
+      "column": 18,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Error",
+      "message": "[new-cap]: A constructor name should not start with a lowercase letter.",
+      "ruleId": "new-cap",
+      "line": 40,
+      "column": 17,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Info",
+      "message": "+ 6 other warnings of [new-cap] rule",
+      "ruleId": "new-cap",
+      "line": 40,
+      "column": 17,
+      "filePath": "/src/test.js"
+    }, {
+      "type": "Error",
+      "message": "[prefer-arrow-callback]: Unexpected function expression.",
+      "ruleId": "prefer-arrow-callback",
+      "line": 65,
+      "column": 3,
+      "filePath": "/src/test.js"
+    }]
+  }
+}
