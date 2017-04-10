@@ -1,0 +1,34 @@
+{
+  "name": "lazy-postproc-engine",
+  "version": "2.0.0",
+  "description": "Engine for postprocessing of messages from other engines.",
+  "main": "postprocessor-engine.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Nebojsa Lazic",
+  "license": "MIT",
+  "dependencies": {
+    "@lazyass/engine-helpers": "^6.0.0",
+    "lodash": "^4.17.4",
+    "rewire": "^2.5.2"
+  },
+  "devDependencies": {
+    "@lazyass/common": "^1.0.0",
+    "request": "^2.79.0",
+    "winston": "^2.3.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getlazy/lazy-postproc-engine.git"
+  },
+  "keywords": [
+    "lazy",
+    "postprocessor",
+    "engine"
+  ],
+  "bugs": {
+    "url": "https://github.com/getlazy/lazy-postproc-engine/issues"
+  },
+  "homepage": "https://github.com/getlazy/lazy-postproc-engine#readme"
+}
