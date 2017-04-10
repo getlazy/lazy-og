@@ -1,0 +1,52 @@
+{
+  "name": "generator-lazy-engine",
+  "version": "1.0.0",
+  "description": "Generator for Lazy engines.",
+  "keywords": [
+    "yeoman-generator",
+    "lazy",
+    "software development",
+    "engine",
+    "hackable",
+    "coding",
+    "assistant"
+  ],
+  "files": [
+    "index.js",
+    "generators"
+  ],
+  "authors": [
+    {
+      "name": "Ivan Erceg",
+      "url": "https://github.com/ierceg",
+      "title": "Software Shipper",
+      "username": "ierceg",
+      "twitter": "ierceg"
+    },
+    {
+      "name": "Nebojsa Lazic",
+      "url": "https://github.com/neboysa",
+      "title": "Master of Disaster",
+      "username": "neboysa",
+      "twitter": "2klik"
+    }
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getlazy/generator-lazy-engine.git"
+  },
+  "bugs": {
+    "url": "https://github.com/getlazy/generator-lazy-engine/issues"
+  },
+  "homepage": "https://github.com/getlazy/generator-lazy-engine",
+  "dependencies": {
+    "generator-license": "^5.1.0",
+    "git-remote-origin-url": "^2.0.0",
+    "github-username": "^3.0.0",
+    "inquirer-npm-name": "^2.0.0",
+    "lodash": "^4.17.4",
+    "path": "^0.12.7",
+    "yeoman-generator": "^1.0.1"
+  }
+}
