@@ -1,0 +1,33 @@
+{
+  "name": "stylelint-engine",
+  "version": "2.0.0",
+  "description": "lazy engine serving requests to lint CSS and related using Stylelint",
+  "main": "stylelint-engine.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getlazy/lazy-stylelint-engine.git"
+  },
+  "keywords": [
+    "lazy",
+    "stylelint",
+    "engine"
+  ],
+  "author": "Ivan Erceg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/getlazy/lazy-stylelint-engine/issues"
+  },
+  "homepage": "https://github.com/getlazy/lazy-stylelint-engine#readme",
+  "dependencies": {
+    "@lazyass/engine-helpers": "^6.0.0",
+    "lodash": "^4.17.2",
+    "stylelint": "^7.6.0",
+    "stylelint-config-standard": "^15.0.0"
+  },
+  "devDependencies": {
+    "request": "^2.79.0"
+  }
+}
