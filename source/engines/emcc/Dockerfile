@@ -1,5 +1,5 @@
-FROM node:6.9-alpine
-MAINTAINER Ivan Erceg <ivan@softwaremarbles.com>
+FROM node:6.10-alpine
+MAINTAINER The lazy Authors <team@getlazy.org>
 ARG NPM_TOKEN
 STOPSIGNAL SIGTERM
 WORKDIR /app

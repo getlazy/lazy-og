@@ -1,7 +1,8 @@
 # Forked from https://github.com/SBallert/dockerfiles/blob/master/tidy_html5/Dockerfile (MIT license)
 
 FROM alpine:3.4
-MAINTAINER Ivan Erceg <ivan@softwaremarbles.com>
+MAINTAINER The lazy Authors <team@getlazy.org>
+
 
 ENV TIDY_VERSION 5.2.0
 

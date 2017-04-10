@@ -1,5 +1,6 @@
 FROM ierceg/node-dev:6.9.5
-MAINTAINER lazy team <team@getlazy.org>
+MAINTAINER The lazy Authors <team@getlazy.org>
+
 
 ENV NODE_ENV=production
 ARG NPM_TOKEN

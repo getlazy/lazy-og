@@ -1,5 +1,6 @@
 FROM node:6.10-alpine
-MAINTAINER lazy team <team@getlazy.org>
+MAINTAINER The lazy Authors <team@getlazy.org>
+
 
 ENV NODE_ENV=production
 

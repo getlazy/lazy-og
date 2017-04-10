@@ -1,4 +1,4 @@
-FROM node:6.9-alpine
+FROM node:6.10-alpine
 MAINTAINER <%= author %> 
 ARG NPM_TOKEN
 STOPSIGNAL SIGTERM
