@@ -1,0 +1,7 @@
+{
+    "helper_containers": {
+        "pmd-java": {
+            "image": "codacy/codacy-pmdjava:1.0.114"
+        }
+    }
+}
