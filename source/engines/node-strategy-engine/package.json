@@ -1,0 +1,33 @@
+{
+  "name": "lazy-engine-container",
+  "version": "1.1.0",
+  "description": "Container for Lazy engines.",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "engines": {
+    "node": ">=5.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getlazy/lazy-engine-container.git"
+  },
+  "keywords": [
+    "lazy",
+    "eslint",
+    "engine"
+  ],
+  "author": "Ivan Erceg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/getlazy/lazy-engine-container/issues"
+  },
+  "homepage": "https://github.com/getlazy/lazy-engine-container#readme",
+  "dependencies": {
+    "@lazyass/engine-helpers": "^6.1.0",
+    "cross-spawn": "^5.1.0",
+    "lodash": "^4.17.4",
+    "yarn-install": "^0.2.1"
+  }
+}
