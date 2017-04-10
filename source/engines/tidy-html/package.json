@@ -1,0 +1,35 @@
+{
+  "name": "lazy-tidy-html-engine",
+  "version": "3.0.0",
+  "description": "lazy engine serving requests to lint HTML with TidyHtml",
+  "main": "lazy-tidy-html-engine.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getlazy/lazy-tidy-html-engine.git"
+  },
+  "keywords": [
+    "lazy",
+    "engine",
+    "tidy",
+    "tidyhtml",
+    "html"
+  ],
+  "author": "Ivan Erceg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/getlazy/lazy-tidy-html-engine/issues"
+  },
+  "homepage": "https://github.com/getlazy/lazy-tidy-html-engine#readme",
+  "dependencies": {
+    "@lazyass/engine-helpers": "^6.0.0",
+    "higher": "^1.0.5",
+    "lodash": "^4.17.2",
+    "selectn": "^1.1.1"
+  },
+  "devDependencies": {
+    "request": "^2.79.0"
+  }
+}
