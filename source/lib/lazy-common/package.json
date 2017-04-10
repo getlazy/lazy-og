@@ -1,0 +1,25 @@
+{
+  "name": "@lazyass/common",
+  "version": "1.1.0",
+  "description": "Common utility classes and functions for lazy",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getlazy/lazy-common.git"
+  },
+  "keywords": [
+    "lazy"
+  ],
+  "author": "Ivan Erceg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/getlazy/lazy-common/issues"
+  },
+  "homepage": "https://github.com/getlazy/lazy-common#readme",
+  "dependencies": {
+    "lodash": "^4.17.4"
+  }
+}
