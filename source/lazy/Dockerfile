@@ -1,7 +1,6 @@
 FROM node:6.10-alpine
 MAINTAINER The lazy Authors <team@getlazy.org>
 
-
 RUN apk update && apk upgrade && \
     apk add --no-cache bash git openssh curl
 
@@ -13,7 +12,7 @@ ARG NPM_TOKEN
 # having less layers in a Docker image is beneficial for runtime performance.
 COPY . /app
 WORKDIR /app/
-RUN yarn
+RUN yarn --pure-lockfile
 
 STOPSIGNAL SIGINT
 ENTRYPOINT ["node", "/app/index.js"]

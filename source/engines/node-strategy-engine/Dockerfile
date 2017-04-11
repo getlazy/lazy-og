@@ -1,7 +1,6 @@
 FROM node:6.10-alpine
 MAINTAINER The lazy Authors <team@getlazy.org>
 
-
 ENV NODE_ENV=production
 
 ARG NPM_TOKEN
@@ -11,7 +10,7 @@ ARG NPM_TOKEN
 # having less layers in a Docker image is beneficial for runtime performance.
 COPY . /app
 WORKDIR /app/
-RUN yarn
+RUN yarn --pure-lockfile
 
 STOPSIGNAL SIGINT
 ENTRYPOINT ["node", "/app/index.js"]
