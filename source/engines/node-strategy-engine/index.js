@@ -10,13 +10,14 @@ EngineHelpers.initialize();
 
 const _ = require('lodash');
 const EngineContainer = require('./lib/engine-container');
+
 const LazyPrivateApiClient = EngineHelpers.LazyPrivateApiClient;
 
 let engineContainer;
 
 const client = new LazyPrivateApiClient();
 client.getEngineConfig()
-    .then(fullEngineConfig => {
+    .then((fullEngineConfig) => {
         const engineConfig = _.get(fullEngineConfig, 'config', {});
         engineContainer = new EngineContainer(engineConfig);
 
@@ -28,8 +29,6 @@ client.getEngineConfig()
                 logger.error('Failed to start engine', err);
                 process.exit(-1);
             });
-
-
     })
     .catch((err) => {
         logger.error('Error starting engine.', err);
@@ -53,6 +52,4 @@ process.on('SIGTERM', () => {
         logger.error('Error occurred during stopping engine.', error);
         process.exit(-1);
     }
-
-
 });
