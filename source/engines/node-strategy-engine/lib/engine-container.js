@@ -97,7 +97,7 @@ class EngineContainerHttpServer extends EngineHttpServer {
     }
 }
 
-class Engine {
+class EngineContainer {
     constructor(engineConfig) {
         // get the port to listen on
         const port = process.env.PORT || 80;
@@ -116,4 +116,4 @@ class Engine {
     }
 }
 
-module.exports = Engine;
+module.exports = EngineContainer;
