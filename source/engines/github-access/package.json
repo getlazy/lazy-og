@@ -1,5 +1,5 @@
 {
-  "name": "lazy-github-access-engine",
+  "name": "@getlazy/github-access-engine",
   "version": "2.0.0",
   "description": "lazy engine allowing lazy to access user's GitHub data",
   "main": "index.js",
@@ -8,19 +8,34 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getlazy/lazy-github-access-engine.git"
+    "url": "git+https://github.com/getlazy/lazy.git"
   },
   "keywords": [
     "lazy",
     "engine",
     "GitHub"
   ],
-  "author": "Ivan Erceg",
+  "authors": [
+    {
+      "name": "Ivan Erceg",
+      "url": "https://github.com/ierceg",
+      "title": "Software Shipper",
+      "username": "ierceg",
+      "twitter": "ierceg"
+    },
+    {
+      "name": "Nebojsa Lazic",
+      "url": "https://github.com/neboysa",
+      "title": "Master of Disaster",
+      "username": "neboysa",
+      "twitter": "2klik"
+    }
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/getlazy/lazy-github-access-engine/issues"
+    "url": "https://github.com/getlazy/lazy/issues"
   },
-  "homepage": "https://github.com/getlazy/lazy-github-access-engine#readme",
+  "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
     "@getlazy/engine-helpers": "^6.0.0",
     "lodash": "^4.17.2",

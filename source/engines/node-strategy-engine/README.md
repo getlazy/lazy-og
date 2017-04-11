@@ -11,7 +11,7 @@ Instantiate this engine in `engines` section of `lazy.yaml`. The interesting par
       import_env:
           - NPM_TOKEN
       config:
-          packageNPM: '@getlazy/lazy-engineimpl-eslint'
+          packageNPM: '@getlazy/eslint-engine-strategy'
           packageVersion: latest
           npmRegistry: registry.npmjs.org
           packageConfig:

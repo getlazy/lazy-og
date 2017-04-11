@@ -1,2 +1,2 @@
-# lazy-engineimpl-eslint
-Implementation of Lazy Eslint engine
+# eslint-engine-strategy
+ESlint engine strategy for lazy

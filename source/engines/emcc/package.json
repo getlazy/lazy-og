@@ -1,5 +1,5 @@
 {
-  "name": "lazy-emcc-engine",
+  "name": "@getlazy/emcc-engine",
   "version": "2.0.0",
   "description": "lazy engine serving requests to lint C, C++, ObjC and ObjC++ with EMCC",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getlazy/lazy-emcc-engine.git"
+    "url": "git+https://github.com/getlazy/lazy.git"
   },
   "keywords": [
     "lazy",
@@ -19,12 +19,27 @@
     "Objective-C++",
     "emcc"
   ],
-  "author": "Ivan Erceg",
+  "authors": [
+    {
+      "name": "Ivan Erceg",
+      "url": "https://github.com/ierceg",
+      "title": "Software Shipper",
+      "username": "ierceg",
+      "twitter": "ierceg"
+    },
+    {
+      "name": "Nebojsa Lazic",
+      "url": "https://github.com/neboysa",
+      "title": "Master of Disaster",
+      "username": "neboysa",
+      "twitter": "2klik"
+    }
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/getlazy/lazy-emcc-engine/issues"
+    "url": "https://github.com/getlazy/lazy/issues"
   },
-  "homepage": "https://github.com/getlazy/lazy-emcc-engine#readme",
+  "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
     "@getlazy/engine-helpers": "^6.0.0",
     "higher": "^1.0.5",

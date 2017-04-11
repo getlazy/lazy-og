@@ -1,5 +1,5 @@
 {
-  "name": "lazy-yaml-engine",
+  "name": "@getlazy/yaml-engine",
   "version": "3.0.0",
   "description": "lazy engine for linting YAML files",
   "main": "yaml-engine.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getlazy/lazy-yaml-engine.git"
+    "url": "git+https://github.com/getlazy/lazy.git"
   },
   "keywords": [
     "lazy",
@@ -21,9 +21,9 @@
   "author": "Nebojsa Lazic",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/getlazy/lazy-yaml-engine/issues"
+    "url": "https://github.com/getlazy/lazy/issues"
   },
-  "homepage": "https://github.com/getlazy/lazy-yaml-engine#readme",
+  "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
     "@getlazy/engine-helpers": "^6.0.0",
     "js-yaml": "^3.7.0",

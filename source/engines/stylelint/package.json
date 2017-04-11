@@ -8,19 +8,34 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getlazy/lazy-stylelint-engine.git"
+    "url": "git+https://github.com/getlazy/lazy.git"
   },
   "keywords": [
     "lazy",
     "stylelint",
     "engine"
   ],
-  "author": "Ivan Erceg",
+  "authors": [
+    {
+      "name": "Ivan Erceg",
+      "url": "https://github.com/ierceg",
+      "title": "Software Shipper",
+      "username": "ierceg",
+      "twitter": "ierceg"
+    },
+    {
+      "name": "Nebojsa Lazic",
+      "url": "https://github.com/neboysa",
+      "title": "Master of Disaster",
+      "username": "neboysa",
+      "twitter": "2klik"
+    }
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/getlazy/lazy-stylelint-engine/issues"
+    "url": "https://github.com/getlazy/lazy/issues"
   },
-  "homepage": "https://github.com/getlazy/lazy-stylelint-engine#readme",
+  "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
     "@getlazy/engine-helpers": "^6.0.0",
     "lodash": "^4.17.2",

@@ -1,2 +1,2 @@
-# lazy-engineimpl-postprocessor
-Implementation of Lazy postprocessor engine
+# postprocessor-engine-strategy
+Postprocessor engine strategy for lazy

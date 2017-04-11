@@ -1,5 +1,5 @@
 {
-  "name": "lazy-pullreq-engine",
+  "name": "@getlazy/pullreq-engine",
   "version": "3.0.0",
   "description": "lazy engine for serving comments from GitHub pull requests",
   "main": "pr-engine.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getlazy/lazy-pullreq-engine.git"
+    "url": "git+https://github.com/getlazy/lazy.git"
   },
   "keywords": [
     "lazy",
@@ -18,9 +18,9 @@
   "author": "Nebojsa Lazic",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/getlazy/lazy-pullreq-engine/issues"
+    "url": "https://github.com/getlazy/lazy/issues"
   },
-  "homepage": "https://github.com/getlazy/lazy-pullreq-engine#readme",
+  "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
     "@getlazy/engine-helpers": "^6.0.0",
     "lodash": "^4.17.3",

@@ -1,5 +1,5 @@
 {
-  "name": "lazy-pmd-java-engine",
+  "name": "@getlazy/pmd-java-engine",
   "version": "2.0.0",
   "description": "lazy engine serving requests to lint Java with pmd",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getlazy/lazy-pmd-java-engine.git"
+    "url": "git+https://github.com/getlazy/lazy.git"
   },
   "keywords": [
     "lazy",
@@ -16,12 +16,27 @@
     "java",
     "pmd"
   ],
-  "author": "Ivan Erceg",
+  "authors": [
+    {
+      "name": "Ivan Erceg",
+      "url": "https://github.com/ierceg",
+      "title": "Software Shipper",
+      "username": "ierceg",
+      "twitter": "ierceg"
+    },
+    {
+      "name": "Nebojsa Lazic",
+      "url": "https://github.com/neboysa",
+      "title": "Master of Disaster",
+      "username": "neboysa",
+      "twitter": "2klik"
+    }
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/getlazy/lazy-pmd-java-engine/issues"
+    "url": "https://github.com/getlazy/lazy/issues"
   },
-  "homepage": "https://github.com/getlazy/lazy-pmd-java-engine#readme",
+  "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
     "@getlazy/engine-helpers": "^6.0.0",
     "higher": "^1.0.5",

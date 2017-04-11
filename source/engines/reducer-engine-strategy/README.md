@@ -1,2 +1,2 @@
-# lazy-engineimpl-reducer
-Implementation of Lazy reducer engine
+# reducer-engine-strategy
+Reducer engine strategy for lazy

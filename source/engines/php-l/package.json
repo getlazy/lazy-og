@@ -1,5 +1,5 @@
 {
-  "name": "lazy-php-l-engine",
+  "name": "@getlazy/php-l-engine",
   "version": "2.0.0",
   "description": "lazy engine serving requests to lint PHP",
   "main": "index.js",
@@ -16,17 +16,32 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getlazy/lazy-php-l-engine.git"
+    "url": "git+https://github.com/getlazy/lazy.git"
   },
   "keywords": [
     "lazy",
     "engine",
     "php"
   ],
-  "author": "Ivan Erceg",
+  "authors": [
+    {
+      "name": "Ivan Erceg",
+      "url": "https://github.com/ierceg",
+      "title": "Software Shipper",
+      "username": "ierceg",
+      "twitter": "ierceg"
+    },
+    {
+      "name": "Nebojsa Lazic",
+      "url": "https://github.com/neboysa",
+      "title": "Master of Disaster",
+      "username": "neboysa",
+      "twitter": "2klik"
+    }
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/getlazy/lazy-php-l-engine/issues"
+    "url": "https://github.com/getlazy/lazy/issues"
   },
-  "homepage": "https://github.com/getlazy/lazy-php-l-engine#readme"
+  "homepage": "https://github.com/getlazy/lazy#readme"
 }

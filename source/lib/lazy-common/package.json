@@ -8,17 +8,32 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getlazy/lazy-common.git"
+    "url": "git+https://github.com/getlazy/common.git"
   },
   "keywords": [
     "lazy"
   ],
-  "author": "Ivan Erceg",
+  "authors": [
+    {
+      "name": "Ivan Erceg",
+      "url": "https://github.com/ierceg",
+      "title": "Software Shipper",
+      "username": "ierceg",
+      "twitter": "ierceg"
+    },
+    {
+      "name": "Nebojsa Lazic",
+      "url": "https://github.com/neboysa",
+      "title": "Master of Disaster",
+      "username": "neboysa",
+      "twitter": "2klik"
+    }
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/getlazy/lazy-common/issues"
+    "url": "https://github.com/getlazy/common/issues"
   },
-  "homepage": "https://github.com/getlazy/lazy-common#readme",
+  "homepage": "https://github.com/getlazy/common#readme",
   "dependencies": {
     "lodash": "^4.17.4"
   }

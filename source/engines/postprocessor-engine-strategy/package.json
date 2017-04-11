@@ -1,26 +1,42 @@
 {
-  "name": "@getlazy/lazy-engineimpl-postprocessor",
+  "name": "@getlazy/postprocessor-engine-strategy",
   "version": "1.0.0",
-  "description": "Implementation of Lazy postprocessor engine",
+  "description": "Postprocessor engine strategy for lazy",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getlazy/lazy-engineimpl-postprocessor.git"
+    "url": "git+https://github.com/getlazy/lazy.git"
   },
   "keywords": [
     "lazy",
     "engine",
+    "strategy",
     "postprocessor"
   ],
-  "author": "The lazy Authors",
+  "authors": [
+    {
+      "name": "Ivan Erceg",
+      "url": "https://github.com/ierceg",
+      "title": "Software Shipper",
+      "username": "ierceg",
+      "twitter": "ierceg"
+    },
+    {
+      "name": "Nebojsa Lazic",
+      "url": "https://github.com/neboysa",
+      "title": "Master of Disaster",
+      "username": "neboysa",
+      "twitter": "2klik"
+    }
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/getlazy/lazy-engineimpl-postprocessor/issues"
+    "url": "https://github.com/getlazy/lazy/issues"
   },
-  "homepage": "https://github.com/getlazy/lazy-engineimpl-postprocessor#readme",
+  "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
     "lodash": "^4.17.4"
   }

@@ -1,5 +1,5 @@
 {
-  "name": "lazy-engine-docker-builder",
+  "name": "@getlazy/engine-docker-builder",
   "version": "1.0.0",
   "description": "Specialized builder for lazy engine docker images",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getlazy/lazy-engine-docker-builder.git"
+    "url": "git+https://github.com/getlazy/lazy.git"
   },
   "keywords": [
     "lazy",
@@ -16,12 +16,27 @@
     "docker",
     "builder"
   ],
-  "author": "The lazy Authors",
+  "authors": [
+    {
+      "name": "Ivan Erceg",
+      "url": "https://github.com/ierceg",
+      "title": "Software Shipper",
+      "username": "ierceg",
+      "twitter": "ierceg"
+    },
+    {
+      "name": "Nebojsa Lazic",
+      "url": "https://github.com/neboysa",
+      "title": "Master of Disaster",
+      "username": "neboysa",
+      "twitter": "2klik"
+    }
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/getlazy/lazy-engine-docker-builder/issues"
+    "url": "https://github.com/getlazy/lazy/issues"
   },
-  "homepage": "https://github.com/getlazy/lazy-engine-docker-builder#readme",
+  "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
     "async": "^2.1.4",
     "fs-extra": "^2.0.0",
