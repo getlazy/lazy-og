@@ -6,7 +6,7 @@
 // lazy ignore class-methods-use-this
 
 const _ = require('lodash');
-const EngineHelpers = require('@lazyass/engine-helpers');
+const EngineHelpers = require('@getlazy/engine-helpers');
 
 const HelperContainer = EngineHelpers.HelperContainer;
 const AdaptedAtomLinter = EngineHelpers.AdaptedAtomLinter;

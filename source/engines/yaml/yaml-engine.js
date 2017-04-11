@@ -4,7 +4,7 @@
 const _ = require('lodash');
 const path = require('path');
 const yaml = require('js-yaml');
-const EngineHelpers = require('@lazyass/engine-helpers');
+const EngineHelpers = require('@getlazy/engine-helpers');
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 

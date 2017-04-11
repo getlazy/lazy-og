@@ -8,7 +8,7 @@ const _ = require('lodash');
 const assert = require('assert');
 const request = require('request');
 const rewire = require('rewire');
-const EnigeHelpersDouble = td.replace('@lazyass/engine-helpers');
+const EnigeHelpersDouble = td.replace('@getlazy/engine-helpers');
 const testModule = rewire('../engine');
 const LazyEngineHttpServer = testModule.__get__('LazyEngineHttpServer');
 

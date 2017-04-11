@@ -1,7 +1,7 @@
 
 'use strict';
 
-const EngineHelpers = require('@lazyass/engine-helpers');
+const EngineHelpers = require('@getlazy/engine-helpers');
 EngineHelpers.initialize();
 
 const Engine = require('../yaml-engine');

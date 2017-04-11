@@ -6,7 +6,7 @@
 // lazy ignore class-methods-use-this
 
 const _ = require('lodash'); // lazy ignore-once lodash/import-scope
-const EngineHelpers = require('@lazyass/engine-helpers');
+const EngineHelpers = require('@getlazy/engine-helpers');
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 const LazyPrivateApiClient = EngineHelpers.LazyPrivateApiClient;

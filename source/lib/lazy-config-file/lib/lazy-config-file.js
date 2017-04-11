@@ -9,7 +9,7 @@ const async = require('async');
 const Ajv = require('ajv');
 const isUrl = require('is-url');
 const request = require('request-promise-native');
-const logger = require('@lazyass/common').createPackageLogger('lazy-config-file');
+const logger = require('@getlazy/common').createPackageLogger('lazy-config-file');
 
 //  LAZY_CONFIG_SCHEMA is defined at the end of the file but set during module loading.
 let LAZY_CONFIG_SCHEMA;

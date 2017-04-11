@@ -39,9 +39,9 @@
   },
   "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
-    "@lazyass/common": "^1.1.0",
-    "@lazyass/engine-pipeline": "^2.2.0",
-    "@lazyass/lazy-config-file": "^1.2.0",
+    "@getlazy/common": "^1.1.0",
+    "@getlazy/engine-pipeline": "^2.2.0",
+    "@getlazy/lazy-config-file": "^1.2.0",
     "async": "^2.1.4",
     "body-parser": "^1.15.2",
     "common-errors": "^1.0.0",
@@ -59,7 +59,7 @@
     "winston-elasticsearch": "github:ierceg/winston-elasticsearch#v5.1.0"
   },
   "devDependencies": {
-    "@lazyass/node-lazy-client": "^1.2.1",
+    "@getlazy/node-lazy-client": "^1.2.1",
     "nock": "^9.0.2",
     "testdouble": "^1.10.2"
   }

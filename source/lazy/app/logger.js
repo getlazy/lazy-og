@@ -5,7 +5,7 @@ const _ = require('lodash');
 const winston = require('winston');
 const WinstonElasticsearch = require('winston-elasticsearch');
 const fp = require('lodash/fp');
-const common = require('@lazyass/common');
+const common = require('@getlazy/common');
 
 const LAZY_VERSION = require('../package.json').version;
 

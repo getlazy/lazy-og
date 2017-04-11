@@ -2,7 +2,7 @@
 'use strict';
 
 const _ = require('lodash');
-const logger = require('@lazyass/common').createPackageLogger('lazy-engine-pipeline');
+const logger = require('@getlazy/common').createPackageLogger('lazy-engine-pipeline');
 const EventEmitter = require('events');
 
 // Keep running the promises returned by the given action while the given condition returns true.

@@ -7,7 +7,7 @@ const _ = require('lodash');
 const low = require('lowdb');
 const LowdbLibFileAsync = require('lowdb/lib/file-async');
 const mkdirp = require('mkdirp');
-const EngineHelpers = require('@lazyass/engine-helpers');
+const EngineHelpers = require('@getlazy/engine-helpers');
 const url = require('url');
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;

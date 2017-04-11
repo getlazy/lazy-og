@@ -185,7 +185,7 @@ module.exports = class extends Generator {
 		this.npmInstall(['lodash'], {
 			save: true
 		});
-		this.npmInstall(['@lazyass/engine-helpers'], {
+		this.npmInstall(['@getlazy/engine-helpers'], {
 			save: true
 		});
 		this.npmInstall(['assert'], {
@@ -197,7 +197,7 @@ module.exports = class extends Generator {
 		this.npmInstall(['rewire'], {
 			'save-dev': true
 		});
-		this.npmInstall(['@lazyass/common'], {
+		this.npmInstall(['@getlazy/common'], {
 			'save-dev': true
 		});
 		this.npmInstall(['winston'], {

@@ -3,7 +3,7 @@
 
 /* global logger */
 
-const EngineHelpers = require('@lazyass/engine-helpers');
+const EngineHelpers = require('@getlazy/engine-helpers');
 
 global.logger = EngineHelpers.Logger.getEngineLogger();
 

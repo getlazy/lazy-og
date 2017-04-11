@@ -5,7 +5,7 @@
 
 const _ = require('lodash');
 
-const EngineHelpers = require('@lazyass/engine-helpers');
+const EngineHelpers = require('@getlazy/engine-helpers');
 const stylelint = require('stylelint');
 const stylelintConfigStandard = require('stylelint-config-standard');
 

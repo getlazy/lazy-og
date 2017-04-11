@@ -1,5 +1,5 @@
 {
-  "name": "@lazyass/common",
+  "name": "@getlazy/common",
   "version": "1.1.0",
   "description": "Common utility classes and functions for lazy",
   "main": "index.js",

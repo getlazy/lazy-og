@@ -8,7 +8,7 @@ const Logger = require('./app/logger');
 global.logger = Logger.createTemporaryLogger();
 
 const _ = require('lodash');
-const LazyConfigFile = require('@lazyass/lazy-config-file');
+const LazyConfigFile = require('@getlazy/lazy-config-file');
 const Main = require('./app/main.js');
 
 // Setup graceful termination on SIGINT.
@@ -51,8 +51,8 @@ const redirectPackagesLogEvents = (packageNames) => {
 };
 
 // Capture log events from packages emitting log events.
-redirectPackagesLogEvents(['@lazyass/engine-pipeline',
-    '@lazyass/lazy-config-file']);
+redirectPackagesLogEvents(['@getlazy/engine-pipeline',
+    '@getlazy/lazy-config-file']);
 
 // Our 3rd agument is path to lazy.yaml (1st is node, 2nd is index.js)
 const lazyYamlPath = process.argv[2];

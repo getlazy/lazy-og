@@ -1,5 +1,5 @@
 {
-  "name": "@lazyass/engine-pipeline",
+  "name": "@getlazy/engine-pipeline",
   "version": "2.2.5",
   "description": "Runs tasks through lazy engine pipeline",
   "main": "index.js",
@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/getlazy/lazy-engine-pipeline#readme",
   "dependencies": {
-    "@lazyass/common": "^1.1.0",
+    "@getlazy/common": "^1.1.0",
     "language-detect": "^1.1.0",
     "lodash": "^4.17.4",
     "oh-lodash": "^1.0.0"

@@ -6,7 +6,7 @@
 const _ = require('lodash');
 const H = require('higher');
 const selectn = require('selectn');
-const EngineHelpers = require('@lazyass/engine-helpers');
+const EngineHelpers = require('@getlazy/engine-helpers');
 
 const HelperContainer = EngineHelpers.HelperContainer;
 const EngineHttpServer = EngineHelpers.EngineHttpServer;

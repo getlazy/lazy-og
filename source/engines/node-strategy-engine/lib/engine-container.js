@@ -8,7 +8,7 @@
 const _ = require('lodash');
 const spawn = require('cross-spawn');
 const yarnInstall = require('yarn-install');
-const EngineHelpers = require('@lazyass/engine-helpers');
+const EngineHelpers = require('@getlazy/engine-helpers');
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 

@@ -3,7 +3,7 @@
 
 const _ = require('lodash');
 const winston = require('winston');
-const common = require('@lazyass/common');
+const common = require('@getlazy/common');
 
 let logger;
 

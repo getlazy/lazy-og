@@ -5,7 +5,7 @@ const _ = require('lodash');
 const fp = require('lodash/fp');
 const detect = require('language-detect');
 const EnginePipelineRun = require('./engine-pipeline-run');
-const logger = require('@lazyass/common').createPackageLogger('lazy-engine-pipeline');
+const logger = require('@getlazy/common').createPackageLogger('lazy-engine-pipeline');
 const EventEmitter = require('events');
 
 /**

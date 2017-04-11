@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/getlazy/lazy-emcc-engine#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^6.0.0",
+    "@getlazy/engine-helpers": "^6.0.0",
     "higher": "^1.0.5",
     "lodash": "^4.17.2"
   },

@@ -6,7 +6,7 @@ const _ = require('lodash');
 const selectn = require('selectn');
 const proxy = require('http-proxy-middleware');
 const PACKAGE_VERSION = require('../../../package.json').version;
-const EnginePipeline = require('@lazyass/engine-pipeline');
+const EnginePipeline = require('@getlazy/engine-pipeline');
 
 let enginePipeline;
 let engineManager;

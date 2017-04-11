@@ -4,7 +4,7 @@
 // Default logger in engine helpers outputs JSON, so we need 
 // a more readable one
 const winston = require('winston');
-const common = require('@lazyass/common');
+const common = require('@getlazy/common');
 
 const createTemporaryLogger = () => {
     winston.addColors(common.LazyLoggingLevels.colors);

@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const EngineHelpers = require('@lazyass/engine-helpers');
+const EngineHelpers = require('@getlazy/engine-helpers');
 const RepoLinter = require('./app/repo-linter.js');
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;

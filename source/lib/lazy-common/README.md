@@ -8,7 +8,7 @@ Using this object ensures consistent logging levels across all lazy processes ru
 Use:
 
 ```js
-const common = require('@lazyass/common');
+const common = require('@getlazy/common');
 const winston = require('winston');
 
 winston.addColors(common.LazyLoggingLevels.colors);
@@ -25,7 +25,7 @@ External packages cannot know if `logger` exists on the global level nor what ar
 Use:
 
 ```js
-const common = require('@lazyass/common');
+const common = require('@getlazy/common');
 const logger = common.createLogger('my-package'); // We never assign this `logger` to `global` as that would overwrite application's `global.logger`.
 
 // ...

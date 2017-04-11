@@ -4,7 +4,8 @@
 // In engine processes it is strongly recommended to include engine-helpers as the first thing
 // in the process's lifetime and then immediately invoke `initialize` which will setup global logger,
 // default handlers for uncaught exceptions, unhandled promises and so on.
-const EngineHelpers = require('@lazyass/engine-helpers');
+const EngineHelpers = require('@getlazy/engine-helpers');
+
 EngineHelpers.initialize();
 
 const _ = require('lodash');
