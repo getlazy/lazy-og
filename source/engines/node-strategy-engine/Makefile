@@ -16,10 +16,8 @@ run:
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
 	    -v "/tmp:/lazy" \
-		-e "LAZY_VOLUME_NAME=/tmp" \
 	    -w /app \
 	    ierceg/node-dev:6.9.1 \
 	    node /app/index.js
-
 
 .PHONY: *
