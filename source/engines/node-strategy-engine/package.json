@@ -1,7 +1,7 @@
 {
-  "name": "lazy-engine-container",
+  "name": "node-strategy-engine",
   "version": "1.1.0",
-  "description": "Container for Lazy engines.",
+  "description": "Engine for engine strategies implemented in JavaScript/Node.js",
   "main": "index.js",
   "scripts": {
     "test": "test"
@@ -11,21 +11,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getlazy/lazy-engine-container.git"
+    "url": "git+https://github.com/getlazy/lazy.git"
   },
   "keywords": [
     "lazy",
-    "eslint",
-    "engine"
+    "engine",
+    "strategy"
   ],
-  "author": "Ivan Erceg",
+  "author": "The lazy Authors",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/getlazy/lazy-engine-container/issues"
+    "url": "https://github.com/getlazy/lazy/issues"
   },
-  "homepage": "https://github.com/getlazy/lazy-engine-container#readme",
+  "homepage": "https://github.com/getlazy/lazy/tree/master/source/engines/node-strategy-engine#readme",
   "dependencies": {
-    "@lazyass/engine-helpers": "^6.1.0",
+    "@getlazy/engine-helpers": "^6.1.0",
     "cross-spawn": "^5.1.0",
     "lodash": "^4.17.4",
     "yarn-install": "^0.2.1"

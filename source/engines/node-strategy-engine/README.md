@@ -1,5 +1,5 @@
-# lazy-engine-container
-Universal container for engines implemented in JavaScript/Node.js
+# node-strategy-engine
+Engine for engine strategies implemented in JavaScript/Node.js
 
 ## Configuring engines
 

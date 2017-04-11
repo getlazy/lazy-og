@@ -4,13 +4,13 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 build:
 	docker build \
 		--build-arg NPM_TOKEN=${NPM_TOKEN} \
-		-t getlazy/engine-container:$(PACKAGE_VERSION) \
-		-t getlazy/engine-container:latest \
+		-t getlazy/node-strategy-engine:$(PACKAGE_VERSION) \
+		-t getlazy/node-strategy-engine:latest \
 		.
 
 push:
-	docker push getlazy/engine-container:$(PACKAGE_VERSION)
-	docker push getlazy/engine-container:latest
+	docker push getlazy/node-strategy-engine:$(PACKAGE_VERSION)
+	docker push getlazy/node-strategy-engine:latest
 
 run:
 	docker run -it --rm \
