@@ -59,7 +59,7 @@ class Main {
             .then(() => Main._recreateAllEngines())
             .then(() => Main._loadExternalExpressAppControllers())
             .catch((err) => {
-                logger.error('Failed to boot lazy', { err: err && err.toString() });
+                logger.error('Failed to boot lazy', { err: _.get(err, 'message') });
                 return Main.stop()
                     .then(() => {
                         process.exit(-1);
@@ -108,7 +108,7 @@ class Main {
                 });
 
                 internalExpressApp.on('error', (err) => {
-                    logger.error('Internal ExpressJS app error', { err: err && err.toString() });
+                    logger.error('Internal ExpressJS app error', { err: _.get(err, 'message') });
                 });
             }));
     }
@@ -156,7 +156,7 @@ class Main {
             });
 
             externalExpressApp.on('error', (err) => {
-                logger.error('Extenal ExpressJS app error', { err: err && err.toString() });
+                logger.error('Extenal ExpressJS app error', { err: _.get(err, 'message') });
             });
         });
     }

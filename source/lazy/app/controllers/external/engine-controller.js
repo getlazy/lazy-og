@@ -49,7 +49,7 @@ const addEndpoints = (app, options) => {
                     });
                 });
         } catch (err) {
-            logger.error('Exception during file analysis', { err: err && err.toString() });
+            logger.error('Exception during file analysis', { err: _.get(err, 'message') });
             return res.status(500).send({
                 error: err && err.message
             });
