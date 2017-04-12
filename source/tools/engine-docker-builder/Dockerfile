@@ -1,4 +1,4 @@
-FROM ierceg/node-dev:6.9.5
+FROM ierceg/node-dev:6.10
 MAINTAINER The lazy Authors <team@getlazy.org>
 
 

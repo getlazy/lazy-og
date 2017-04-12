@@ -9,5 +9,5 @@ docker run -it --rm \
     -w /app \
     --env-file env \
     -e NPM_TOKEN=${NPM_TOKEN} \
-    ierceg/node-dev:6.9.1 \
+    ierceg/node-dev:6.10 \
     node index.js /config/lazy.yaml

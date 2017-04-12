@@ -4,7 +4,7 @@ test:
 	    -v "$(shell pwd):/app" \
 	    -w /app \
 	    --net=none \
-	    ierceg/node-dev:6.9.1 \
+	    ierceg/node-dev:6.10 \
 	    mocha
 
 test-cont:
@@ -12,7 +12,7 @@ test-cont:
 	    -v "$(shell pwd):/app" \
 	    -w /app \
 	    --net=none \
-	    ierceg/node-dev:6.9.1 \
+	    ierceg/node-dev:6.10 \
 	    nodemon -V -d 1 -L -w /app --exec mocha
 
 coverage:
@@ -20,12 +20,12 @@ coverage:
 	    -v "$(shell pwd):/app" \
 	    -w /app \
 	    --net=none \
-	    ierceg/node-dev:6.9.1 \
+	    ierceg/node-dev:6.10 \
 	    istanbul cover _mocha -- --recursive
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
 	    -w /app \
-	    ierceg/node-dev:6.9.1 \
+	    ierceg/node-dev:6.10 \
 	    istanbul report text
 	open coverage/lcov-report/index.html
 

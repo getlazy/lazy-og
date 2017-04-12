@@ -17,7 +17,7 @@ run:
 	    -v "$(shell pwd):/app" \
 	    -v "/tmp:/lazy" \
 	    -w /app \
-	    ierceg/node-dev:6.9.1 \
+	    ierceg/node-dev:6.10 \
 	    node /app/index.js
 
 .PHONY: *

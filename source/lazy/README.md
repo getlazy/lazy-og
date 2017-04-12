@@ -243,7 +243,7 @@ version: 1
 id: hacking
 engines:
     eslint:
-        image: ierceg/node-dev:6.9.1
+        image: ierceg/node-dev:6.10
         command: nodemon -V -d 1 -L -w node /app/index.js
         working_dir: /app
         volumes:

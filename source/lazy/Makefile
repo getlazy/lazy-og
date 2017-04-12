@@ -17,7 +17,7 @@ test:
 	    -v "$(shell pwd):/app" \
 	    -w /app \
 	    --stop-signal SIGINT \
-	    ierceg/node-dev:6.9.1 \
+	    ierceg/node-dev:6.10 \
 	    mocha -r test/bootstrap
 
 test-cont:
@@ -25,7 +25,7 @@ test-cont:
 	    -v "$(shell pwd):/app" \
 	    -w /app \
 	    --stop-signal SIGINT \
-	    ierceg/node-dev:6.9.1 \
+	    ierceg/node-dev:6.10 \
 	    nodemon -V -d 1 -L -w /app --exec mocha -r test/bootstrap
 
 coverage:
@@ -33,12 +33,12 @@ coverage:
 	    -v "$(shell pwd):/app" \
 	    -w /app \
 	    --stop-signal SIGINT \
-	    ierceg/node-dev:6.9.1 \
+	    ierceg/node-dev:6.10 \
 	    istanbul cover _mocha -- --recursive -r test/bootstrap
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
 	    -w /app \
-	    ierceg/node-dev:6.9.1 \
+	    ierceg/node-dev:6.10 \
 	    istanbul report text
 
 bash:

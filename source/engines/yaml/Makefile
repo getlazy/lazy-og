@@ -17,7 +17,7 @@ run:
 	    -v "$(shell pwd):/app" \
 	    -v "/tmp:/lazy" \
 	    -w /app \
-	    ierceg/node-dev:6.9.1 \
+	    ierceg/node-dev:6.10 \
 	    node /app/index.js
 
 test:
@@ -25,7 +25,7 @@ test:
 	    -v "$(shell pwd):/app" \
 	    -v "/tmp:/lazy" \
 	    -w /app \
-	    ierceg/node-dev:6.9.1 \
+	    ierceg/node-dev:6.10 \
 	    mocha
 
 coverage:
@@ -33,13 +33,13 @@ coverage:
 	    -v "$(shell pwd):/app" \
 	    -v "/tmp:/lazy" \
 	    -w /app \
-	    ierceg/node-dev:6.9.1 \
+	    ierceg/node-dev:6.10 \
 	    istanbul cover _mocha -- --recursive
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
 	    -v "/tmp:/lazy" \
 	    -w /app \
-	    ierceg/node-dev:6.9.1 \
+	    ierceg/node-dev:6.10 \
 	    istanbul report text
 
 .PHONY: *
