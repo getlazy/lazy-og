@@ -1,22 +1,25 @@
-'use strict'
+
+'use strict';
+
+/* global logger */
 
 const _ = require('lodash');
 const fp = require('lodash/fp');
 
 const infoWooHoo = {
-	type: 'Info',
-	message: '',
-	ruleId: ' lazy-no-linter-warnings '
+    type: 'Info',
+    message: '',
+    ruleId: ' lazy-no-linter-warnings '
 };
 const infoIgnoredAll = {
-	type: 'Info',
-	message: 'All lazy checks ignored in this file.',
-	ruleId: ' lazy-off '
+    type: 'Info',
+    message: 'All lazy checks ignored in this file.',
+    ruleId: ' lazy-off '
 };
 const infoCodeNotChecked = {
-	type: 'Info',
-	ruleId: ' lazy-no-linters-defined ',
-	message: ''
+    type: 'Info',
+    ruleId: ' lazy-no-linters-defined ',
+    message: ''
 };
 
 const supportedLanguages = ['javascript', 'json', 'yaml', 'html', 'c', 'c++', 'objective-c', 'objective-c++', 'css', 'scss', 'less', 'sugarcss', 'php', 'java', 'cpp', 'c#', 'shell', 'ruby', 'python', 'coffeescript'];
@@ -34,29 +37,31 @@ const VERY_LARGE_LINE_NUMBER = 100000000; // Probably no file will have more tha
  * @return {Object} Command object
  */
 const _parseLine = (line) => {
-	const regex = /(#|\/*|\/\/)\W*lazy\s+(\S*)\s*([^;*]*)\s*;*(.*)/g;
+    const regex = /(#|\/*|\/\/)\W*lazy\s+(\S*)\s*([^;*]*)\s*;*(.*)/g;
 
-	const command = {
-		commandStr: '',
-		args: [],
-		comment: ''
-	};
+    const command = {
+        commandStr: '',
+        args: [],
+        comment: ''
+    };
 
-	let m;
-	while ((m = regex.exec(line)) !== null) {
-		// This is necessary to avoid infinite loops with zero-width matches
-		if (m.index === regex.lastIndex) {
-			regex.lastIndex++;
-		}
-		const commandStr = _.get(m, '[2]', '');
+    let m;
+    // lazy ignore-once no-cond-assign
+    while ((m = regex.exec(line)) !== null) {
+        // This is necessary to avoid infinite loops with zero-width matches
+        if (m.index === regex.lastIndex) {
+                // lazy ignore-once no-plusplus
+            regex.lastIndex++;
+        }
+        const commandStr = _.get(m, '[2]', '');
 
-		if (!_.isEmpty(commandStr)) {
-			command.commandStr = commandStr;
-			command.args = _.words(_.get(m, '[3]', ''), /\S+/g);
-			command.comment = _.get(m, '[4]', ''); // comments (after ;)
-		}
-	}
-	return command;
+        if (!_.isEmpty(commandStr)) {
+            command.commandStr = commandStr;
+            command.args = _.words(_.get(m, '[3]', ''), /\S+/g);
+            command.comment = _.get(m, '[4]', ''); // comments (after ;)
+        }
+    }
+    return command;
 };
 
 /**
@@ -65,73 +70,71 @@ const _parseLine = (line) => {
  * @return {Object} List of all directives found in comments
  */
 const _getLazyDirectives = (lines) => {
-	const directives = {
-		ignore_all: false,
-		ignore: [],
-		ignore_once: [],
-		ignore_local: [],
-		dead_zones: [] // Dead zones are parts of the file in which we should ignore warnings
-	};
+    const directives = {
+        ignore_all: false,
+        ignore: [],
+        ignore_once: [],
+        ignore_local: [],
+        dead_zones: [] // Dead zones are parts of the file in which we should ignore warnings
+    };
 
-	let deadZone;
+    let deadZone;
 
-	_.forEach(lines, (oneLine, lineNo) => {
-		const command = _parseLine(oneLine);
+    _.forEach(lines, (oneLine, lineNo) => {
+        const command = _parseLine(oneLine);
 
-		// Ignoring all the rules?
-		if (_.eq(command.commandStr, 'ignore-all')) {
-			directives.ignore_all = true;
-			return;
-		}
+        // Ignoring all the rules?
+        if (_.eq(command.commandStr, 'ignore-all')) {
+            directives.ignore_all = true;
+            return;
+        }
 
-		if (_.eq(command.commandStr, 'ignore-start')) {
-			deadZone = {
-				startLine: lineNo + 1,
-				endLine: VERY_LARGE_LINE_NUMBER
-			};
-		}
+        if (_.eq(command.commandStr, 'ignore-start')) {
+            deadZone = {
+                startLine: lineNo + 1,
+                endLine: VERY_LARGE_LINE_NUMBER
+            };
+        }
 
-		if (_.eq(command.commandStr, 'ignore-end')) {
-			if (!_.isNil(deadZone)) {
-				// If deadZone is not nill, that means we have
-				// detected ignore-start directive before
-				deadZone.endLine = lineNo + 1;
-				directives.dead_zones.push(deadZone);
-				deadZone = undefined;
-			}
-		}
+        if (_.eq(command.commandStr, 'ignore-end')) {
+            if (!_.isNil(deadZone)) {
+                // If deadZone is not nill, that means we have
+                // detected ignore-start directive before
+                deadZone.endLine = lineNo + 1;
+                directives.dead_zones.push(deadZone);
+                deadZone = undefined;
+            }
+        }
 
-		if (_.eq(command.commandStr, 'ignore')) {
-			if (_.isEmpty(command.args)) {
-				// if there are no args, then treat this as
-				// "ignore all warnings at this line"
-				directives.ignore_local.push(lineNo + 1);
-			} else {
-				// lazy ignore-once lodash/prefer-map ; _.map with be more complicated in this case
-				_.forEach(command.args, (ruleToIgnore) => {
-					directives.ignore.push(_.toLower(ruleToIgnore));
-				});
-			}
-		}
+        if (_.eq(command.commandStr, 'ignore')) {
+            if (_.isEmpty(command.args)) {
+                // if there are no args, then treat this as
+                // "ignore all warnings at this line"
+                directives.ignore_local.push(lineNo + 1);
+            } else {
+                _.forEach(command.args, (ruleToIgnore) => {
+                    directives.ignore.push(_.toLower(ruleToIgnore));
+                });
+            }
+        }
 
-		if (_.eq(command.commandStr, 'ignore-once')) {
-			// lazy ignore-once lodash/prefer-map  ; map with be more complicated in this case
-			_.forEach(command.args, (ruleToIgnore) => {
-				directives.ignore_once.push({
-					line: lineNo + 1, // lineNo is zero based in forEach
-					ruleId: _.toLower(ruleToIgnore)
-				});
-			});
-		}
-	});
+        if (_.eq(command.commandStr, 'ignore-once')) {
+            _.forEach(command.args, (ruleToIgnore) => {
+                directives.ignore_once.push({
+                    line: lineNo + 1, // lineNo is zero based in forEach
+                    ruleId: _.toLower(ruleToIgnore)
+                });
+            });
+        }
+    });
 
-	// Finally, if there was ignore-start,
-	// but no ignore-end, add dead zone
-	if (!_.isNil(deadZone)) {
-		directives.dead_zones.push(deadZone);
-	}
+    // Finally, if there was ignore-start,
+    // but no ignore-end, add dead zone
+    if (!_.isNil(deadZone)) {
+        directives.dead_zones.push(deadZone);
+    }
 
-	return directives;
+    return directives;
 };
 
 /**
@@ -144,17 +147,17 @@ const _getLazyDirectives = (lines) => {
  * @return {boolean} true if there is nothin but whitespaces between fromLine and toLine; false otherwise
  */
 const _nothingBetweenLines = (fromLine, toLine, lines) => {
-	if (_.eq(toLine, fromLine)) {
-		return true; // same line
-	}
-	if (_.gt(fromLine, toLine)) {
-		return false; // "from" is after "to" line
-	}
+    if (_.eq(toLine, fromLine)) {
+        return true; // same line
+    }
+    if (_.gt(fromLine, toLine)) {
+        return false; // "from" is after "to" line
+    }
 
-	// go from fromLine to toLine,
-	// and return true if everything in between is only whitespace
-	const linesBetween = _.join(_.slice(lines, fromLine, toLine - 1), ' ');
-	return _.isEmpty(_.trim(linesBetween));
+    // go from fromLine to toLine,
+    // and return true if everything in between is only whitespace
+    const linesBetween = _.join(_.slice(lines, fromLine, toLine - 1), ' ');
+    return _.isEmpty(_.trim(linesBetween));
 };
 
 /**
@@ -163,17 +166,22 @@ const _nothingBetweenLines = (fromLine, toLine, lines) => {
  * @param {Object} toRemove List of ruleId's to remove from warningList
  * @return {Object} Filtered list of messages
  */
-const _removeIgnoreWarnings = (warningList, toRemove) => {
-	_.remove(warningList, (warning) => {
-		const ruleId = _.get(warning, 'ruleId');
-		if (_.isNil(ruleId) || !_.includes(toRemove, _.toLower(ruleId))) {
-			return false;
-		}
-		logger.metric('remove-warning', {
-			ruleId
-		});
-		return true;
-	});
+const _removeIgnoreWarnings = (warningList, toRemove, metrics) => {
+    _.remove(warningList, (warning) => {
+        const ruleId = _.get(warning, 'ruleId');
+        if (_.isNil(ruleId) || !_.includes(toRemove, _.toLower(ruleId))) {
+            return false;
+        }
+        metrics.push({
+            timestamp: Date.now(),
+            category: 'file-analysis',
+            action: 'remove-warning',
+            custom: {
+                ruleId
+            }
+        });
+        return true;
+    });
 };
 
 /**
@@ -182,49 +190,58 @@ const _removeIgnoreWarnings = (warningList, toRemove) => {
  * @param {Object} toRemove List of lines to remove warnings from
  * @return {Object} Filtered list of messages
  */
-const _removeLocalWarnings = (warningList, toRemove) => {
-	const processedLines = [];
+const _removeLocalWarnings = (warningList, toRemove, metrics) => {
+    const processedLines = [];
 
-	_.pullAllWith(warningList, toRemove, (warning, directiveLine) => {
-		const warningLine = _.parseInt(_.get(warning, 'line', 0), 10);
-		if (_.eq(warningLine, directiveLine)) {
-			logger.metric('remove-local-warnings', {
-				ruleId: warning.ruleId
-			});
-			processedLines.push(directiveLine);
-			return true;
-		}
-		return false;
-	});
-	// If there are some lines that are reported for ignorance,
-	// but they haven't been reported, mark their ignorance as warning
-	// lazy ignore-once lodash/prefer-map ; As we are just adding more warnings, following is more readable.
-	_.forEach(_.difference(toRemove, processedLines), (line) => {
-		warningList.push({
-			type: 'Warning',
-			message: 'No rules violated at this line.',
-			ruleId: ' lazy-no-ignore-line ',
-			line,
-			column: 1
-		});
-	});
+    _.pullAllWith(warningList, toRemove, (warning, directiveLine) => {
+        const warningLine = _.parseInt(_.get(warning, 'line', 0), 10);
+        if (_.eq(warningLine, directiveLine)) {
+            metrics.push({
+                timestamp: Date.now(),
+                category: 'file-analysis',
+                action: 'remove-local-warnings',
+                custom: {
+                    ruleId: warning.ruleId
+                }
+            });
+            processedLines.push(directiveLine);
+            return true;
+        }
+        return false;
+    });
+    // If there are some lines that are reported for ignorance,
+    // but they haven't been reported, mark their ignorance as warning
+    _.forEach(_.difference(toRemove, processedLines), (line) => {
+        warningList.push({
+            type: 'Warning',
+            message: 'No rules violated at this line.',
+            ruleId: ' lazy-no-ignore-line ',
+            line,
+            column: 1
+        });
+    });
 };
 
-const _removeIgnoreAlwaysWarnings = (warningList, ignoreAlwaysWarnings) => {
-	if (_.isEmpty(ignoreAlwaysWarnings)) {
-		return;
-	}
+const _removeIgnoreAlwaysWarnings = (warningList, ignoreAlwaysWarnings, metrics) => {
+    if (_.isEmpty(ignoreAlwaysWarnings)) {
+        return;
+    }
 
-	// Always omit all warnings which rule ID is on the list of ignore-always.
-	_.remove(warningList, (warning) => {
-		const remove = !_.isUndefined(warning.ruleId) && _.includes(ignoreAlwaysWarnings, warning.ruleId);
-		if (remove) {
-			logger.metric('remove-ignore-always-warnings', {
-				ruleId: warning.ruleId
-			});
-		}
-		return remove;
-	});
+    // Always omit all warnings which rule ID is on the list of ignore-always.
+    _.remove(warningList, (warning) => {
+        const remove = !_.isUndefined(warning.ruleId) && _.includes(ignoreAlwaysWarnings, warning.ruleId);
+        if (remove) {
+            metrics.push({
+                timestamp: Date.now(),
+                category: 'file-analysis',
+                action: 'remove-ignore-always-warnings',
+                custom: {
+                    ruleId: warning.ruleId
+                }
+            });
+        }
+        return remove;
+    });
 };
 
 /**
@@ -233,44 +250,47 @@ const _removeIgnoreAlwaysWarnings = (warningList, ignoreAlwaysWarnings) => {
  * @param {Object} toRemove List of ruleId's to remove from warningList
  * @return {Object} Filtered list of messages
  */
-const _removeIgnoreOnceWarnings = (warningList, toRemove, lines) => {
+const _removeIgnoreOnceWarnings = (warningList, toRemove, lines, metrics) => {
+    const processedDirectives = [];
 
-	const processedDirectives = [];
+    _.pullAllWith(warningList, toRemove, (warning, directive) => {
+        // Each ignore-once rule should be executed just once,
+        if (_.includes(processedDirectives, directive)) {
+            return false;
+        }
+        const warningLine = _.parseInt(_.get(warning, 'line', 0), 10);
+        const directiveLine = _.parseInt(_.get(directive, 'line', 0), 10);
+        const warningRule = _.toLower(_.get(warning, 'ruleId'));
+        const directiveRule = _.toLower(_.get(directive, 'ruleId'));
 
-	_.pullAllWith(warningList, toRemove, (warning, directive) => {
-		// Each ignore-once rule should be executed just once,
-		if (_.includes(processedDirectives, directive)) {
-			return false;
-		}
-		const warningLine = _.parseInt(_.get(warning, 'line', 0), 10);
-		const directiveLine = _.parseInt(_.get(directive, 'line', 0), 10);
-		const warningRule = _.toLower(_.get(warning, 'ruleId'));
-		const directiveRule = _.toLower(_.get(directive, 'ruleId'));
+        if ((_.eq(warningRule, directiveRule)) && _nothingBetweenLines(directiveLine, warningLine, lines)) {
+            // Remember directives we have processed to avoid using them again
+            processedDirectives.push(directive);
+            metrics.push({
+                timestamp: Date.now(),
+                category: 'file-analysis',
+                action: 'remove-ignore-once-warnings',
+                custom: {
+                    ruleId: warning.ruleId
+                }
+            });
+            return true;
+        }
+        return false;
+    });
 
-		if ((_.eq(warningRule, directiveRule)) && _nothingBetweenLines(directiveLine, warningLine, lines)) {
-			// Remember directives we have processed to avoid using them again
-			processedDirectives.push(directive);
-			logger.metric('remove-ignore-once-warnings', {
-				ruleId: warningRule
-			});
-			return true;
-		}
-		return false;
-	});
-
-	// If there are some rules that are reported for ignorance,
-	// but they haven't been reported, mark their ignorance as warning
-	// lazy ignore-once lodash/prefer-map ; As we are just adding more warnings, following is more readable.
-	_.forEach(_.difference(toRemove, processedDirectives), (warn) => {
-		warningList.push({
-			type: 'Warning',
-			message: `No [${warn.ruleId}] rule violation.`,
-			//  We set spaces around the rule ID so that it cannot be disabled.
-			ruleId: ' lazy-no-ignore-once ',
-			line: warn.line,
-			column: 1
-		});
-	});
+    // If there are some rules that are reported for ignorance,
+    // but they haven't been reported, mark their ignorance as warning
+    _.forEach(_.difference(toRemove, processedDirectives), (warn) => {
+        warningList.push({
+            type: 'Warning',
+            message: `No [${warn.ruleId}] rule violation.`,
+            //  We set spaces around the rule ID so that it cannot be disabled.
+            ruleId: ' lazy-no-ignore-once ',
+            line: warn.line,
+            column: 1
+        });
+    });
 };
 
 /**
@@ -280,33 +300,39 @@ const _removeIgnoreOnceWarnings = (warningList, toRemove, lines) => {
  * @param {Object} deadZones List of dead zones to remove warnings from
  * @return {Object} Filtered list of messages
  */
-const _removeDeadZoneWarnings = (warningList, deadZones) => {
-	_.pullAllWith(warningList, deadZones, (warning, oneDeadZone) => {
-		const warningLine = _.parseInt(_.get(warning, 'line', 0), 10);
-		if (!_.inRange(warningLine, oneDeadZone.startLine, oneDeadZone.endLine)) {
-			return false;
-		}
-		logger.metric('remove-dead-zone-warning', {
-			ruleId: warning.ruleId
-		});
-		return true;
-	});
-	return warningList;
+const _removeDeadZoneWarnings = (warningList, deadZones, metrics) => {
+    _.pullAllWith(warningList, deadZones, (warning, oneDeadZone) => {
+        const warningLine = _.parseInt(_.get(warning, 'line', 0), 10);
+        if (!_.inRange(warningLine, oneDeadZone.startLine, oneDeadZone.endLine)) {
+            return false;
+        }
+        metrics.push({
+            timestamp: Date.now(),
+            category: 'file-analysis',
+            action: 'remove-dead-zone-warning',
+            custom: {
+                ruleId: warning.ruleId
+            }
+        });
+        return true;
+    });
+    return warningList;
 };
 
 module.exports = {
 
-	configure: (config) => {
-		return Promise.resolve();
-	},
+    configure: (config) => {
+        return Promise.resolve();
+    },
 
-	shutDown: () => {
-		return Promise.resolve();
-	},
+    shutDown: () => {
+        return Promise.resolve();
+    },
 
-	handleRequest: (hostPath, language, content, context) => {
+    handleRequest: (hostPath, language, content, context) => {
         return new Promise((resolve) => {
             const filteredWarnings = _.get(context, 'previousStepResults.warnings', []);
+            const metrics = [];
             const wooHooMsgs = _.get(context, 'engineParams.woohoos',
                 ['Woo-hoo! No linter warnings - your code looks pretty nice.']);
             const ignoreAlwaysWarnings = _.get(context, 'engineParams.ignore-always');
@@ -324,16 +350,28 @@ module.exports = {
             // If there are no warnings from previous steps and the code is checked,
             // then don't bother, just return wooHoo
             if (_.isEmpty(filteredWarnings)) { // nothing from the previos engines
-                logger.metric('woohoo-state');
-                resolve({ warnings: [infoWooHoo] });
+                metrics.push({
+                    timestamp: Date.now(),
+                    category: 'file-analysis',
+                    action: 'woohoo-state'
+                });
+                resolve({ warnings: [infoWooHoo], metrics });
                 return;
             }
 
-            // Log metrics for all warnings.
-            _.forEach(filteredWarnings, warning => logger.metric('warning', { ruleId: warning.ruleId }));
+            // Add metrics for all warnings.
+            const timestamp = Date.now();
+            _.forEach(filteredWarnings, warning => metrics.push({
+                timestamp,
+                category: 'file-analysis',
+                action: 'issue-warning',
+                custom: {
+                    ruleId: warning.ruleId
+                }
+            }));
 
             // Remove all always ignore warnings.
-            _removeIgnoreAlwaysWarnings(filteredWarnings, ignoreAlwaysWarnings);
+            _removeIgnoreAlwaysWarnings(filteredWarnings, ignoreAlwaysWarnings, metrics);
 
             // Look for directive only in languages that support either //, / *, or # style comments.
             // Prepare language and detected language to be in the same format as suppored languages.
@@ -349,33 +387,41 @@ module.exports = {
 
                 if (directives.ignore_all) {
                     // Ignoring everything - report it and get out
-                    logger.metric('ignored-all');
+                    metrics.push({
+                        timestamp: Date.now(),
+                        category: 'file-analysis',
+                        action: 'ignored-all'
+                    });
                     const newFilteredWarnings = [infoIgnoredAll];
                     if (!isCodeChecked) {
                         newFilteredWarnings.push(infoCodeNotChecked);
                     }
-                    resolve({ warnings: newFilteredWarnings });
+                    resolve({ warnings: newFilteredWarnings, metrics });
                     return;
                 }
-                _removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once, lines);
-                _removeLocalWarnings(filteredWarnings, directives.ignore_local);
-                _removeIgnoreWarnings(filteredWarnings, directives.ignore);
-                _removeDeadZoneWarnings(filteredWarnings, directives.dead_zones);
+                _removeIgnoreOnceWarnings(filteredWarnings, directives.ignore_once, lines, metrics);
+                _removeLocalWarnings(filteredWarnings, directives.ignore_local, metrics);
+                _removeIgnoreWarnings(filteredWarnings, directives.ignore, metrics);
+                _removeDeadZoneWarnings(filteredWarnings, directives.dead_zones, metrics);
             }
 
             // If there are no warnings after processing directives, return wooHoo
             if (_.isEmpty(filteredWarnings)) {
-                logger.metric('woohoo-state');
+                metrics.push({
+                    timestamp: Date.now(),
+                    category: 'file-analysis',
+                    action: 'woohoo-state'
+                });
                 filteredWarnings.push(infoWooHoo);
             }
-            resolve({ warnings: filteredWarnings });
+            resolve({ warnings: filteredWarnings, metrics });
         });
-	},
+    },
 
-	getMeta: () => {
-		return {
-			languages: []
-		};
-	},
+    getMeta() {
+        return {
+            languages: []
+        };
+    },
 
 };
