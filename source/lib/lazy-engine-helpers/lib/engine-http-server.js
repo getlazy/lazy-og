@@ -135,7 +135,7 @@ class EngineHttpServer {
             })
             .catch((err) => {
                 logger.error('Server listen failed', {
-                    err: err && err.toString(),
+                    err: _.get(err, 'message'),
                     port: this._port
                 });
                 //  We have to cleanup as we have already invoked `beforeListening`.
