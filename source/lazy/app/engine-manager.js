@@ -5,6 +5,7 @@
 
 const _ = require('lodash');
 const url = require('url');
+const path = require('path');
 const H = require('higher');
 const selectn = require('selectn');
 const HigherDockerManager = require('higher-docker-manager');
@@ -30,7 +31,7 @@ class EngineManager {
         this._isRunning = false;
         this._engineHelperContainers = {};
 
-        //  Resolve the repository auth since its values are kept in the lazy's process environment.
+        // Resolve the repository auth since its values are kept in the lazy's process environment.
         this._repositoryAuth = EngineManager._resolveRepositoryAuthValues(this._config);
     }
 
@@ -61,7 +62,7 @@ class EngineManager {
                 this._engines = engines;
             })
             .then(() => {
-                //  Install ui if one is specified.
+                // Install ui if one is specified.
                 if (_.isObject(this._config.ui)) {
                     return this._createEngineContainer('ui', this._config.ui)
                         .then((uiEngine) => {
@@ -129,9 +130,9 @@ class EngineManager {
                 const createEngineParams = {
                     Image: imageName,
                     Cmd: _.isString(engineConfig.command) ? engineConfig.command.split(' ') : engineConfig.command,
-                    //  Engine's environment consists of the variables set in the config,
-                    //  variables imported from lazy's environment and variables created by
-                    //  lazy itself.
+                    // Engine's environment consists of the variables set in the config,
+                    // variables imported from lazy's environment and variables created by
+                    // lazy itself.
                     Env: _.union(
                         engineConfig.env,
                         _.map(engineConfig.import_env,
@@ -144,19 +145,31 @@ class EngineManager {
                                 hostname: ip.address(),
                                 port: self._config.privateApiPort
                             })}`,
-                            //  TODO: Fix this as special engines like UI don't follow this URL pattern.
+                            // TODO: Fix this as special engines like UI don't follow this URL pattern.
                             `LAZY_ENGINE_URL=${selectn('_config.service_url', self)}/engine/${engineId}`,
                             'LAZY_VOLUME_MOUNT=/lazy',
                             `LAZY_ENGINE_SANDBOX_DIR=/lazy/sandbox/${engineId}`
                         ],
                         _.isInteger(engineConfig.port) ? [`PORT=${engineConfig.port}`] : []),
                     HostConfig: {
-                        //  We only allow volumes to be bound to host.
-                        Binds: _.union(engineConfig.volumes, [
-                            //  HACK: We hard-code the volume mount path to /lazy which is
-                            //  known to all containers.
-                            `${self._volume.Name}:/lazy`
-                        ]),
+                        // Bind volumes to host, resolve relative paths if necessary.
+                        Binds: _.union(_.map(
+                            engineConfig.volumes, (volumeDefinition) => {
+                                const [hostPath, containerPath] = volumeDefinition.split(':');
+                                if (path.isAbsolute(hostPath)) {
+                                    return volumeDefinition;
+                                }
+
+                                // For relative paths assume that we are mounting paths relative
+                                // to lazy's source path on the host.
+                                const absoluteHostPath =
+                                    path.join(process.env.HOST_LAZY_SOURCE_PATH, hostPath);
+                                return `${absoluteHostPath}:${containerPath}`;
+                            }), [
+                                // HACK: We hard-code the volume mount path to /lazy which is
+                                // known to all containers.
+                                `${self._volume.Name}:/lazy`
+                            ]),
                         RestartPolicy: {
                             Name: 'unless-stopped'
                         }
@@ -202,11 +215,11 @@ class EngineManager {
                 }
 
                 const volumeCreateParams = {
-                    //  Name it after the unique ID.
+                    // Name it after the unique ID.
                     name: `lazy-volume-${this._id}`,
                     Labels: {}
                 };
-                //  Add the label to later use it to find this container.
+                // Add the label to later use it to find this container.
                 volumeCreateParams.Labels[Label.OrgGetlazyLazyEngineManagerOwnerLazyId] = this._id;
 
                 return EngineManager._createVolume(volumeCreateParams);
@@ -236,8 +249,8 @@ class EngineManager {
 
     static _resolveRepositoryAuthValues(repositoryAuth) {
         const resolvedRepositoryAuth = {};
-        //  Resolve the values of properties defined with _env suffix. Those properties instruct
-        //  lazy to read their values from its own environment.
+        // Resolve the values of properties defined with _env suffix. Those properties instruct
+        // lazy to read their values from its own environment.
         _.forEach(repositoryAuth, (value, key) => {
             if (_.endsWith(key, '_env')) {
                 resolvedRepositoryAuth[key.slice(0, key.length - '_env'.length)] =
