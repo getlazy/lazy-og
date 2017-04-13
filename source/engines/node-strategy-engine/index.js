@@ -1,4 +1,6 @@
+
 'use strict';
+
 /* global logger */
 
 // In engine processes it is strongly recommended to include engine-helpers as the first thing
@@ -22,9 +24,6 @@ client.getEngineConfig()
         engineContainer = new EngineContainer(engineConfig);
 
         engineContainer.start()
-            .then(() => {
-                logger.info('Engine started.');
-            })
             .catch((err) => {
                 logger.error('Failed to start engine', err);
                 process.exit(-1);

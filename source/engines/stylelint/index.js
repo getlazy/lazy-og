@@ -1,18 +1,18 @@
 
 'use strict';
 
+/* global logger */
+
 // In engine processes it is strongly recommended to include engine-helpers as the first thing
 // in the process's lifetime and then immediately invoke `initialize` which will setup global logger,
 // default handlers for uncaught exceptions, unhandled promises and so on.
 require('@getlazy/engine-helpers').initialize();
 
 const Engine = require('./stylelint-engine');
+
 const engine = new Engine();
 
 engine.start()
-    .then(() => {
-        logger.info('engine started');
-    })
     .catch((err) => {
         logger.error('Failed to start', err);
         process.exit(-1);
