@@ -253,6 +253,7 @@ class EngineManager {
      * Wrapper around HigherDockerManager.pullImage for easier unit testing.
      * @private
      */
+    // istanbul ignore next
     static _pullImage(...args) {
         // istanbul ignore next
         return HigherDockerManager.pullImage(...args);
@@ -262,6 +263,7 @@ class EngineManager {
      * Wrapper around HigherDockerManager.getOwnContainer for easier unit testing.
      * @private
      */
+    // istanbul ignore next
     static _getOwnContainer() {
         // istanbul ignore next
         return HigherDockerManager.getOwnContainer();
@@ -271,6 +273,7 @@ class EngineManager {
      * Wrapper around HigherDockerManager.createContainer for easier unit testing.
      * @private
      */
+    // istanbul ignore next
     static _createContainer(...args) {
         // istanbul ignore next
         return HigherDockerManager.createContainer(...args);
@@ -280,6 +283,7 @@ class EngineManager {
      * Wrapper around HigherDockerManager.getVolumesForLabel for easier unit testing.
      * @private
      */
+    // istanbul ignore next
     static _getVolumesForLabel(...args) {
         // istanbul ignore next
         return HigherDockerManager.getVolumesForLabel(...args);
