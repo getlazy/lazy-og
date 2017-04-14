@@ -3,7 +3,7 @@ PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 
 build:
 	docker build \
-		--build-arg NPM_TOKEN=${NPM_TOKEN} \
+		--build-arg NPM_TOKEN=$(NPM_TOKEN) \
 		-t getlazy/lazy:$(PACKAGE_VERSION) \
 		-t getlazy/lazy:latest \
 		.
@@ -45,8 +45,17 @@ bash:
 	docker run --rm -it \
 		-v "$(shell pwd):/app" \
 		-w /app \
-		--env NPM_TOKEN=${NPM_TOKEN} \
+		--env NPM_TOKEN=$(NPM_TOKEN) \
 		node:6.10-alpine \
 		sh
+
+install:
+	docker run -it --rm \
+	    -v "$(shell pwd):/app" \
+	    -w /app \
+	    --stop-signal SIGINT \
+	    --env NPM_TOKEN=$(NPM_TOKEN) \
+	    ierceg/node-dev:6.10 \
+	    yarn $(YARN_ARGS)
 
 .PHONY: *

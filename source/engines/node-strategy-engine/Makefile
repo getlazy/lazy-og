@@ -20,4 +20,13 @@ run:
 	    ierceg/node-dev:6.10 \
 	    node /app/index.js
 
+install:
+	docker run -it --rm \
+	    -v "$(shell pwd):/app" \
+	    -w /app \
+	    --stop-signal SIGINT \
+	    --env NPM_TOKEN=$(NPM_TOKEN) \
+	    ierceg/node-dev:6.10 \
+	    yarn $(YARN_ARGS)
+
 .PHONY: *
