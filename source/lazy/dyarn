@@ -2,6 +2,6 @@
 docker run --rm -t \
     -v "$(pwd):/app" \
     -w /app \
-    --env NPM_TOKEN=${NPM_TOKEN} \
+    --env NPM_TOKEN=$(NPM_TOKEN) \
     node:6.10-alpine \
     yarn $@

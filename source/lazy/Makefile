@@ -1,12 +1,13 @@
 
 PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
+YARN_CACHE_DIR=$(shell yarn cache dir || echo ~/.yarn-cache)
 
 build:
 	docker build \
-		--build-arg NPM_TOKEN=$(NPM_TOKEN) \
-		-t getlazy/lazy:$(PACKAGE_VERSION) \
-		-t getlazy/lazy:latest \
-		.
+	    --build-arg NPM_TOKEN=$(NPM_TOKEN) \
+	    -t getlazy/lazy:$(PACKAGE_VERSION) \
+	    -t getlazy/lazy:latest \
+	    .
 
 push:
 	docker push getlazy/lazy:$(PACKAGE_VERSION)
@@ -50,8 +51,10 @@ bash:
 		sh
 
 install:
+	mkdir -p $(YARN_CACHE_DIR)
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
+	    -v "$(YARN_CACHE_DIR):/usr/local/share/.cache/yarn" \
 	    -w /app \
 	    --stop-signal SIGINT \
 	    --env NPM_TOKEN=$(NPM_TOKEN) \

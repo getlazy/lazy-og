@@ -1,13 +1,13 @@
 
 PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
-YARN_CACHE_DIR=$(shell yarn cache dir || echo $(shell pwd)/.yarn-cache)
+YARN_CACHE_DIR=$(shell yarn cache dir || echo ~/.yarn-cache)
 
 build:
 	docker run --rm \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v "$(shell pwd):/sources" \
 		-v "$(YARN_CACHE_DIR):/usr/local/share/.cache/yarn" \
-		--env NPM_TOKEN=${NPM_TOKEN} \
+		--env NPM_TOKEN=$(NPM_TOKEN) \
 		getlazy/engine-docker-builder:latest \
 		getlazy/php-l-engine:$(PACKAGE_VERSION) \
 		getlazy/php-l-engine:latest
@@ -47,8 +47,10 @@ coverage:
 	    istanbul report text
 
 install:
+	mkdir -p $(YARN_CACHE_DIR)
 	docker run -it --rm \
 	    -v "$(shell pwd):/app" \
+	    -v "$(YARN_CACHE_DIR):/usr/local/share/.cache/yarn" \
 	    -w /app \
 	    --stop-signal SIGINT \
 	    --env NPM_TOKEN=$(NPM_TOKEN) \
