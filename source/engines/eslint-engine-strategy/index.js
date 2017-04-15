@@ -1,4 +1,5 @@
-'use strict'
+
+'use strict';
 
 /* global logger */
 
@@ -8,6 +9,8 @@ const yarnInstall = require('yarn-install');
 const getRuleURI = require('eslint-rule-documentation');
 
 let availablePlugins;
+
+// lazy ignore arrow-body-style
 
 /**
  * Configure ESLint based on the given configuration.
@@ -20,7 +23,6 @@ const _configure = (eslintConfiguration) => {
     return new Promise((resolve, reject) => {
         const packages = [];
         const installedPlugins = [];
-        const rules = {};
 
         const plugins = _.get(eslintConfiguration, 'plugins', []);
         if (!_.isEmpty(plugins)) {
@@ -58,23 +60,23 @@ const _getEslintCli = (localConfig) => {
         fix: false,
         parserOptions: _.get(localConfig, 'parserOptions', {
             ecmaVersion: 7
-        }),
+        })
     });
 };
 
 module.exports = {
-    configure: (config) => {
+    configure(config) {
         return _configure(config)
             .then((cfg) => {
                 availablePlugins = cfg.installedPlugins;
-            })
+            });
     },
 
-    shutDown: () => {
+    shutDown() {
         return Promise.resolve();
     },
 
-    handleRequest: (hostPath, language, content, context) => {
+    handleRequest(hostPath, language, content, context) {
         const localConfig = _.get(context, 'engineParams.config', {});
 
         return new Promise((resolve) => {
@@ -99,7 +101,7 @@ module.exports = {
                         rWarning.moreInfo = moreInfoUrl;
                     }
 
-          rWarning.fix = _.get(warning, 'fix', {});
+                    rWarning.fix = _.get(warning, 'fix', {});
                     return rWarning;
                 })
                 .filter()
@@ -114,9 +116,9 @@ module.exports = {
         });
     },
 
-    getMeta: () => {
+    getMeta() {
         return {
             languages: ['JavaScript']
         };
-    },
+    }
 };
