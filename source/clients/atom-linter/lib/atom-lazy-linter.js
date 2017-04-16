@@ -18,6 +18,8 @@ import simpleGit from 'simple-git';
 import async from 'async';
 import findUp from 'find-up';
 import path from 'path';
+import stripJsonComments from 'strip-json-comments';
+import tryJsonParse from 'try-json-parse';
 
 type Linter$Provider = Object
 
@@ -378,13 +380,15 @@ module.exports = {
         return Promise.resolve(results);
     },
 
+    // HACK: For now we only support .eslintrc and .jshintrc.
     _getConfigFilesForPath(filePath) {
-        // What if there is both .jshintrc and .eslintrc? We give precedence to whatever is the first
+        // What if there is both .eslintrc and say .jshintrc? We give precedence to whatever is the first
         // (which might change from run to run so that's a problem as well). TODO: add explicit
         // precedence and/or repo-level warning when multiple conflicting files are present
         // and/or collecting all files rather than just one file but stopping at the first level
         // where any file has been found (patch for find-up)
-        return findUp(['.jshintrc', '.eslintrc'], { cwd: path.dirname(filePath) })
+        // TODO: Add support for JSCS.
+        return findUp(['.eslintrc', '.jshintrc'], { cwd: path.dirname(filePath) })
             .then((configFilePath) => {
                 if (_.isNil(configFilePath)) {
                     return Promise.resolve();
@@ -399,10 +403,20 @@ module.exports = {
                             return;
                         }
 
+                        // HACK: Assuming config file is in JSON. For now it's safe as we only
+                        // support .eslintrc and .jshintrc.
+                        const config = tryJsonParse(stripJsonComments(content.toString()));
+                        if (_.isUndefined(config)) {
+                            console.log('Error parsing config file', configFilePath, err);
+                            // We swallow the error as entire request shouldn't fail due to this.
+                            resolve();
+                            return;
+                        }
+
                         // Resolve it as array of config files (future proof)
                         resolve([{
                             name: path.basename(configFilePath),
-                            content: content.toString()
+                            config
                         }]);
                     });
                 });
