@@ -51,14 +51,23 @@ const _configure = (eslintConfiguration) => {
     });
 };
 
-const _getEslintCli = (localConfig) => {
+const _getEslintCli = (eslintConfig, configFiles) => {
+    // ESLint config from the files has the precedence over the one configured in lazy.
+    const eslintrcFile = _.find(configFiles, configFile => configFile.name === '.eslintrc');
+    if (eslintrcFile) {
+        return eslintrcFile.config;
+    }
+    if (_.isObject(eslintrcFile) && _.isObject(eslintrcFile.config)) {
+        eslintConfig = eslintrcFile.config;
+    }
+
     return new CLIEngine({
-        envs: _.get(localConfig, 'env', ['node', 'es6']),
-        parser: _.get(localConfig, 'parser', 'babel-eslint'),
+        envs: _.get(eslintConfig, 'env', ['node', 'es6']),
+        parser: _.get(eslintConfig, 'parser', 'babel-eslint'),
         plugins: availablePlugins,
-        rules: _.get(localConfig, 'rules', {}),
+        rules: _.get(eslintConfig, 'rules', {}),
         fix: false,
-        parserOptions: _.get(localConfig, 'parserOptions', {
+        parserOptions: _.get(eslintConfig, 'parserOptions', {
             ecmaVersion: 7
         })
     });
@@ -77,10 +86,18 @@ module.exports = {
     },
 
     handleRequest(hostPath, language, content, context) {
-        const localConfig = _.get(context, 'engineParams.config', {});
+        const eslintConfig = _.get(context, 'engineParams.config', {});
+        const configFiles = _.get(context, 'configFiles');
+
+        // HACK: Skip ESLint if there is a jshintrc config file. We do the same in JSHint engine
+        // which means that if both of these files are included, neither ESLint nor JSHint will be run.
+        // However (another hack level) we currently collect only one configuration file.
+        if (_.some(configFiles, configFile => configFile.name === '.jshintrc')) {
+            return Promise.resolve([]);
+        }
 
         return new Promise((resolve) => {
-            const res = _getEslintCli(localConfig).executeOnText(content, hostPath);
+            const res = _getEslintCli(eslintConfig, configFiles).executeOnText(content, hostPath);
             const results = _.head(_.get(res, 'results'));
             const messages = _.get(results, 'messages');
 
