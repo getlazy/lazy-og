@@ -1,0 +1,206 @@
+version: 1
+service_url: https://whatever.com
+repository_auth:
+  username_env: LAZY_DOCKER_REPOSITORY_AUTH_USERNAME
+  password_env: LAZY_DOCKER_REPOSITORY_AUTH_PASSWORD
+  email_env: LAZY_DOCKER_REPOSITORY_AUTH_EMAIL
+config:
+  logger:
+    console:
+      level: metric
+    # elastic: # as seen here https://github.com/vanthome/winston-elasticsearch
+    #   level: metric
+    #   indexPrefix: lazy-default
+    #   clientOpts: # as seen here https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/configuration.html
+    #     host: elk:9200
+    #     apiVersion: "5.0"
+engines:
+  eslint:
+    image: ierceg/node-dev:6.10
+    command: nodemon -d 1 -L -w /app -w /strategy /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/node-strategy-engine:/app"
+      - "source/engines/eslint-engine-strategy:/strategy"
+    import_env:
+      - NPM_TOKEN
+    config:
+      # packageNPM: '@getlazy/eslint-engine-strategy'
+      # packageVersion: latest
+      packageConfig:
+        plugins:
+        - name: lodash
+          packageName: eslint-plugin-lodash
+          packageVersion: latest
+        - name: import
+          packageName: eslint-plugin-import
+  jshint:
+    image: ierceg/node-dev:6.10
+    command: nodemon -d 1 -L -w /app -w /strategy /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/node-strategy-engine:/app"
+      - "source/engines/jshint-engine-strategy:/strategy"
+    import_env:
+      - NPM_TOKEN
+    config:
+      packageConfig:
+  stylelint:
+    image: ierceg/node-dev:6.10
+    command: nodemon -d 1 -L -w /app /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/stylelint:/app"
+    boot_timeout: 120
+  tidy_html:
+    image: ierceg/node-dev:6.10
+    command: nodemon -d 1 -L -w /app /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/tidy-html:/app"
+    labels:
+      org.getlazy.lazy.engine.image-metadata.json: "{\"helper_containers\":{\"tidy_html\":{\"image\":\"getlazy/tidy-html:5.2.0\"}}}"
+    boot_timeout: 120
+  emcc:
+    image: ierceg/node-dev:6.10
+    command: nodemon -d 1 -L -w /app /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/emcc:/app"
+    labels:
+      org.getlazy.lazy.engine.image-metadata.json: "{\"helper_containers\":{\"emcc\":{\"image\":\"apiaryio/emcc:1.36\"}}}"
+    boot_timeout: 120
+  php-l:
+    image: ierceg/node-dev:6.10
+    command: nodemon -d 1 -L -w /app /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/php-l:/app"
+    labels:
+      org.getlazy.lazy.engine.image-metadata.json: "{\"helper_containers\":{\"php-l\":{\"image\":\"php:7.0.13-cli\"}}}"
+    boot_timeout: 120
+  pmd-java:
+    image: ierceg/node-dev:6.10
+    command: nodemon -d 1 -L -w /app /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/pmd-java:/app"
+    labels:
+      org.getlazy.lazy.engine.image-metadata.json: "{\"helper_containers\":{\"pmd-java\":{\"image\":\"codacy/codacy-pmdjava:1.0.114\"}}}"
+    boot_timeout: 120
+  github_access:
+    image: ierceg/node-dev:6.10
+    command: nodemon -d 1 -L -w /app /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/github-access:/app"
+    env:
+      - AUTH_SUCCESS_PATH=/
+      - AUTH_FAILURE_PATH=/auth-failed
+    import_env:
+      - GITHUB_CLIENT_ID
+      - GITHUB_CLIENT_SECRET
+    boot_timeout: 120
+  pullreq:
+    image: ierceg/node-dev:6.10
+    command: nodemon -d 1 -L -w /app /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/pullreq:/app"
+    env:
+      - GITHUB_USER=ierceg
+      - GITHUB_ACCESS_ENGINE_NAME=github-access
+    import_env:
+      - GITHUB_CLIENT_ID
+      - GITHUB_CLIENT_SECRET
+    boot_timeout: 120
+  yaml:
+    image: ierceg/node-dev:6.10
+    command: nodemon -d 1 -L -w /app /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/yaml:/app"
+    boot_timeout: 120
+  postprocessor:
+    image: ierceg/node-dev:6.10
+    command: nodemon -d 1 -L -w /app -w /strategy /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/node-strategy-engine:/app"
+      - "source/engines/postprocessor-engine-strategy:/strategy"
+  reducer:
+    image: ierceg/node-dev:6.10
+    command: nodemon -d 1 -L -w /app -w /strategy /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/node-strategy-engine:/app"
+      - "source/engines/reducer-engine-strategy:/strategy"
+engine_pipeline:
+  bundle:
+  - sequence:               # pullreq engine depends on github-access, so we run them sequentially
+    - github_access:
+    - pullreq:
+  - sequence:               # Linters. Run any and all linters in parallel
+    - bundle:
+      - eslint:
+          config:
+            ~include: eslint-config.yaml
+      - jshint:
+      - yaml:
+      - stylelint:
+      - tidy_html:
+      - emcc:
+      - php-l:
+      - pmd-java:
+    - postprocessor:                # apply postprocessor to their output
+        woohoos:
+          # R.A.H.
+          - "Progress isn't made by early risers. It's made by lazy men trying to find easier ways to do something."
+          # Programming
+          - "Talk is cheap. Show me the code."
+          - "Programs must be written for people to read, and only incidentally for machines to execute."
+          - "The trouble with computers is you *play* with them."
+          - "But if you've ever worked with computers, you understand the disease - the *delight* in being able to see how much you can do."
+          - "That's the thing about people who think they hate computers. What they really hate is lousy programmers."
+          - "Always code as if the guy who ends up maintaining your code will be a violent psychopath who knows where you live."
+          - "I'm not a great programmer; I'm just a good programmer with great habits."
+          - "Give a man a program, frustrate him for a day. Teach a man to program, frustrate him for a lifetime."
+          - "Pray, Mr. Babbage, if you put into the machine wrong figures, will the right answers come out?"
+          - "The computer programmer is a creator of universes for which he alone is the lawgiver."
+          - "Walking on water and developing software from a specification are easy if both are frozen."
+          - "The most disastrous thing that you can ever learn is your first programming language."
+          - "Programming went back to the beginning of time."
+          # Movies
+          - "Maximum effort."
+          - "Ahhhh. I'm touching myself tonight."
+          - "Cue the music."
+          - "Oh, that's because it's Christmas Day, Dopinder. And I'm after someone on my naughty list."
+          - "My boyfriend said this was a superhero movie but that guy in the suit just turned that other guy into a fucking kabab!"
+          - "Well, I may be super, but I'm no hero."
+          - "This is a shameful and reckless use of your powers."
+          - "Time to make the chimi-fuckin'-changas."
+          - "Yeah. There you go. Hashtag it."
+          - "Right up Main Street."
+          - "Rich Corinthian leather."
+          - "McAvoy or Stewart? These timelines can get so confusing."
+          - "There's the money shot, baby."
+          - "Yeah, it's right next to the prostate. Or is that the on switch?"
+          - "It sounds even stupider when you say it."
+          - "That came out wrong. Or did it?"
+          - "Whoo! Superhero landing! You know, that's really hard on your knees."
+          - "Dad?"
+          - "I... I never carry a wallet when I'm working. Ruins the lines of my suit."
+          - "That's right! You're about to be killed by a zamboni!"
+          - "All dinosaurs feared the T-Rex!"
+          - "Ahhh! Your poor wife!"
+          - "Daddy needs to express some rage."
+          - "I don't have time for the goody two-shows bullshit right now!"
+          - "I tried to picture clusters of information as they moved through the computer."
+          - "I kept dreaming of a world, I thought I'd never see."
+          - "The Grid. A Digital Frontier."
+          - "Brothers, what we do in life echoes in eternity."
+        ignore-always:
+          - lodash/import-scope
+    - reducer:              # and, finally, limit the number of reported errors
+        maxWarningsPerRule: 5     # allow up to 5 warnings for same rule-id
+        maxWarningsPerFile: 300   # allow up to 150 warnings per file
