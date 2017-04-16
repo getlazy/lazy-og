@@ -1,5 +1,5 @@
 {
-  "name": "jshint-engine-strategy",
+  "name": "@getlazy/jshint-engine-strategy",
   "version": "1.0.0",
   "description": "JSHint engine strategy for lazy",
   "main": "jshint-engine-strategy.js",
@@ -12,9 +12,10 @@
   },
   "keywords": [
     "lazy",
+    "engine",
+    "strategy",
     "javascript",
-    "jshint",
-    "engine"
+    "jshint"
   ],
   "authors": [
     {
