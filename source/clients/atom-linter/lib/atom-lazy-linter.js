@@ -1,22 +1,23 @@
 'use babel';
 
-// Above must be the absolutely first line in the file otherwise Atom gets confused
+// NOTE: The line above *****MUST***** be the absolutely first line (no blanks) otherwise Atom gets mightily confused.
 
 /* global atom */
 // lazy ignore import/extensions arrow-body-style lodash/chain-style lodash/chaining
 // lazy ignore arrow-parens no-console lodash/import-scope
 
 import _ from 'lodash';
-
 import {
     CompositeDisposable
-}
-from 'atom';
+} from 'atom';
 import request from 'request';
+import fs from 'fs';
 import os from 'os';
 import crypto from 'crypto';
 import simpleGit from 'simple-git';
 import async from 'async';
+import findUp from 'find-up';
+import path from 'path';
 
 type Linter$Provider = Object
 
@@ -24,7 +25,7 @@ type Linter$Provider = Object
 //  This number is then used to extend the warnings to the entire line rather than just
 //  (line, column) coordinates.
 const ARBITRARILY_VERY_LARGE_COLUMN_NUMBER = 100000;
-const LAZY_HOMEPAGE = 'http://beta.getlazy.io';
+const LAZY_HOMEPAGE = 'http://mvp.getlazy.io';
 const LAZY_ICONS = {
     info: 'beer',
     warning: 'alert',
@@ -46,7 +47,7 @@ module.exports = {
         lazyToken: {
             type: 'string',
             default: '',
-            description: 'Get your token at http://beta.getlazy.io and paste it here.'
+            description: 'Get your token at http://mvp.getlazy.io and paste it here.'
         }
     },
 
@@ -70,9 +71,9 @@ module.exports = {
         this.subscriptions.dispose();
     },
 
-    getProjectDirectoryForPath(path) {
+    _getProjectDirectoryForPath(filePath) {
         return _.find(atom.project.getDirectories(), (directory) => {
-            return directory.contains(path);
+            return directory.contains(filePath);
         });
     },
 
@@ -119,10 +120,11 @@ module.exports = {
                     return runningRequestPromise;
                 }
                 //  Create the promise and then add it to the map of running requests.
-                const promise = self.getRepoInfoForPath(filePath)
-                    .then((repoInfo) => {
+                const promise = Promise.all([
+                    self._getRepoInfoForPath(filePath), self._getConfigFilesForPath(filePath)])
+                    .then(([repoInfo, configFiles]) => {
                         //  TODO: Cache the results for at least a little while to avoid unnecessary slowdowns.
-                        return self.makeRequest(filePath, grammar, fileContents, repoInfo);
+                        return self._makeRequest(filePath, grammar, fileContents, repoInfo, configFiles);
                     })
                     .then((requestResults) => {
                         const {
@@ -186,8 +188,7 @@ module.exports = {
                             }]);
                         }
 
-                        const directory = self.getProjectDirectoryForPath(filePath);
-
+                        const directory = self._getProjectDirectoryForPath(filePath);
 
                         return new Promise((resolve) => {
                             //  Directory is nil if the file is not in the project.
@@ -219,7 +220,7 @@ module.exports = {
         return linter;
     },
 
-    getLocalFileInfo(fullPath) {
+    _getLocalFileInfo(fullPath) {
         const pathInfo = atom.project.relativizePath(fullPath);
         return {
             baseDir: pathInfo[0],
@@ -227,10 +228,10 @@ module.exports = {
         };
     },
 
-    getRepoInfoForPath(path) {
+    _getRepoInfoForPath(filePath) {
         const self = this;
 
-        const directory = self.getProjectDirectoryForPath(path);
+        const directory = self._getProjectDirectoryForPath(filePath);
 
         if (_.isNil(directory)) {
             return Promise.resolve(null);
@@ -260,7 +261,7 @@ module.exports = {
                             remotes: reflectedRemotes.value,
                             status: reflectedStatus.value,
                             branches: _.get(reflectedBranches.value, 'branches'),
-                            fileInfo: self.getLocalFileInfo(path)
+                            fileInfo: self._getLocalFileInfo(filePath)
                         };
 
                         return resolve(repoInfo);
@@ -268,13 +269,10 @@ module.exports = {
                 });
             });
     },
-    makeRequest(path, grammar, fileContents, repoInfo) {
+
+    _makeRequest(filePath, grammar, fileContents, repoInfo, configFiles) {
         const self = this;
 
-        let apikeyHeader = '';
-        if (!_.isEmpty(self.lazyToken)) {
-            apikeyHeader = self.lazyToken;
-        }
         return new Promise((resolve) => {
             const requestParams = {
                 method: 'POST',
@@ -283,16 +281,17 @@ module.exports = {
                 headers: {
                     Accept: 'application/json',
                     'X-LazyApi-Version': 'v20161217',
-                    apikey: apikeyHeader
+                    apikey: self.lazyToken
                 },
                 body: {
-                    hostPath: path,
+                    hostPath: filePath,
                     language: grammar,
                     content: fileContents,
                     context: {
                         host: os.hostname(),
                         client: `atom@${atom.getVersion()}`,
-                        repositoryInformation: repoInfo
+                        repositoryInformation: repoInfo,
+                        configFiles
                     }
                 }
             };
@@ -306,7 +305,7 @@ module.exports = {
         });
     },
 
-    _processResults(path, fileContents, warnings, repository, buffer) {
+    _processResults(filePath, fileContents, warnings, repository, buffer) {
         const self = this;
 
         // For warnings that are comming from Pull Requests
@@ -316,7 +315,7 @@ module.exports = {
             const updatedWarning = warning;
             if ((!_.isNil(repository)) && (_.isEqual(warning.type, 'PR'))) {
                 updatedWarning.line = self.getUpdatedLineNumber(
-                    warning.line, fileContents, path, repository);
+                    warning.line, fileContents, filePath, repository);
             }
             return updatedWarning;
         });
@@ -356,7 +355,7 @@ module.exports = {
                 icon: _.get(LAZY_ICONS, severity, 'arrow-small-right'),
                 description,
                 location: {
-                    file: path,
+                    file: filePath,
                     position: [
                         [screenLine, screenCol],
                         [screenLine, ARBITRARILY_VERY_LARGE_COLUMN_NUMBER]
@@ -365,8 +364,8 @@ module.exports = {
             };
 
             if (_.eq(severity, 'pr')) {
-              oneResult.severity = 'info';
-              oneResult.icon = LAZY_ICONS.pull_request;
+                oneResult.severity = 'info';
+                oneResult.icon = LAZY_ICONS.pull_request;
             }
 
             if (!_.isEmpty(solutions) && areSolutionsEmpty) {
@@ -377,5 +376,41 @@ module.exports = {
             return oneResult;
         });
         return Promise.resolve(results);
+    },
+
+    _getConfigFilesForPath(filePath) {
+        // What if there is both .jshintrc and .eslintrc? We give precedence to whatever is the first
+        // (which might change from run to run so that's a problem as well). TODO: add explicit
+        // precedence and/or repo-level warning when multiple conflicting files are present
+        // and/or collecting all files rather than just one file but stopping at the first level
+        // where any file has been found (patch for find-up)
+        return findUp(['.jshintrc', '.eslintrc'], { cwd: path.dirname(filePath) })
+            .then((configFilePath) => {
+                if (_.isNil(configFilePath)) {
+                    return Promise.resolve();
+                }
+
+                return new Promise((resolve) => {
+                    fs.readFile(configFilePath, (err, content) => {
+                        if (err) {
+                            console.log('Error reading config file', configFilePath, err);
+                            // We swallow the error as entire request shouldn't fail due to this.
+                            resolve();
+                            return;
+                        }
+
+                        // Resolve it as array of config files (future proof)
+                        resolve([{
+                            name: path.basename(configFilePath),
+                            content: content.toString()
+                        }]);
+                    });
+                });
+            })
+            .catch((err) => {
+                console.log('Error searching for config files', err);
+                // We swallow the error as entire request shouldn't fail due to this.
+                return Promise.resolve();
+            });
     }
 };

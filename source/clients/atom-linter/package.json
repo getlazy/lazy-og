@@ -15,6 +15,7 @@
   "dependencies": {
     "async": "^2.1.4",
     "atom-package-deps": "^4.3.1",
+    "find-up": "^2.1.0",
     "lodash": "^4.17.2",
     "request": "^2.78.0",
     "simple-git": "^1.65.0"
