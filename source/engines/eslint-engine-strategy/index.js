@@ -38,13 +38,16 @@ const _configure = (eslintConfiguration) => {
                 }
             });
 
-            logger.info('Downloading and installing packages:', packages);
-            const spawnSyncResult = yarnInstall(packages);
-            if (spawnSyncResult.status !== 0) {
-                reject(new Error(`yarn failed with ${spawnSyncResult.status}`));
-                return;
+            if (!_.isEmpty(packages)) {
+                logger.info('Downloading and installing packages:', packages);
+                const spawnSyncResult = yarnInstall(packages);
+                if (spawnSyncResult.status !== 0) {
+                    reject(new Error(`yarn failed with ${spawnSyncResult.status}`));
+                    return;
+                }
             }
         }
+
         resolve({
             installedPlugins
         });
