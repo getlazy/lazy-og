@@ -96,6 +96,7 @@ module.exports = {
         // which means that if both of these files are included, neither ESLint nor JSHint will be run.
         // However (another hack level) we currently collect only one configuration file.
         if (_.some(configFiles, configFile => configFile.name === '.jshintrc')) {
+            logger.warn('HACK: skipping eslint due to presence of .jshintrc');
             return Promise.resolve([]);
         }
 
