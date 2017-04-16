@@ -13,7 +13,6 @@ const EngineHelpers = require('@getlazy/engine-helpers');
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
 class EngineContainerHttpServer extends EngineHttpServer {
-
     constructor(port, config) {
         super(port);
         this._config = _.get(config, 'packageConfig', {});
@@ -63,6 +62,7 @@ class EngineContainerHttpServer extends EngineHttpServer {
             return Promise.reject(error);
         }
     }
+
     afterListening() {
         try {
             return this._engine.shutDown();

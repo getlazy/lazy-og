@@ -11,7 +11,9 @@ const EngineHelpers = require('@getlazy/engine-helpers');
 EngineHelpers.initialize();
 
 const _ = require('lodash');
+const fs = require('fs');
 const EngineContainer = require('./lib/engine-container');
+const LocalEngineStrategyProxy = require('./lib/local-engine-strategy-proxy');
 
 const LazyPrivateApiClient = EngineHelpers.LazyPrivateApiClient;
 
@@ -21,7 +23,13 @@ const client = new LazyPrivateApiClient();
 client.getEngineConfig()
     .then((fullEngineConfig) => {
         const engineConfig = _.get(fullEngineConfig, 'config', {});
-        engineContainer = new EngineContainer(engineConfig);
+
+        // During hacking we mount a local strategy at /strategy of engine's container.
+        if (fs.existsSync('/strategy')) {
+            engineContainer = new LocalEngineStrategyProxy(engineConfig, '/strategy');
+        } else {
+            engineContainer = new EngineContainer(engineConfig);
+        }
 
         engineContainer.start()
             .catch((err) => {
