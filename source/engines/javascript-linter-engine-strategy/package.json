@@ -1,5 +1,5 @@
 {
-  "name": "@getlazy/eslint-engine-strategy",
+  "name": "@getlazy/javascript-linter-engine-strategy",
   "version": "1.1.1",
   "description": "ESlint engine strategy for lazy",
   "main": "index.js",
@@ -15,7 +15,8 @@
     "engine",
     "strategy",
     "javascript",
-    "eslint"
+    "eslint",
+    "jshint"
   ],
   "authors": [
     {
@@ -42,6 +43,7 @@
     "babel-eslint": "^7.2.0",
     "eslint": "^3.10.2",
     "eslint-rule-documentation": "^1.0.6",
+    "jshint": "^2.9.4",
     "lodash": "^4.17.4",
     "yarn-install": "^0.2.1"
   }
