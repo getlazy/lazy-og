@@ -7,10 +7,19 @@ const _ = require('lodash');
 const CLIEngine = require('eslint').CLIEngine;
 const yarnInstall = require('yarn-install');
 const getRuleURI = require('eslint-rule-documentation');
+const jshint = require('jshint').JSHINT;
 
-let availablePlugins;
+let availableEslintPlugins;
 
 // lazy ignore arrow-body-style
+
+const LinterType = {
+    ESLint: 'eslint',
+    JSHint: 'jshint'
+};
+
+const ESLINT_CONFIG_FILE_NAME = '.eslintrc';
+const JSHINT_CONFIG_FILE_NAME = '.jshintrc';
 
 /**
  * Configure ESLint based on the given configuration.
@@ -19,7 +28,7 @@ let availablePlugins;
  * @return {Promise} Promise that is resolved once the configuration is ready,
  *                   and all required module downloaded & installed
  */
-const _configure = (eslintConfiguration) => {
+const _configureEslint = (eslintConfiguration) => {
     return new Promise((resolve, reject) => {
         const packages = [];
         const installedPlugins = [];
@@ -54,33 +63,133 @@ const _configure = (eslintConfiguration) => {
     });
 };
 
-const _getEslintCli = (eslintConfig, configFiles) => {
-    // ESLint config from the files has the precedence over the one configured in lazy.
-    const eslintrcFile = _.find(configFiles, configFile => configFile.name === '.eslintrc');
-    if (eslintrcFile) {
-        return eslintrcFile.config;
-    }
-    if (_.isObject(eslintrcFile) && _.isObject(eslintrcFile.config)) {
-        eslintConfig = eslintrcFile.config;
+const _configureJshint = (/* eslintConfiguration */) => {
+    // Nothing to do for now.
+    return Promise.resolve();
+};
+
+const _chooseLinter = (engineConfig, configFiles) => {
+    // Check if there is anything in config files.
+    if (!_.isEmpty(configFiles)) {
+        // Good old `for` is by far the best solution here as we can jump out of it as soon as we
+        // have a hit.
+        let candidatePromise;
+        for (let i = 0; i < configFiles.length; ++i) {
+            const configFile = configFiles[i];
+            switch (_.toLower(configFile.name)) {
+                case ESLINT_CONFIG_FILE_NAME:
+                    // Since we hit ESLint config which has the highest priority, we immediately
+                    // return that solution.
+                    return Promise.resolve({ type: LinterType.ESLint, config: configFile.config });
+                case JSHINT_CONFIG_FILE_NAME:
+                    // Since ESLint has advantage, JSHint configuration is just a candidate.
+                    candidatePromise =
+                        Promise.resolve({ type: LinterType.JSHint, config: configFile.config });
+                    break;
+                default:
+                    // Nothing to do, continue iterating.
+                    break;
+            }
+        }
+
+        if (candidatePromise) {
+            return candidatePromise;
+        }
     }
 
+    // Now check if linter is defined in engine config.
+    switch (_.toLower(_.get(engineConfig, 'linter'))) {
+        case 'eslint':
+            return Promise.resolve({ type: LinterType.ESLint, config: engineConfig });
+        case 'jshint':
+            return Promise.resolve({ type: LinterType.JSHint, config: engineConfig });
+        default:
+            // Assume that the given engine config, if any, is given for ESLint (default)
+            logger.warn('No linter default, using ESLint');
+            return Promise.resolve({ type: LinterType.ESLint, config: engineConfig });
+    }
+};
+
+const _getEslintCli = (config) => {
     return new CLIEngine({
-        envs: _.get(eslintConfig, 'env', ['node', 'es6']),
-        parser: _.get(eslintConfig, 'parser', 'babel-eslint'),
-        plugins: availablePlugins,
-        rules: _.get(eslintConfig, 'rules', {}),
+        envs: _.get(config, 'env', ['node', 'es6']),
+        parser: _.get(config, 'parser', 'babel-eslint'),
+        plugins: availableEslintPlugins,
+        rules: _.get(config, 'rules', {}),
         fix: false,
-        parserOptions: _.get(eslintConfig, 'parserOptions', {
+        parserOptions: _.get(config, 'parserOptions', {
             ecmaVersion: 7
         })
     });
 };
 
+const _runEslint = (config, content, hostPath) => {
+    return new Promise((resolve) => {
+        const res = _getEslintCli(config).executeOnText(content, hostPath);
+        const results = _.head(_.get(res, 'results'));
+        const messages = _.get(results, 'messages');
+
+        const warnings = _
+            .chain(messages)
+            .map((warning) => {
+                const rWarning = {
+                    type: _.eq(warning.severity, 2) ? 'Error' : 'Warning',
+                    message: `[${warning.ruleId}]: ${warning.message}`,
+                    ruleId: warning.ruleId,
+                    line: warning.line,
+                    column: warning.column
+                };
+
+                if (!_.isNull(warning.ruleId)) {
+                    const ruleDocs = getRuleURI(warning.ruleId);
+                    const moreInfoUrl = (ruleDocs.found) ? ruleDocs.url : `https://www.google.com/search?q=${warning.ruleId}`;
+                    rWarning.moreInfo = moreInfoUrl;
+                }
+
+                rWarning.fix = _.get(warning, 'fix', {});
+                return rWarning;
+            })
+            .filter()
+            .value();
+
+        resolve(warnings);
+    });
+};
+
+const _runJshint = (config, content) => {
+    return new Promise((resolve) => {
+        jshint(content, config, _.get(config, 'globals'));
+
+        const warnings = _(_.get(jshint.data(), 'errors'))
+            .map((warning) => {
+                const lazyWarning = {
+                    type: 'Error',
+                    message: `[${warning.code}]: ${warning.reason}`,
+                    ruleId: warning.code,
+                    line: warning.line,
+                    column: warning.character
+                };
+
+                if (!_.isNil(warning.code)) {
+                    const moreInfoUrl = `https://www.google.com/search?q=jshint&${warning.code}`;
+                    lazyWarning.moreInfo = moreInfoUrl;
+                }
+
+                return lazyWarning;
+            })
+            .filter()
+            .value();
+
+        resolve(warnings);
+    });
+};
+
 module.exports = {
     configure(config) {
-        return _configure(config)
-            .then((cfg) => {
-                availablePlugins = cfg.installedPlugins;
+        return _configureEslint(_.get(config, 'eslint'))
+            .then((resolvedConfig) => {
+                availableEslintPlugins = resolvedConfig.installedPlugins;
+                return _configureJshint(_.get(config, 'jshint'));
             });
     },
 
@@ -89,52 +198,33 @@ module.exports = {
     },
 
     handleRequest(hostPath, language, content, context) {
-        const eslintConfig = _.get(context, 'engineParams.config', {});
+        const engineConfig = _.get(context, 'engineParams.config', {});
         const configFiles = _.get(context, 'configFiles');
 
-        // HACK: Skip ESLint if there is a jshintrc config file. We do the same in JSHint engine
-        // which means that if both of these files are included, neither ESLint nor JSHint will be run.
-        // However (another hack level) we currently collect only one configuration file.
-        if (_.some(configFiles, configFile => configFile.name === '.jshintrc')) {
-            logger.warn('HACK: skipping eslint due to presence of .jshintrc');
-            return Promise.resolve([]);
-        }
-
-        return new Promise((resolve) => {
-            const res = _getEslintCli(eslintConfig, configFiles).executeOnText(content, hostPath);
-            const results = _.head(_.get(res, 'results'));
-            const messages = _.get(results, 'messages');
-
-            const warnings = _
-                .chain(messages)
-                .map((warning) => {
-                    const rWarning = {
-                        type: _.eq(warning.severity, 2) ? 'Error' : 'Warning',
-                        message: `[${warning.ruleId}]: ${warning.message}`,
-                        ruleId: warning.ruleId,
-                        line: warning.line,
-                        column: warning.column
-                    };
-
-                    if (!_.isNull(warning.ruleId)) {
-                        const ruleDocs = getRuleURI(warning.ruleId);
-                        const moreInfoUrl = (ruleDocs.found) ? ruleDocs.url : `https://www.google.com/search?q=${warning.ruleId}`;
-                        rWarning.moreInfo = moreInfoUrl;
-                    }
-
-                    rWarning.fix = _.get(warning, 'fix', {});
-                    return rWarning;
-                })
-                .filter()
-                .value();
-
-            resolve({
-                status: {
-                    codeChecked: true
-                },
-                warnings
+        // Choose if we should execute ESLint *OR* JSHint but never both.
+        // The advantage is with configuration files and then with engine configuration
+        // and finally if there is none then we default to ESLint and its js-standard configuration.
+        return _chooseLinter(engineConfig, configFiles)
+            .then(({ type, config }) => {
+                switch (type) {
+                    case LinterType.JSHint:
+                        return _runJshint(config, content);
+                    case LinterType.ESLint:
+                    case LinterType.Default:
+                    default:
+                        return _runEslint(config, content, hostPath);
+                }
+            })
+            .then((warnings) => {
+                const metrics = [];
+                return {
+                    status: {
+                        codeChecked: true
+                    },
+                    warnings,
+                    metrics
+                };
             });
-        });
     },
 
     getMeta() {

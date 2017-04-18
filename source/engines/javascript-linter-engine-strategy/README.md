@@ -1,2 +1,2 @@
-# eslint-engine-strategy
-ESlint engine strategy for lazy
+# javascript-linter-engine-strategy
+JavaScript linter engine strategy for lazy
