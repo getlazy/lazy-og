@@ -15,36 +15,25 @@ config:
     #     host: elk:9200
     #     apiVersion: "5.0"
 engines:
-  eslint:
+  javascript:
     image: ierceg/node-dev:6.10
     command: nodemon -d 1 -L -w /app -w /strategy /app/index.js
     working_dir: /app
     volumes:
       - "source/engines/node-strategy-engine:/app"
-      - "source/engines/eslint-engine-strategy:/strategy"
-    import_env:
-      - NPM_TOKEN
-    config:
-      # packageNPM: '@getlazy/eslint-engine-strategy'
-      # packageVersion: latest
-      packageConfig:
-        plugins:
-        - name: lodash
-          packageName: eslint-plugin-lodash
-          packageVersion: latest
-        - name: import
-          packageName: eslint-plugin-import
-  jshint:
-    image: ierceg/node-dev:6.10
-    command: nodemon -d 1 -L -w /app -w /strategy /app/index.js
-    working_dir: /app
-    volumes:
-      - "source/engines/node-strategy-engine:/app"
-      - "source/engines/jshint-engine-strategy:/strategy"
+      - "source/engines/javascript-engine-strategy:/strategy"
     import_env:
       - NPM_TOKEN
     config:
       packageConfig:
+        eslint:
+          plugins:
+          - name: lodash
+            packageName: eslint-plugin-lodash
+            packageVersion: latest
+          - name: import
+            packageName: eslint-plugin-import
+            packageVersion: latest
   stylelint:
     image: ierceg/node-dev:6.10
     command: nodemon -d 1 -L -w /app /app/index.js
@@ -142,10 +131,9 @@ engine_pipeline:
     - pullreq:
   - sequence:               # Linters. Run any and all linters in parallel
     - bundle:
-      - eslint:
+      - javascript:
           config:
             ~include: eslint-config.yaml
-      - jshint:
       - yaml:
       - stylelint:
       - tidy_html:
