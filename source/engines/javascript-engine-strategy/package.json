@@ -1,8 +1,8 @@
 {
-  "name": "@getlazy/javascript-linter-engine-strategy",
-  "version": "1.1.1",
-  "description": "ESlint engine strategy for lazy",
-  "main": "javascript-linter-engine-strategy.js",
+  "name": "@getlazy/javascript-engine-strategy",
+  "version": "1.0.0",
+  "description": "JavaScript linter engine strategy for lazy",
+  "main": "javascript-engine-strategy.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
