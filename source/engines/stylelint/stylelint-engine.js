@@ -13,8 +13,7 @@ const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
 //  We are implicitly using `this` in overridden methods but eslint keep telling us not to.
 /* eslint class-methods-use-this: off */
-class StylelintEngineHttpServer extends EngineHttpServer
-{
+class StylelintEngineHttpServer extends EngineHttpServer {
     beforeListening() {
         this._stylelint = stylelint;
         this._stylelintConfigStandard = stylelintConfigStandard;
@@ -73,8 +72,7 @@ class StylelintEngineHttpServer extends EngineHttpServer
     }
 }
 
-class Engine
-{
+class Engine {
     start() {
         const port = process.env.PORT || 80;
         this._server = new StylelintEngineHttpServer(port);
