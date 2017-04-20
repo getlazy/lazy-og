@@ -9,11 +9,11 @@
     lodash "^4.17.4"
 
 "@getlazy/config-file@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@getlazy/config-file/-/config-file-3.0.0.tgz#656d11f3fdeb50d2c49c7f8f6fd283b60cd7d64e"
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@getlazy/config-file/-/config-file-3.1.0.tgz#65f5417b7cce43cab71d00257da8b0076418ed45"
   dependencies:
     "@getlazy/common" "^1.1.0"
-    ajv "^5.0.0-beta.1"
+    ajv "^5.0.0"
     async "^2.1.4"
     fs-promise "^1.0.0"
     is-url "^1.2.2"
@@ -61,7 +61,7 @@ ajv@^4.9.1:
     co "^4.6.0"
     json-stable-stringify "^1.0.1"
 
-ajv@^5.0.0-beta.1:
+ajv@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-5.0.0.tgz#a2c717764e8036d15fd227b070ddaf7867ab413a"
   dependencies:

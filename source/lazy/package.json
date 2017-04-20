@@ -40,8 +40,8 @@
   "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
     "@getlazy/common": "^1.1.0",
-    "@getlazy/engine-pipeline": "^2.2.0",
     "@getlazy/config-file": "^3.0.0",
+    "@getlazy/engine-pipeline": "^2.2.0",
     "async": "^2.1.4",
     "body-parser": "^1.15.2",
     "common-errors": "^1.0.0",
