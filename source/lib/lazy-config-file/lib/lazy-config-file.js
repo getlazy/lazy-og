@@ -148,7 +148,7 @@ module.exports = LazyConfigFile;
 
 //  This is executed during module loading.
 LAZY_CONFIG_SCHEMA = {
-    $schema: 'http://json-schema.org/draft-04/schema#',
+    $schema: 'http://json-schema.org/draft-06/schema#',
     title: 'lazy.yaml schema',
     type: 'object',
     properties: {

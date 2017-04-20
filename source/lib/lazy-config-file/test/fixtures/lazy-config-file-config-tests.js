@@ -143,7 +143,7 @@ module.exports = [{
             }]
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be object'
 }, {
     id: '#19',
     config: {
@@ -205,7 +205,7 @@ module.exports = [{
             }]
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be object'
 }, {
     id: '#24',
     config: {
@@ -271,7 +271,7 @@ module.exports = [{
             }]
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be object'
 }, {
     id: '#30',
     config: {
@@ -333,7 +333,7 @@ module.exports = [{
             }]
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be object'
 }, {
     id: '#35',
     config: {
@@ -476,7 +476,7 @@ module.exports = [{
             test: 'test'
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be object'
 }, {
     id: '#44',
     config: {
@@ -491,7 +491,7 @@ module.exports = [{
             test: {}
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should have required property \'image\''
 }, {
     id: '#45',
     config: {
@@ -508,7 +508,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be string'
 }, {
     id: '#46',
     config: {
@@ -525,7 +525,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT be shorter than 3 characters'
 }, {
     id: '#47',
     config: {
@@ -542,7 +542,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should match pattern "^.+:.+$"'
 }, {
     id: '#48',
     config: {
@@ -560,7 +560,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have additional properties'
 }, {
     id: 'test engine.command #1',
     config: {
@@ -578,7 +578,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be string'
 }, {
     id: 'test engine.command #2',
     config: {
@@ -596,7 +596,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT be shorter than 1 characters'
 }, {
     id: 'test engine.command #3',
     config: {
@@ -631,7 +631,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be string'
 }, {
     id: 'test engine.command #5',
     config: {
@@ -649,7 +649,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be string'
 }, {
     id: 'test engine.command #6',
     config: {
@@ -684,7 +684,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be string'
 }, {
     id: 'test engine.working_dir #1',
     config: {
@@ -702,7 +702,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be string'
 }, {
     id: 'test engine.working_dir #2',
     config: {
@@ -720,7 +720,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT be shorter than 1 characters'
 }, {
     id: 'test engine.working_dir #3',
     config: {
@@ -755,7 +755,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be array'
 }, {
     id: 'test engine.volumes #2',
     config: {
@@ -773,7 +773,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have less than 1 items'
 }, {
     id: 'test engine.volumes #3',
     config: {
@@ -791,7 +791,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be string'
 }, {
     id: 'test engine.volumes #4',
     config: {
@@ -809,7 +809,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should match pattern "^.*:.*$"'
 }, {
     id: 'test engine.volumes #5',
     config: {
@@ -844,7 +844,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have duplicate items (items ## 0 and 1 are identical)'
 }, {
     id: 'test engine.boot_wait #1',
     config: {
@@ -862,7 +862,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be boolean'
 }, {
     id: 'test engine.boot_wait #2',
     config: {
@@ -897,7 +897,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be integer'
 }, {
     id: 'test engine.boot_timeout #2',
     config: {
@@ -915,7 +915,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be >= 1'
 }, {
     id: 'test engine.boot_timeout #3',
     config: {
@@ -950,7 +950,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be object'
 }, {
     id: 'test engine.meta #2',
     config: {
@@ -987,7 +987,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be array'
 }, {
     id: 'test engine.meta #4',
     config: {
@@ -1026,7 +1026,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be string'
 }, {
     id: 'test engine.meta #6',
     config: {
@@ -1083,7 +1083,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be array'
 }, {
     id: 'test engine.env #2',
     config: {
@@ -1101,7 +1101,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have less than 1 items'
 }, {
     id: 'test engine.env #3',
     config: {
@@ -1119,7 +1119,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be string'
 }, {
     id: 'test engine.env #4',
     config: {
@@ -1137,7 +1137,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should match pattern "^.+=.*$"'
 }, {
     id: 'test engine.env #5',
     config: {
@@ -1172,7 +1172,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have duplicate items (items ## 0 and 1 are identical)'
 }, {
     id: 'test engine.import_env #1',
     config: {
@@ -1190,7 +1190,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be array'
 }, {
     id: 'test engine.import_env #2',
     config: {
@@ -1208,7 +1208,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have less than 1 items'
 }, {
     id: 'test engine.import_env #3',
     config: {
@@ -1226,7 +1226,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be string'
 }, {
     id: 'test engine.import_env #4',
     config: {
@@ -1244,7 +1244,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT be shorter than 1 characters'
 }, {
     id: 'test engine.import_env #5',
     config: {
@@ -1279,7 +1279,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have duplicate items (items ## 0 and 1 are identical)'
 }, {
     id: 'test engine.config #1',
     config: {
@@ -1297,7 +1297,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be object'
 }, {
     id: 'test engine.config #2',
     config: {
@@ -1371,7 +1371,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be object'
 }, {
     id: 'test engine.labels #2',
     config: {
@@ -1389,7 +1389,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have less than 1 properties'
 }, {
     id: 'test engine.labels #3',
     config: {
@@ -1429,7 +1429,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be string'
 }, {
     id: 'test engine.labels #5',
     config: {
@@ -1467,7 +1467,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be object'
 }, {
     id: 'test repository_auth #2',
     config: {
@@ -1485,7 +1485,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should have required property \'username_env\''
 }, {
     id: 'test repository_auth #3',
     config: {
@@ -1505,7 +1505,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have additional properties'
 }, {
     id: 'test repository_auth #4',
     config: {
@@ -1525,7 +1525,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should have required property \'password_env\''
 }, {
     id: 'test repository_auth #5',
     config: {
@@ -1546,7 +1546,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be string'
 }, {
     id: 'test repository_auth #6',
     config: {
@@ -1588,7 +1588,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have additional properties'
 }, {
     id: 'test repository_auth #8',
     config: {
@@ -1610,7 +1610,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should be string'
 }, {
     id: 'test repository_auth #9',
     config: {
@@ -1632,7 +1632,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT be shorter than 1 characters'
 }, {
     id: 'test repository_auth #10',
     config: {
@@ -1673,7 +1673,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have additional properties'
 }, {
     id: 'test repository_auth #12',
     config: {
@@ -1693,7 +1693,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have additional properties'
 }, {
     id: 'test repository_auth #13',
     config: {
@@ -2059,11 +2059,11 @@ module.exports = [{
         },
         engines: {
             test: {
-                host: null
+                host: 123
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have additional properties' // This is likely a defect in output
 }, {
     id: 'test engine.host #2',
     config: {
@@ -2080,7 +2080,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have additional properties' // This is likely a defect in output
 }, {
     id: 'test engine.host #3',
     config: {
@@ -2114,7 +2114,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have additional properties'
 }, {
     id: 'test engine.port #2',
     config: {
@@ -2132,7 +2132,7 @@ module.exports = [{
             }
         }
     },
-    firstErrorMessage: 'should match exactly one schema in oneOf'
+    firstErrorMessage: 'should NOT have additional properties'
 }, {
     id: 'test engine.port #3',
     config: {

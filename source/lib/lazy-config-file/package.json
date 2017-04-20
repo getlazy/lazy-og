@@ -38,7 +38,7 @@
   "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
     "@getlazy/common": "^1.1.0",
-    "ajv": "^5.0.0-beta.1",
+    "ajv": "^5.0.0",
     "async": "^2.1.4",
     "fs-promise": "^1.0.0",
     "is-url": "^1.2.2",
