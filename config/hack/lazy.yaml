@@ -117,6 +117,7 @@ engines:
     volumes:
       - "source/engines/node-strategy-engine:/app"
       - "source/engines/postprocessor-engine-strategy:/strategy"
+    boot_timeout: 120
   reducer:
     image: ierceg/node-dev:6.10
     command: nodemon -d 1 -L -w /app -w /strategy /app/index.js
@@ -124,6 +125,7 @@ engines:
     volumes:
       - "source/engines/node-strategy-engine:/app"
       - "source/engines/reducer-engine-strategy:/strategy"
+    boot_timeout: 120
 engine_pipeline:
   bundle:
   - sequence:               # pullreq engine depends on github-access, so we run them sequentially
@@ -159,6 +161,7 @@ engine_pipeline:
           - "The most disastrous thing that you can ever learn is your first programming language."
           - "Programming went back to the beginning of time."
           # Movies
+          # - Deadpool
           - "Maximum effort."
           - "Ahhhh. I'm touching myself tonight."
           - "Cue the music."
@@ -183,9 +186,11 @@ engine_pipeline:
           - "Ahhh! Your poor wife!"
           - "Daddy needs to express some rage."
           - "I don't have time for the goody two-shows bullshit right now!"
+          # - Tron 2 soundtrack
           - "I tried to picture clusters of information as they moved through the computer."
           - "I kept dreaming of a world, I thought I'd never see."
           - "The Grid. A Digital Frontier."
+          # - The Gladiator
           - "Brothers, what we do in life echoes in eternity."
         ignore-always:
           - lodash/import-scope
