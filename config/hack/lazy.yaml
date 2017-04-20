@@ -17,7 +17,7 @@ config:
 engines:
   javascript:
     image: ierceg/node-dev:6.10
-    command: nodemon -d 1 -L -w /app -w /strategy /app/index.js
+    command: nodemon -q -d 1 -L -w /app -w /strategy /app/index.js
     working_dir: /app
     volumes:
       - "source/engines/node-strategy-engine:/app"
@@ -36,14 +36,14 @@ engines:
             packageVersion: latest
   stylelint:
     image: ierceg/node-dev:6.10
-    command: nodemon -d 1 -L -w /app /app/index.js
+    command: nodemon -q -d 1 -L -w /app /app/index.js
     working_dir: /app
     volumes:
       - "source/engines/stylelint:/app"
     boot_timeout: 120
   tidy_html:
     image: ierceg/node-dev:6.10
-    command: nodemon -d 1 -L -w /app /app/index.js
+    command: nodemon -q -d 1 -L -w /app /app/index.js
     working_dir: /app
     volumes:
       - "source/engines/tidy-html:/app"
@@ -52,7 +52,7 @@ engines:
     boot_timeout: 120
   emcc:
     image: ierceg/node-dev:6.10
-    command: nodemon -d 1 -L -w /app /app/index.js
+    command: nodemon -q -d 1 -L -w /app /app/index.js
     working_dir: /app
     volumes:
       - "source/engines/emcc:/app"
@@ -61,7 +61,7 @@ engines:
     boot_timeout: 120
   php-l:
     image: ierceg/node-dev:6.10
-    command: nodemon -d 1 -L -w /app /app/index.js
+    command: nodemon -q -d 1 -L -w /app /app/index.js
     working_dir: /app
     volumes:
       - "source/engines/php-l:/app"
@@ -70,7 +70,7 @@ engines:
     boot_timeout: 120
   pmd-java:
     image: ierceg/node-dev:6.10
-    command: nodemon -d 1 -L -w /app /app/index.js
+    command: nodemon -q -d 1 -L -w /app /app/index.js
     working_dir: /app
     volumes:
       - "source/engines/pmd-java:/app"
@@ -79,7 +79,7 @@ engines:
     boot_timeout: 120
   github_access:
     image: ierceg/node-dev:6.10
-    command: nodemon -d 1 -L -w /app /app/index.js
+    command: nodemon -q -d 1 -L -w /app /app/index.js
     working_dir: /app
     volumes:
       - "source/engines/github-access:/app"
@@ -92,7 +92,7 @@ engines:
     boot_timeout: 120
   pullreq:
     image: ierceg/node-dev:6.10
-    command: nodemon -d 1 -L -w /app /app/index.js
+    command: nodemon -q -d 1 -L -w /app /app/index.js
     working_dir: /app
     volumes:
       - "source/engines/pullreq:/app"
@@ -105,14 +105,14 @@ engines:
     boot_timeout: 120
   yaml:
     image: ierceg/node-dev:6.10
-    command: nodemon -d 1 -L -w /app /app/index.js
+    command: nodemon -q -d 1 -L -w /app /app/index.js
     working_dir: /app
     volumes:
       - "source/engines/yaml:/app"
     boot_timeout: 120
   postprocessor:
     image: ierceg/node-dev:6.10
-    command: nodemon -d 1 -L -w /app -w /strategy /app/index.js
+    command: nodemon -q -d 1 -L -w /app -w /strategy /app/index.js
     working_dir: /app
     volumes:
       - "source/engines/node-strategy-engine:/app"
@@ -120,7 +120,7 @@ engines:
     boot_timeout: 120
   reducer:
     image: ierceg/node-dev:6.10
-    command: nodemon -d 1 -L -w /app -w /strategy /app/index.js
+    command: nodemon -q -d 1 -L -w /app -w /strategy /app/index.js
     working_dir: /app
     volumes:
       - "source/engines/node-strategy-engine:/app"

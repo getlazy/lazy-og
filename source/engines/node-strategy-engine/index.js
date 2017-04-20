@@ -17,7 +17,7 @@ const LocalEngineStrategyProxy = require('./lib/local-engine-strategy-proxy');
 
 const LazyPrivateApiClient = EngineHelpers.LazyPrivateApiClient;
 
-let engineContainer;
+let engine;
 
 const client = new LazyPrivateApiClient();
 client.getEngineConfig()
@@ -26,12 +26,19 @@ client.getEngineConfig()
 
         // During hacking we mount a local strategy at /strategy of engine's container.
         if (fs.existsSync('/strategy')) {
-            engineContainer = new LocalEngineStrategyProxy(engineConfig, '/strategy');
+            engine = new LocalEngineStrategyProxy(engineConfig, '/strategy');
         } else {
-            engineContainer = new EngineContainer(engineConfig);
+            engine = new EngineContainer(engineConfig);
         }
 
-        engineContainer.start()
+        // We purposefully log starting/started messages from the engine as that allows us to keep track
+        // of restarts directly in the console during development (it would be terribly hacky to say
+        // monitor for [nodemon], which we use to restart, and output those from lazy)
+        logger.info('Starting engine.');
+        engine.start()
+            .then(() => {
+                logger.info('Engine started.');
+            })
             .catch((err) => {
                 logger.error('Failed to start engine', err);
                 process.exit(-1);
@@ -46,7 +53,7 @@ client.getEngineConfig()
 process.on('SIGTERM', () => {
     logger.info('Received SIGTERM, stopping engine.');
     try {
-        engineContainer.stop()
+        engine.stop()
             .then(() => {
                 logger.info('Engine stopped.');
                 process.exit(0);

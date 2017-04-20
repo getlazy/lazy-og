@@ -70,7 +70,6 @@ class Engine {
     start() {
         const self = this;
 
-        logger.info('Starting engine', { engineId: self.id });
         return self._redirectContainerLogsToLogger()
             .then(() => self._container.status())
             .then((containerStatus) => {
@@ -159,19 +158,19 @@ class Engine {
                 //  First try to parse as JSON the line as we received it. If it succeeds then it means
                 //  that it was a valid and complete JSON which in turn means that pending buffers
                 //  were not and we will just dump them as they were received.
-                let messageJson = HigherDockerManager.containerOutputBuffersToString([buffer]);
+                let potentialJsonMessage = HigherDockerManager.containerOutputBuffersToString([buffer]);
                 try {
-                    const messageData = JSON.parse(messageJson);
+                    const messageData = JSON.parse(potentialJsonMessage);
                     logAndClearPendingBuffers();
                     logEngineMessage(messageData);
                 } catch (e1) {
                     //  Since single buffer parsing failed we will now try to parse this buffer together
                     //  with all the other pending buffers.
                     pendingBuffers.push(buffer);
-                    messageJson = HigherDockerManager.containerOutputBuffersToString(pendingBuffers);
+                    potentialJsonMessage = HigherDockerManager.containerOutputBuffersToString(pendingBuffers);
 
                     try {
-                        const messageData = JSON.parse(messageJson);
+                        const messageData = JSON.parse(potentialJsonMessage);
                         //  Parse succeeded so let's clear the buffers.
                         pendingBuffers = [];
                         logEngineMessage(messageData);
@@ -183,7 +182,7 @@ class Engine {
             stream.on('end', () => {
                 //  Before ending dump all the pending buffers as they are.
                 logAndClearPendingBuffers();
-                logger.info('Stopped streaming logs', { engineId: self.id });
+                logger.warn('Stopped streaming logs', { engineId: self.id });
             });
             stream.on('error', (err) => {
                 logger.error('Error while streaming logs for engine', { err, engineId: self.id });
@@ -224,7 +223,6 @@ class Engine {
                         .then(() => {
                             //  We received an error-less status so assume everything is fine.
                             healthyStatus = true;
-                            logger.info('Engine online', { engineId: self.id });
                             next();
                         })
                         .catch(() => {
