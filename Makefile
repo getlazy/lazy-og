@@ -38,8 +38,7 @@ install:
 	make -C source/engines/tidy-html install
 	make -C source/engines/pullreq install
 	make -C source/engines/github-access install
-	make -C source/engines/eslint-engine-strategy install
-	make -C source/engines/jshint-engine-strategy install
+	make -C source/engines/javascript-engine-strategy install
 	make -C source/engines/reducer-engine-strategy install
 	make -C source/engines/postprocessor-engine-strategy install
 
