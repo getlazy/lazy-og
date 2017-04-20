@@ -5,7 +5,6 @@
 
 const _ = require('lodash');
 const H = require('higher');
-const selectn = require('selectn');
 const EngineHelpers = require('@getlazy/engine-helpers');
 
 const HelperContainer = EngineHelpers.HelperContainer;
@@ -55,7 +54,7 @@ class PmdJavaHelperContainer extends HelperContainer {
                         const warning = JSON.parse(cleanJsonLine);
                         return {
                             type: 'Warning',
-                            line: H.ifFalsy(selectn('location.lines.begin', warning), 0),
+                            line: H.ifFalsy(_.get(warning, 'location.lines.begin'), 0),
                             column: 1,
                             message: warning.description
                         };

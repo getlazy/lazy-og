@@ -3,7 +3,6 @@
 /* global logger */
 
 const _ = require('lodash');
-const selectn = require('selectn');
 const proxy = require('http-proxy-middleware');
 const PACKAGE_VERSION = require('../../../package.json').version;
 const EnginePipeline = require('@getlazy/engine-pipeline');
@@ -31,14 +30,15 @@ const addEndpoints = (app, options) => {
     });
 
     app.post('/file', (req, res) => {
-        const language = selectn('body.language', req);
-        const hostPath = selectn('body.hostPath', req);
+        const language = _.get(req, 'body.language');
+        const hostPath = _.get(req, 'body.hostPath');
         if (_.isEmpty(language) || _.isEmpty(hostPath)) {
-            return res.status(400).send();
+            res.status(400).send();
+            return;
         }
 
-        const content = selectn('body.content', req);
-        const context = selectn('body.context', req);
+    	const content = _.get(req, 'body.content');
+        const context = _.get(req, 'body.context');
 
         try {
             return enginePipeline.analyzeFile(hostPath, language, content, context)

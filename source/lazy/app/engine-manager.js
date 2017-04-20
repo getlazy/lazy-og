@@ -7,7 +7,6 @@ const _ = require('lodash');
 const url = require('url');
 const path = require('path');
 const H = require('higher');
-const selectn = require('selectn');
 const HigherDockerManager = require('higher-docker-manager');
 const Engine = require('./engine');
 const ip = require('ip');
@@ -139,14 +138,14 @@ class EngineManager {
                             importEnvvar => `${importEnvvar}=${process.env[importEnvvar]}`),
                         [
                             `LAZY_ENGINE_ID=${engineId}`,
-                            `LAZY_SERVICE_URL=${selectn('_config.service_url', self)}`,
+                            `LAZY_SERVICE_URL=${_.get(self, '_config.service_url')}`,
                             `LAZY_PRIVATE_API_URL=${url.format({
                                 protocol: 'http',
                                 hostname: ip.address(),
                                 port: self._config.privateApiPort
                             })}`,
                             // TODO: Fix this as special engines like UI don't follow this URL pattern.
-                            `LAZY_ENGINE_URL=${selectn('_config.service_url', self)}/engine/${engineId}`,
+                            `LAZY_ENGINE_URL=${_.get(self, '_config.service_url')}/engine/${engineId}`,
                             'LAZY_VOLUME_MOUNT=/lazy',
                             `LAZY_ENGINE_SANDBOX_DIR=/lazy/sandbox/${engineId}`
                         ],
