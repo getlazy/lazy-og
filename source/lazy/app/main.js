@@ -165,7 +165,7 @@ class Main {
      * @private
      */
     static _loadExternalExpressAppControllers() {
-        return externalControllers.initialize(externalExpressApp, { engineManager, config });
+        return externalControllers.initialize(externalExpressApp, { config, engineManager });
     }
 
     /**

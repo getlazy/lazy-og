@@ -48,3 +48,5 @@ env
 config/eslint-rules.yaml
 
 config/test.yaml
+
+yarn-error.log
