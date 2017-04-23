@@ -5,7 +5,7 @@
 
 const _ = require('lodash');
 const assert = require('assert');
-const NodeLazyClient = require('@lazyass/node-lazy-client');
+const NodeLazyClient = require('@getlazy/node-lazy-client');
 const bootstrap = require('./bootstrap');
 
 const ASSERT_FALSE = (data) => {
