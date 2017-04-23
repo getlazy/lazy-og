@@ -1,8 +1,16 @@
 FROM node:6.10-alpine
-MAINTAINER <%= author %> 
+MAINTAINER <your name goes here>
+
+ENV NODE_ENV=production
+
 ARG NPM_TOKEN
-STOPSIGNAL SIGTERM
-WORKDIR /app
+
+# yarn is so fast that there is no good reason to split copying package.json/yarn.yaml/.npmrc
+# and the rest of the sources to get marginal build performance improvements. On the other hand
+# having less layers in a Docker image is beneficial for runtime performance.
 COPY . /app
-RUN npm install
+WORKDIR /app
+RUN yarn --pure-lockfile
+
+STOPSIGNAL SIGTERM
 ENTRYPOINT ["node", "/app/index.js"]

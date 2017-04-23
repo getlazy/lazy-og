@@ -1,6 +1,6 @@
 {
   "name": "@getlazy/postprocessor-engine-strategy",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Postprocessor engine strategy for lazy",
   "main": "index.js",
   "scripts": {

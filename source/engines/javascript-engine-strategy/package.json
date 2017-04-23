@@ -1,6 +1,6 @@
 {
   "name": "@getlazy/javascript-engine-strategy",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "JavaScript linter engine strategy for lazy",
   "main": "javascript-engine-strategy.js",
   "scripts": {

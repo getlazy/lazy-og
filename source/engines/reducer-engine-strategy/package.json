@@ -1,6 +1,6 @@
 {
   "name": "@getlazy/reducer-engine-strategy",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Reducer engine strategy for lazy",
   "main": "index.js",
   "scripts": {

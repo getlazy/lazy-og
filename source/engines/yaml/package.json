@@ -1,6 +1,6 @@
 {
   "name": "@getlazy/yaml-engine",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "lazy engine for linting YAML files",
   "main": "yaml-engine.js",
   "scripts": {
