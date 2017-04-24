@@ -349,6 +349,11 @@ LAZY_CONFIG_SCHEMA = {
                 },
                 meta: {
                     $ref: '#/definitions/engine_meta'
+                },
+                // Sometimes even remotely configured engines want to retrieve their
+                // configuration from their lazy.
+                config: {
+                    type: 'object'
                 }
             },
             required: ['host'],
