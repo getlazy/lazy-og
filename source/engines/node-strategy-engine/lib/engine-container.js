@@ -38,6 +38,7 @@ class EngineContainerHttpServer extends EngineHttpServer {
         }
         // Download the package thet implements the engine
         const packageNPM = _.get(config, 'packageNPM');
+        const packageName = _.get(config, 'packageName', packageNPM);
         const packageVersion = _.get(config, 'packageVersion');
         let enginePackage;
         if (!_.isEmpty(packageVersion)) {
@@ -52,7 +53,7 @@ class EngineContainerHttpServer extends EngineHttpServer {
             this._engine = {};
             throw new Error(`yarn failed with ${spawnSyncResult.status}`);
         }
-        this._engine = require(packageNPM);
+        this._engine = require(packageName);
     }
 
     beforeListening() {
