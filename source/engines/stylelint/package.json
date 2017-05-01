@@ -1,6 +1,6 @@
 {
   "name": "stylelint-engine",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "lazy engine serving requests to lint CSS and related using Stylelint",
   "main": "stylelint-engine.js",
   "scripts": {
@@ -37,7 +37,7 @@
   },
   "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
-    "@getlazy/engine-helpers": "^6.0.0",
+    "@getlazy/engine-helpers": "^6.1.0",
     "lodash": "^4.17.2",
     "request": "^2.79.0",
     "stylelint": "^7.6.0",
