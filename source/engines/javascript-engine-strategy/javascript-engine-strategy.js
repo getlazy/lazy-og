@@ -1,11 +1,10 @@
-
 'use strict';
 
 /* global logger */
 
 const _ = require('lodash');
 const CLIEngine = require('eslint').CLIEngine;
-const yarnInstall = require('yarn-install');
+const spawn = require('cross-spawn');
 const getRuleURI = require('eslint-rule-documentation');
 const jshint = require('jshint').JSHINT;
 
@@ -39,22 +38,21 @@ const _configureEslint = (eslintConfiguration) => {
                 const packageName = _.get(onePlugin, 'package', '');
                 if (!_.isEmpty(packageName)) {
                     const packageVersion = _.get(onePlugin, 'package-version', 'latest');
-                    packages.push(`${packageName}@${packageVersion}`);
+                    const onePackage = `${packageName}@${packageVersion}`;
+                    const spawnSyncResult = spawn.sync('npm', ['install', `${onePackage}`, '--save'], {
+                        stdio: 'ignore'
+                    });
+                    if (spawnSyncResult.status !== 0) {
+                        logger.warn(`NPM install for ${onePackage} failed with ${spawnSyncResult.status}`);
+                    } else {
+                        packages.push(onePackage);
+                    }
                 }
                 const pluginName = _.get(onePlugin, 'name', '');
                 if (!_.isEmpty(pluginName)) {
                     installedPlugins.push(pluginName);
                 }
             });
-
-            if (!_.isEmpty(packages)) {
-                logger.info('Downloading and installing packages:', packages);
-                const spawnSyncResult = yarnInstall(packages);
-                if (spawnSyncResult.status !== 0) {
-                    reject(new Error(`yarn failed with ${spawnSyncResult.status}`));
-                    return;
-                }
-            }
         }
 
         resolve({
@@ -63,7 +61,7 @@ const _configureEslint = (eslintConfiguration) => {
     });
 };
 
-const _configureJshint = (/* eslintConfiguration */) => {
+const _configureJshint = ( /* eslintConfiguration */ ) => {
     // Nothing to do for now.
     return Promise.resolve();
 };
@@ -80,11 +78,17 @@ const _chooseLinter = (engineConfig, configFiles) => {
                 case ESLINT_CONFIG_FILE_NAME:
                     // Since we hit ESLint config which has the highest priority, we immediately
                     // return that solution.
-                    return Promise.resolve({ type: LinterType.ESLint, config: configFile.config });
+                    return Promise.resolve({
+                        type: LinterType.ESLint,
+                        config: configFile.config
+                    });
                 case JSHINT_CONFIG_FILE_NAME:
                     // Since ESLint has advantage, JSHint configuration is just a candidate.
                     candidatePromise =
-                        Promise.resolve({ type: LinterType.JSHint, config: configFile.config });
+                        Promise.resolve({
+                            type: LinterType.JSHint,
+                            config: configFile.config
+                        });
                     break;
                 default:
                     // Nothing to do, continue iterating.
@@ -100,13 +104,22 @@ const _chooseLinter = (engineConfig, configFiles) => {
     // Now check if linter is defined in engine config.
     switch (_.toLower(_.get(engineConfig, 'linter'))) {
         case 'eslint':
-            return Promise.resolve({ type: LinterType.ESLint, config: engineConfig });
+            return Promise.resolve({
+                type: LinterType.ESLint,
+                config: engineConfig
+            });
         case 'jshint':
-            return Promise.resolve({ type: LinterType.JSHint, config: engineConfig });
+            return Promise.resolve({
+                type: LinterType.JSHint,
+                config: engineConfig
+            });
         default:
             // Assume that the given engine config, if any, is given for ESLint (default)
             logger.warn('No linter default, using ESLint');
-            return Promise.resolve({ type: LinterType.ESLint, config: engineConfig });
+            return Promise.resolve({
+                type: LinterType.ESLint,
+                config: engineConfig
+            });
     }
 };
 
@@ -142,7 +155,8 @@ const _runEslint = (config, content, hostPath) => {
 
                 if (!_.isNull(warning.ruleId)) {
                     const ruleDocs = getRuleURI(warning.ruleId);
-                    const moreInfoUrl = (ruleDocs.found) ? ruleDocs.url : `https://www.google.com/search?q=${warning.ruleId}`;
+                    const moreInfoUrl = (ruleDocs.found) ? ruleDocs.url :
+                        `https://www.google.com/search?q=${warning.ruleId}`;
                     rWarning.moreInfo = moreInfoUrl;
                 }
 
@@ -186,50 +200,52 @@ const _runJshint = (config, content) => {
 
 module.exports = {
     configure(config) {
-        return _configureEslint(_.get(config, 'eslint'))
-            .then((resolvedConfig) => {
-                availableEslintPlugins = resolvedConfig.installedPlugins;
-                return _configureJshint(_.get(config, 'jshint'));
-            });
-    },
+            return _configureEslint(_.get(config, 'eslint'))
+                .then((resolvedConfig) => {
+                    availableEslintPlugins = resolvedConfig.installedPlugins;
+                    return _configureJshint(_.get(config, 'jshint'));
+                });
+        },
 
-    shutDown() {
-        return Promise.resolve();
-    },
+        shutDown() {
+            return Promise.resolve();
+        },
 
-    handleRequest(hostPath, language, content, context) {
-        const engineConfig = _.get(context, 'engineParams.config', {});
-        const configFiles = _.get(context, 'configFiles');
+        handleRequest(hostPath, language, content, context) {
+            const engineConfig = _.get(context, 'engineParams.config', {});
+            const configFiles = _.get(context, 'configFiles');
 
-        // Choose if we should execute ESLint *OR* JSHint but never both.
-        // The advantage is with configuration files and then with engine configuration
-        // and finally if there is none then we default to ESLint and its js-standard configuration.
-        return _chooseLinter(engineConfig, configFiles)
-            .then(({ type, config }) => {
-                switch (type) {
-                    case LinterType.JSHint:
-                        return _runJshint(config, content);
-                    case LinterType.ESLint:
-                    case LinterType.Default:
-                    default:
-                        return _runEslint(config, content, hostPath);
-                }
-            })
-            .then((warnings) => {
-                const metrics = [];
-                return {
-                    status: {
-                        codeChecked: true
-                    },
-                    warnings,
-                    metrics
-                };
-            });
-    },
+            // Choose if we should execute ESLint *OR* JSHint but never both.
+            // The advantage is with configuration files and then with engine configuration
+            // and finally if there is none then we default to ESLint and its js-standard configuration.
+            return _chooseLinter(engineConfig, configFiles)
+                .then(({
+                    type, config
+                }) => {
+                    switch (type) {
+                        case LinterType.JSHint:
+                            return _runJshint(config, content);
+                        case LinterType.ESLint:
+                        case LinterType.Default:
+                        default:
+                            return _runEslint(config, content, hostPath);
+                    }
+                })
+                .then((warnings) => {
+                    const metrics = [];
+                    return {
+                        status: {
+                            codeChecked: true
+                        },
+                        warnings,
+                        metrics
+                    };
+                });
+        },
 
-    getMeta() {
-        return {
-            languages: ['JavaScript']
-        };
-    }
+        getMeta() {
+            return {
+                languages: ['JavaScript']
+            };
+        }
 };

@@ -7,8 +7,12 @@
 
 const _ = require('lodash');
 const spawn = require('cross-spawn');
-const yarnInstall = require('yarn-install');
 const EngineHelpers = require('@getlazy/engine-helpers');
+
+// Don't use Yarn - see below for more info
+/*
+const yarnInstall = require('yarn-install');
+*/
 
 const EngineHttpServer = EngineHelpers.EngineHttpServer;
 
@@ -48,11 +52,28 @@ class EngineContainerHttpServer extends EngineHttpServer {
         }
 
         logger.info('Downloading and installing package:', enginePackage);
+
+        // Code below is using Yarn to install strategy implementation packages.
+        // Yarn is not stable enough for this - it has certain issues with installing
+        // private packages (@something/...)
+        // Thus, we are giving up on yarn, and switching to NPM instead.
+        /*
         const spawnSyncResult = yarnInstall([enginePackage]);
         if (spawnSyncResult.status !== 0) {
             this._engine = {};
             throw new Error(`yarn failed with ${spawnSyncResult.status}`);
         }
+        */
+
+        // NPM implementation
+        const npmInstallResult = spawn.sync('npm', ['install', `${enginePackage}`, '--save'], {
+                stdio: 'ignore' 
+            }); 
+        if (npmInstallResult.status !== 0) {
+            this._engine = {};
+            throw new Error(`NPM install failed with ${npmInstallResult.status}`);
+        }
+
         this._engine = require(packageName);
     }
 
