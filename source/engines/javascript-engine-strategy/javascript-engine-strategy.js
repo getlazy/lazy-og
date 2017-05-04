@@ -39,18 +39,21 @@ const _configureEslint = (eslintConfiguration) => {
                 if (!_.isEmpty(packageName)) {
                     const packageVersion = _.get(onePlugin, 'package-version', 'latest');
                     const onePackage = `${packageName}@${packageVersion}`;
+                    logger.info(`Installing "${onePackage}" ...`);
                     const spawnSyncResult = spawn.sync('npm', ['install', `${onePackage}`, '--save'], {
                         stdio: 'ignore'
                     });
                     if (spawnSyncResult.status !== 0) {
                         logger.warn(`NPM install for ${onePackage} failed with ${spawnSyncResult.status}`);
                     } else {
+                        logger.info(`Successfully installed "${onePackage}".`);
                         packages.push(onePackage);
                     }
                 }
                 const pluginName = _.get(onePlugin, 'name', '');
                 if (!_.isEmpty(pluginName)) {
                     installedPlugins.push(pluginName);
+                    logger.info(`Plugin "${pluginName}" installed.`);
                 }
             });
         }
