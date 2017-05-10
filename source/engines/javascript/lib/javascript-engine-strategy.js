@@ -5,7 +5,6 @@
 
 const _ = require('lodash');
 const CLIEngine = require('eslint').CLIEngine;
-const yarnInstall = require('yarn-install');
 const getRuleURI = require('eslint-rule-documentation');
 const jshint = require('jshint').JSHINT;
 
@@ -46,15 +45,6 @@ const _configureEslint = (eslintConfiguration) => {
                     installedPlugins.push(pluginName);
                 }
             });
-
-            if (!_.isEmpty(packages)) {
-                logger.info('Downloading and installing packages:', packages);
-                const spawnSyncResult = yarnInstall(packages);
-                if (spawnSyncResult.status !== 0) {
-                    reject(new Error(`yarn failed with ${spawnSyncResult.status}`));
-                    return;
-                }
-            }
         }
 
         resolve({

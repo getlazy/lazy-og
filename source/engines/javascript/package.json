@@ -2,7 +2,7 @@
   "name": "@getlazy/javascript-engine-strategy",
   "version": "1.2.0",
   "description": "JavaScript linter engine strategy for lazy",
-  "main": "javascript-engine-strategy.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -42,6 +42,8 @@
   "dependencies": {
     "babel-eslint": "^7.2.0",
     "eslint": "^3.10.2",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-lodash": "^2.4.0",
     "eslint-rule-documentation": "^1.0.6",
     "jshint": "^2.9.4",
     "lodash": "^4.17.4",
