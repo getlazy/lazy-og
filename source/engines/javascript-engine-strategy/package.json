@@ -1,6 +1,6 @@
 {
   "name": "@getlazy/javascript-engine-strategy",
-  "version": "1.1.0",
+  "version": "1.1.3",
   "description": "JavaScript linter engine strategy for lazy",
   "main": "javascript-engine-strategy.js",
   "scripts": {
@@ -41,10 +41,10 @@
   "homepage": "https://github.com/getlazy/lazy#readme",
   "dependencies": {
     "babel-eslint": "^7.2.0",
+    "cross-spawn": "^5.1.0",
     "eslint": "^3.10.2",
     "eslint-rule-documentation": "^1.0.6",
     "jshint": "^2.9.4",
-    "lodash": "^4.17.4",
-    "yarn-install": "^0.2.1"
+    "lodash": "^4.17.4"
   }
 }

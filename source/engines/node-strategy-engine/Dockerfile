@@ -10,7 +10,8 @@ ARG NPM_TOKEN
 # having less layers in a Docker image is beneficial for runtime performance.
 COPY . /app
 WORKDIR /app/
-RUN yarn --pure-lockfile
+#RUN yarn --pure-lockfile
+RUN npm install
 
 STOPSIGNAL SIGINT
 ENTRYPOINT ["node", "/app/index.js"]
