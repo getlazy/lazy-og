@@ -2,6 +2,17 @@
 PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 YARN_CACHE_DIR=$(shell yarn cache dir || echo ~/.yarn-cache)
 
+build:
+	docker build \
+	    --build-arg NPM_TOKEN=$(NPM_TOKEN) \
+	    -t getlazy/reducer-engine:$(PACKAGE_VERSION) \
+	    -t getlazy/reducer-engine:latest \
+	    .
+
+push:
+	docker push getlazy/reducer-engine:$(PACKAGE_VERSION)
+	docker push getlazy/reducer-engine:latest
+
 install:
 	mkdir -p $(YARN_CACHE_DIR)
 	docker run -it --rm \

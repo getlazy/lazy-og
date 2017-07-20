@@ -12,6 +12,19 @@ build:
 	make -C source/engines/pullreq build
 	make -C source/engines/github-access build
 
+push:
+	make -C source/lazy push
+	make -C source/tools/engine-docker-builder push
+	make -C source/engines/node-strategy-engine push
+	make -C source/engines/emcc push
+	make -C source/engines/yaml push
+	make -C source/engines/php-l push
+	make -C source/engines/pmd-java push
+	make -C source/engines/stylelint push
+	make -C source/engines/tidy-html push
+	make -C source/engines/pullreq push
+	make -C source/engines/github-access push
+
 run:
 	docker run -it --rm \
 	    -v "$(shell pwd)/config/default:/config" \

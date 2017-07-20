@@ -50,7 +50,6 @@ const _parseLine = (line) => {
     while ((m = regex.exec(line)) !== null) {
         // This is necessary to avoid infinite loops with zero-width matches
         if (m.index === regex.lastIndex) {
-                // lazy ignore-once no-plusplus
             regex.lastIndex++;
         }
         const commandStr = _.get(m, '[2]', '');
