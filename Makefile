@@ -51,11 +51,11 @@ install:
 	make -C source/engines/tidy-html install
 	make -C source/engines/pullreq install
 	make -C source/engines/github-access install
-	make -C source/engines/javascript-engine-strategy install
-	make -C source/engines/reducer-engine-strategy install
-	make -C source/engines/postprocessor-engine-strategy install
+	make -C source/engines/javascript install
+	make -C source/engines/reducer install
+	make -C source/engines/postprocessor install
 
-hack:
+hack: build install
 	docker run -it --rm \
 		-v "$(shell pwd)/source/lazy:/app" \
 	    -v "$(shell pwd)/config/hack:/config" \

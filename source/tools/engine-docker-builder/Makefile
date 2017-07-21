@@ -2,7 +2,7 @@
 PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 YARN_CACHE_DIR=$(shell yarn cache dir || echo ~/.yarn-cache)
 
-build:
+build: bootstrap-build
 	mkdir -p $(YARN_CACHE_DIR)
 	docker run \
 		--rm -it \
