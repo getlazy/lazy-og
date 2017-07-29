@@ -26,6 +26,12 @@ Hackable Coding Assistant
 * Run `make build` in the root of the cloned repository
 * Run `make run-<your option>` in the root of the cloned repository (e.g. `make run-node-backend`)
 
+### Run only
+
+* Install [Docker](https://store.docker.com/search?type=edition&offering=community)
+* Clone this repository
+* Run `make run-<your option>` in the root of the cloned repository (e.g. `make run-node-backend`). This will pull prebuilt images.
+
 ### Available hack/run options
 
 * `crazy-diamond`: runs all available engines, which would be useful in an instance running on a separate box (e.g. a cloud based instance for a team) but is usually not useful running in local (one rarely needs *all* engines)
