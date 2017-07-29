@@ -1,4 +1,5 @@
 version: 1
+# This lazy config includes *all* current engines. Which is why it's called "crazy diamond" - it's slow and you most likely won't need them.
 service_url: https://whatever.com
 repository_auth:
   username_env: LAZY_DOCKER_REPOSITORY_AUTH_USERNAME

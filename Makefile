@@ -55,10 +55,11 @@ install:
 	make -C source/engines/reducer install
 	make -C source/engines/postprocessor install
 
-hack: install
+hack-crazy-diamond: install
 	docker run -it --rm \
 		-v "$(shell pwd)/source/lazy:/app" \
 	    -v "$(shell pwd)/config/hack:/config" \
+		-v "$(shell pwd)/config/hack/lazy-hack-crazy-diamond.yaml:/config/lazy.yaml" \
 	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -p "16827:80" \
 	    --stop-signal SIGTERM \
