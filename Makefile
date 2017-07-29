@@ -35,7 +35,7 @@ run:
 	    -w /app \
 	    -e NPM_TOKEN=$(NPM_TOKEN) \
 		-e HOST_LAZY_SOURCE_PATH=$(shell pwrd) \
-	    getlazy/lazy:latest /config/lazy.yaml
+	    getlazy/lazy:latest /config/.mounted-lazy.yaml
 
 install-pure:
 	YARN_ARGS=--pure-lockfile make install
@@ -59,7 +59,7 @@ hack-crazy-diamond: install
 	docker run -it --rm \
 		-v "$(shell pwd)/source/lazy:/app" \
 	    -v "$(shell pwd)/config/hack:/config" \
-		-v "$(shell pwd)/config/hack/lazy-hack-crazy-diamond.yaml:/config/lazy.yaml" \
+		-v "$(shell pwd)/config/hack/lazy-hack-crazy-diamond.yaml:/config/.mounted-lazy.yaml" \
 	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -p "16827:80" \
 	    --stop-signal SIGTERM \
@@ -67,13 +67,13 @@ hack-crazy-diamond: install
 	    -e NPM_TOKEN=$(NPM_TOKEN) \
 	    -e HOST_LAZY_SOURCE_PATH=$(shell pwd) \
 	    ierceg/node-dev:6.10 \
-	    nodemon -V -d 1 -L -w /app -w /config.lazy.yaml index.js /config/lazy.yaml
+	    nodemon -V -d 1 -L -w /app -w /config/.mounted-lazy.yaml index.js /config/.mounted-lazy.yaml
 
 hack-node-backend: install
 	docker run -it --rm \
 		-v "$(shell pwd)/source/lazy:/app" \
 	    -v "$(shell pwd)/config/hack:/config" \
-	    -v "$(shell pwd)/config/hack/lazy-hack-node-backend.yaml:/config/lazy.yaml" \
+	    -v "$(shell pwd)/config/hack/lazy-hack-node-backend.yaml:/config/.mounted-lazy.yaml" \
 	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -p "16827:80" \
 	    --stop-signal SIGTERM \
@@ -81,7 +81,7 @@ hack-node-backend: install
 	    -e NPM_TOKEN=$(NPM_TOKEN) \
 	    -e HOST_LAZY_SOURCE_PATH=$(shell pwd) \
 	    ierceg/node-dev:6.10 \
-	    nodemon -V -d 1 -L -w /app -w /config.lazy.yaml index.js /config/lazy.yaml
+	    nodemon -V -d 1 -L -w /app -w /config/.mounted-lazy.yaml index.js /config/.mounted-lazy.yaml
 
 bash:
 	docker run --rm -it \
