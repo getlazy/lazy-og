@@ -1,0 +1,100 @@
+version: 1
+service_url: https://whatever.com
+repository_auth:
+  username_env: LAZY_DOCKER_REPOSITORY_AUTH_USERNAME
+  password_env: LAZY_DOCKER_REPOSITORY_AUTH_PASSWORD
+  email_env: LAZY_DOCKER_REPOSITORY_AUTH_EMAIL
+config:
+  logger:
+    console:
+      level: metric
+    # elastic: # as seen here https://github.com/vanthome/winston-elasticsearch
+    #   level: metric
+    #   indexPrefix: lazy-default
+    #   clientOpts: # as seen here https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/configuration.html
+    #     host: elk:9200
+    #     apiVersion: "5.0"
+engines:
+  javascript:
+    image: ierceg/node-dev:6.10
+    command: nodemon -q -d 1 -L -w /app -w /strategy /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/node-strategy-engine:/app"
+      - "source/engines/javascript:/strategy"
+    import_env:
+      - NPM_TOKEN
+    config:
+      packageConfig:
+        eslint:
+          plugins:
+          - name: lodash
+            packageName: eslint-plugin-lodash
+            packageVersion: latest
+          - name: import
+            packageName: eslint-plugin-import
+            packageVersion: latest
+  github_access:
+    image: ierceg/node-dev:6.10
+    command: nodemon -q -d 1 -L -w /app /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/github-access:/app"
+    env:
+      - AUTH_SUCCESS_PATH=/
+      - AUTH_FAILURE_PATH=/auth-failed
+    import_env:
+      - GITHUB_CLIENT_ID
+      - GITHUB_CLIENT_SECRET
+    boot_timeout: 120
+  pullreq:
+    image: ierceg/node-dev:6.10
+    command: nodemon -q -d 1 -L -w /app /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/pullreq:/app"
+    import_env:
+      - GITHUB_CLIENT_ID
+      - GITHUB_CLIENT_SECRET
+    boot_timeout: 120
+  yaml:
+    image: ierceg/node-dev:6.10
+    command: nodemon -q -d 1 -L -w /app /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/yaml:/app"
+    boot_timeout: 120
+  postprocessor:
+    image: ierceg/node-dev:6.10
+    command: nodemon -q -d 1 -L -w /app -w /strategy /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/node-strategy-engine:/app"
+      - "source/engines/postprocessor:/strategy"
+    boot_timeout: 120
+  reducer:
+    image: ierceg/node-dev:6.10
+    command: nodemon -q -d 1 -L -w /app -w /strategy /app/index.js
+    working_dir: /app
+    volumes:
+      - "source/engines/node-strategy-engine:/app"
+      - "source/engines/reducer:/strategy"
+    boot_timeout: 120
+engine_pipeline:
+  bundle:
+  - sequence:               # pullreq engine depends on github-access, so we run them sequentially
+    - github_access:
+    - pullreq:
+  - sequence:               # Linters. Run any and all linters in parallel
+    - bundle:
+      - javascript:
+          config:
+            ~include: eslint-config.yaml
+      - yaml:
+    - postprocessor:                # apply postprocessor to their output
+        ~include: default-woohoos.yaml
+        ignore-always:
+          - lodash/import-scope
+    - reducer:              # and, finally, limit the number of reported errors
+        maxWarningsPerRule: 5     # allow up to 5 warnings for same rule-id
+        maxWarningsPerFile: 300   # allow up to 150 warnings per file

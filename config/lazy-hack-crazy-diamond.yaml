@@ -97,9 +97,6 @@ engines:
     working_dir: /app
     volumes:
       - "source/engines/pullreq:/app"
-    env:
-      - GITHUB_USER=ierceg
-      - GITHUB_ACCESS_ENGINE_NAME=github-access
     import_env:
       - GITHUB_CLIENT_ID
       - GITHUB_CLIENT_SECRET

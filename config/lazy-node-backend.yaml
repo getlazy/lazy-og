@@ -16,14 +16,7 @@ config:
     #     apiVersion: "5.0"
 engines:
   javascript:
-    image: ierceg/node-dev:6.10
-    command: nodemon -q -d 1 -L -w /app -w /strategy /app/index.js
-    working_dir: /app
-    volumes:
-      - "source/engines/node-strategy-engine:/app"
-      - "source/engines/javascript:/strategy"
-    import_env:
-      - NPM_TOKEN
+    image: getlazy/javascript:latest
     config:
       packageConfig:
         eslint:
@@ -35,54 +28,21 @@ engines:
             packageName: eslint-plugin-import
             packageVersion: latest
   github_access:
-    image: ierceg/node-dev:6.10
-    command: nodemon -q -d 1 -L -w /app /app/index.js
-    working_dir: /app
-    volumes:
-      - "source/engines/github-access:/app"
+    image: getlazy/github-access-engine:latest
     env:
       - AUTH_SUCCESS_PATH=/
       - AUTH_FAILURE_PATH=/auth-failed
     import_env:
       - GITHUB_CLIENT_ID
       - GITHUB_CLIENT_SECRET
-    boot_timeout: 120
   pullreq:
-    image: ierceg/node-dev:6.10
-    command: nodemon -q -d 1 -L -w /app /app/index.js
-    working_dir: /app
-    volumes:
-      - "source/engines/pullreq:/app"
-    env:
-      - GITHUB_USER=ierceg
-      - GITHUB_ACCESS_ENGINE_NAME=github-access
-    import_env:
-      - GITHUB_CLIENT_ID
-      - GITHUB_CLIENT_SECRET
-    boot_timeout: 120
+    image: getlazy/pullreq-engine:latest
   yaml:
-    image: ierceg/node-dev:6.10
-    command: nodemon -q -d 1 -L -w /app /app/index.js
-    working_dir: /app
-    volumes:
-      - "source/engines/yaml:/app"
-    boot_timeout: 120
+    image: getlazy/yaml-engine:latest
   postprocessor:
-    image: ierceg/node-dev:6.10
-    command: nodemon -q -d 1 -L -w /app -w /strategy /app/index.js
-    working_dir: /app
-    volumes:
-      - "source/engines/node-strategy-engine:/app"
-      - "source/engines/postprocessor:/strategy"
-    boot_timeout: 120
+    image: getlazy/postprocessor-engine:latest
   reducer:
-    image: ierceg/node-dev:6.10
-    command: nodemon -q -d 1 -L -w /app -w /strategy /app/index.js
-    working_dir: /app
-    volumes:
-      - "source/engines/node-strategy-engine:/app"
-      - "source/engines/reducer:/strategy"
-    boot_timeout: 120
+    image: getlazy/reducer-engine:latest
 engine_pipeline:
   bundle:
   - sequence:               # pullreq engine depends on github-access, so we run them sequentially
