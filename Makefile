@@ -89,6 +89,9 @@ run-node-backend:
 		-e HOST_LAZY_SOURCE_PATH=$(shell pwrd) \
 	    getlazy/lazy:latest /config/.mounted-lazy.yaml
 
+stop:
+	docker stop $(docker ps -f "label=org.getlazy.lazy.engine-manager.owner.lazy-id=default" -q)
+
 bash:
 	docker run --rm -it \
 		-v "$(shell pwd):/getlazy" \
