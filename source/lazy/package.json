@@ -47,7 +47,7 @@
     "common-errors": "^1.0.0",
     "express": "^4.14.0",
     "higher": "^1.0.5",
-    "higher-docker-manager": "^1.6.0",
+    "higher-docker-manager": "^1.7.0",
     "http-proxy-middleware": "^0.17.3",
     "ip": "^1.1.4",
     "lodash": "^4.17.2",

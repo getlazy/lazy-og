@@ -278,13 +278,13 @@ dashdash@^1.12.0:
   dependencies:
     assert-plus "^1.0.0"
 
-debug@2.6.1:
+debug@2.6.1, debug@^2.2.0:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.1.tgz#79855090ba2c4e3115cc7d8769491d58f0491351"
   dependencies:
     ms "0.7.2"
 
-debug@2.6.3, debug@^2.2.0, debug@^2.4.4, debug@^2.5.2, debug@^2.6.0:
+debug@2.6.3, debug@^2.4.4, debug@^2.5.2, debug@^2.6.0:
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.3.tgz#0f7eb8c30965ec08c72accfa0130c8b79984141d"
   dependencies:
@@ -561,9 +561,9 @@ hawk@~3.1.3:
     hoek "2.x.x"
     sntp "1.x.x"
 
-higher-docker-manager@^1.6.0:
-  version "1.6.5"
-  resolved "https://registry.yarnpkg.com/higher-docker-manager/-/higher-docker-manager-1.6.5.tgz#ea30040f041575e92d6040a0c6a7df56e4c0b05b"
+higher-docker-manager@^1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/higher-docker-manager/-/higher-docker-manager-1.7.0.tgz#ec12046f8ed75feb144a3e00a85316ede079dfd4"
   dependencies:
     debug "^2.6.0"
     lodash "^4.17.2"

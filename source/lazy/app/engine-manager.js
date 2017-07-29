@@ -101,12 +101,21 @@ class EngineManager {
             (engineConfig, engineId) => self._createEngineContainer(engineId, engineConfig)));
     }
 
+    _getOrPullImage(engineId, imageName) {
+        const self = this;
+
+        return EngineManager._getImage(imageName)
+            .catch((err) => {
+                logger.info('Pulling image', { engineId, image: imageName });
+                return EngineManager._pullImage(self._repositoryAuth, imageName);
+            });
+    }
+
     _createEngineContainer(engineId, engineConfig) {
         const self = this;
 
         const imageName = engineConfig.image;
-        logger.info('Pulling image', { engineId, image: imageName });
-        return EngineManager._pullImage(self._repositoryAuth, imageName)
+        return self._getOrPullImage(engineId, imageName)
             .then((image) => {
                 // Create engine's helper containers from the labels the image has and any additional ones
                 // specified in the engine's configuration.
@@ -269,6 +278,16 @@ class EngineManager {
     static _pullImage(...args) {
         // istanbul ignore next
         return HigherDockerManager.pullImage(...args);
+    }
+
+    /**
+     * Wrapper around HigherDockerManager.pullImage for easier unit testing.
+     * @private
+     */
+    // istanbul ignore next
+    static _getImage(...args) {
+        // istanbul ignore next
+        return HigherDockerManager.getImage(...args);
     }
 
     /**
