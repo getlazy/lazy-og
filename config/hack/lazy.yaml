@@ -21,7 +21,7 @@ engines:
     working_dir: /app
     volumes:
       - "source/engines/node-strategy-engine:/app"
-      - "source/engines/javascript-engine-strategy:/strategy"
+      - "source/engines/javascript:/strategy"
     import_env:
       - NPM_TOKEN
     config:
@@ -116,7 +116,7 @@ engines:
     working_dir: /app
     volumes:
       - "source/engines/node-strategy-engine:/app"
-      - "source/engines/postprocessor-engine-strategy:/strategy"
+      - "source/engines/postprocessor:/strategy"
     boot_timeout: 120
   reducer:
     image: ierceg/node-dev:6.10
@@ -124,7 +124,7 @@ engines:
     working_dir: /app
     volumes:
       - "source/engines/node-strategy-engine:/app"
-      - "source/engines/reducer-engine-strategy:/strategy"
+      - "source/engines/reducer:/strategy"
     boot_timeout: 120
 engine_pipeline:
   bundle:
