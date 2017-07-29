@@ -11,6 +11,9 @@ build:
 	make -C source/engines/tidy-html build
 	make -C source/engines/pullreq build
 	make -C source/engines/github-access build
+	make -C source/engines/javascript build
+	make -C source/engines/reducer build
+	make -C source/engines/postprocessor build
 
 push:
 	make -C source/lazy push
@@ -24,6 +27,9 @@ push:
 	make -C source/engines/tidy-html push
 	make -C source/engines/pullreq push
 	make -C source/engines/github-access push
+	make -C source/engines/javascript push
+	make -C source/engines/reducer push
+	make -C source/engines/postprocessor push
 
 install-pure:
 	YARN_ARGS=--pure-lockfile make install
