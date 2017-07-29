@@ -25,18 +25,6 @@ push:
 	make -C source/engines/pullreq push
 	make -C source/engines/github-access push
 
-run:
-	docker run -it --rm \
-	    -v "$(shell pwd)/config/default:/config" \
-	    -v "/var/run/docker.sock:/var/run/docker.sock" \
-	    -p "16827:80" \
-	    --link elk \
-	    --stop-signal SIGTERM \
-	    -w /app \
-	    -e NPM_TOKEN=$(NPM_TOKEN) \
-		-e HOST_LAZY_SOURCE_PATH=$(shell pwrd) \
-	    getlazy/lazy:latest /config/.mounted-lazy.yaml
-
 install-pure:
 	YARN_ARGS=--pure-lockfile make install
 
@@ -55,11 +43,11 @@ install:
 	make -C source/engines/reducer install
 	make -C source/engines/postprocessor install
 
-hack-crazy-diamond: install
+hack-crazy-diamond:
 	docker run -it --rm \
 		-v "$(shell pwd)/source/lazy:/app" \
-	    -v "$(shell pwd)/config/hack:/config" \
-		-v "$(shell pwd)/config/hack/lazy-hack-crazy-diamond.yaml:/config/.mounted-lazy.yaml" \
+	    -v "$(shell pwd)/config:/config" \
+		-v "$(shell pwd)/config/lazy-hack-crazy-diamond.yaml:/config/.mounted-lazy.yaml" \
 	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -p "16827:80" \
 	    --stop-signal SIGTERM \
@@ -69,11 +57,11 @@ hack-crazy-diamond: install
 	    ierceg/node-dev:6.10 \
 	    nodemon -V -d 1 -L -w /app -w /config/.mounted-lazy.yaml index.js /config/.mounted-lazy.yaml
 
-hack-node-backend: install
+hack-node-backend:
 	docker run -it --rm \
 		-v "$(shell pwd)/source/lazy:/app" \
-	    -v "$(shell pwd)/config/hack:/config" \
-	    -v "$(shell pwd)/config/hack/lazy-hack-node-backend.yaml:/config/.mounted-lazy.yaml" \
+	    -v "$(shell pwd)/config:/config" \
+	    -v "$(shell pwd)/config/lazy-hack-node-backend.yaml:/config/.mounted-lazy.yaml" \
 	    -v "/var/run/docker.sock:/var/run/docker.sock" \
 	    -p "16827:80" \
 	    --stop-signal SIGTERM \
@@ -82,6 +70,18 @@ hack-node-backend: install
 	    -e HOST_LAZY_SOURCE_PATH=$(shell pwd) \
 	    ierceg/node-dev:6.10 \
 	    nodemon -V -d 1 -L -w /app -w /config/.mounted-lazy.yaml index.js /config/.mounted-lazy.yaml
+
+run-node-backend:
+	docker run -it --rm \
+		-v "$(shell pwd)/config:/config" \
+		-v "$(shell pwd)/config/lazy-node-backend.yaml:/config/.mounted-lazy.yaml" \
+	    -v "/var/run/docker.sock:/var/run/docker.sock" \
+	    -p "16827:80" \
+	    --stop-signal SIGTERM \
+	    -w /app \
+	    -e NPM_TOKEN=$(NPM_TOKEN) \
+		-e HOST_LAZY_SOURCE_PATH=$(shell pwrd) \
+	    getlazy/lazy:latest /config/.mounted-lazy.yaml
 
 bash:
 	docker run --rm -it \
