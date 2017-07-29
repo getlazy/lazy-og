@@ -16,7 +16,7 @@ config:
     #     apiVersion: "5.0"
 engines:
   javascript:
-    image: getlazy/javascript:latest
+    image: getlazy/javascript-engine:latest
     config:
       packageConfig:
         eslint:
