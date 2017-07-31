@@ -8,7 +8,7 @@ import (
 )
 
 type Metadata struct {
-	Languages []string `json:languages`
+	Languages []string `json:"languages"`
 }
 
 func getStatusHandler(responseWriter http.ResponseWriter, request *http.Request) {
