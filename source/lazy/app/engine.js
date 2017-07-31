@@ -149,9 +149,10 @@ class Engine {
             };
 
             const logEngineMessage = (messageData) => {
+                const level = messageData.level || "info";
                 const meta = messageData.meta || {};
                 meta.engineId = self.id;
-                logger.log(messageData.level, messageData.message, messageData.meta);
+                logger.log(level, messageData.message, meta);
             };
 
             stream.on('data', (buffer) => {
