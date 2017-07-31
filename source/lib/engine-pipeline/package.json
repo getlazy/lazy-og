@@ -1,6 +1,6 @@
 {
   "name": "@getlazy/engine-pipeline",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "description": "Runs tasks through lazy engine pipeline",
   "main": "index.js",
   "scripts": {

@@ -126,27 +126,24 @@ class EnginePipelineRun extends EventEmitter {
         const newContext = _.cloneDeep(context) || {};
 
         // Process engines asynchronously but ignore each separate failure.
-        let engineItem;
         return Promise.all(
-            _.map(bundle, bundleItem =>
-                (() => {
-                    engineItem = EnginePipelineRun._getEngineItem(bundleItem);
+            _.map(bundle, bundleItem => {
+                const engineItem = EnginePipelineRun._getEngineItem(bundleItem);
 
-                    if (_.isNil(engineItem)) {
-                        return this._runPipeline(bundleItem, newContext);
-                    }
+                if (_.isNil(engineItem)) {
+                    return this._runPipeline(bundleItem, newContext);
+                }
 
-                    // Run the engine with its params.
-                    newContext.engineParams = engineItem.engineParams;
-                    return this._runSingleEngine(engineItem.engineId, newContext);
-                })()
+                // Run the engine with its params.
+                newContext.engineParams = engineItem.engineParams;
+                return this._runSingleEngine(engineItem.engineId, newContext)
                     .catch((err) => {
                         logger.warn('Failure during bundle pipleline run, continuing', {
                             err: _.get(err, 'message'),
                             engineId: _.get(engineItem, 'engineId')
                         });
-                    })
-            )
+                    });
+            })
         ).then((res) => {
             const results = _.compact(res);
             const bundleResults = _.reduce(results, (accum, oneResult) => {
