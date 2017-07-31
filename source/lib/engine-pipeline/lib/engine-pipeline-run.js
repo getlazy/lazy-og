@@ -74,18 +74,23 @@ class EnginePipelineRun extends EventEmitter {
 
         if (_.includes(this._prefilteredEngines, engine)) {
             return engine.analyzeFile(this._hostPath, this._language, this._content, context)
-                .then((res) => {
-                    // If engine returned the metrics then emit metrics event so that environment
-                    // in which we are running has a chance to store them.
-                    if (res.metrics) {
-                        // Emit the event on the run's EnginePipeline object.
-                        this.emit('metrics', engineId, res.metrics);
-                        // Delete the metrics, they shouldn't be accumulated or merged through engine calls.
-                        // lazy ignore-once no-param-reassign
-                        delete res.metrics;
+                .then((response) => {
+                    if (!_.isObject(response)) {
+                        logger.error('Invalid analyzeFile response', {response});
+                        return Promise.reject(new Error('Invalid analyzeFile response'));
                     }
 
-                    return Promise.resolve(res);
+                    // If engine returned the metrics then emit metrics event so that environment
+                    // in which we are running has a chance to store them.
+                    if (response.metrics) {
+                        // Emit the event on the run's EnginePipeline object.
+                        this.emit('metrics', engineId, response.metrics);
+                        // Delete the metrics, they shouldn't be accumulated or merged through engine calls.
+                        // lazy ignore-once no-param-reassign
+                        delete response.metrics;
+                    }
+
+                    return Promise.resolve(response);
                 });
         }
 
