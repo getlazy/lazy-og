@@ -1,8 +1,8 @@
 #/bin/bash
-docker run -it --rm \
-    -v "$(pwd)/config:/config" \
+docker run -d \
+    -v "$HOME/.lazy:/config" \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -p "16827:80" \
     --stop-signal SIGTERM \
     -w /app \
-    getlazy/lazy:latest /config/$1
+    getlazy/lazy:latest /config/lazy.yaml
