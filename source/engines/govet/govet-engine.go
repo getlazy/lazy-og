@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"encoding/json"
+	"io/ioutil"
 )
 
-type Metadata struct {
+type metadata struct {
 	Languages []string `json:"languages"`
 }
 
@@ -38,20 +39,68 @@ func getStatusHandler(responseWriter http.ResponseWriter, request *http.Request)
 }
 
 func getMetaHandler(responseWriter http.ResponseWriter, request *http.Request) {
-	meta := &Metadata{[]string{"go"}}
 	log("info", "GET /meta")
+
+	// This engine supports go language.
+	meta := &metadata{[]string{"go"}}
 	marshaledMeta, err := json.Marshal(meta)
 	if err != nil {
+		logWithMetadata("error", "Failed to marshal metadata", map[string]string{"error": err.Error()})
 		responseWriter.WriteHeader(http.StatusInternalServerError)
-	} else {
-		responseWriter.WriteHeader(http.StatusOK)
-		responseWriter.Write(marshaledMeta)
+		return
 	}
+
+	responseWriter.WriteHeader(http.StatusOK)
+	responseWriter.Write(marshaledMeta)
 }
 
 func postFileHandler(responseWriter http.ResponseWriter, request *http.Request) {
 	log("info", "POST /file")
+
+	decoder := json.NewDecoder(request.Body)
+	var body interface{}
+	err := decoder.Decode(&body)
+	if err != nil {
+		logWithMetadata("error", "Failed to decode request body", map[string]string{"error": err.Error()})
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	defer request.Body.Close()
+
+	bodyMap, bodyIsMap := body.(map[string]interface{})
+	if !bodyIsMap {
+		log("error", "Request body is invalid")
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	content, contentIsString := bodyMap["content"].(string)
+	if !contentIsString {
+		log("error", "Request file content is invalid")
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Save the content of the file in the temporary directory so that we can run analysis on it.
+	tmpFile, err := ioutil.TempFile("/lazy", "lazy-temp-content-")
+	if err != nil {
+		logWithMetadata("error", "Failed to open temporary file", map[string]string{"error": err.Error()})
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	defer tmpFile.Close()
+
+	_, err = tmpFile.WriteString(content)
+	if err != nil {
+		logWithMetadata("error", "Failed to write to temporary file", map[string]string{"error": err.Error()})
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	responseWriter.WriteHeader(http.StatusOK)
+	responseWriter.Write([]byte("{}"))
 }
 
 func main() {
