@@ -28,7 +28,7 @@ const JSHINT_CONFIG_FILE_NAME = '.jshintrc';
  *                   and all required module downloaded & installed
  */
 const _configureEslint = (eslintConfiguration) => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const packages = [];
         const installedPlugins = [];
 
