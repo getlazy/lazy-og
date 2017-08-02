@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"encoding/json"
 	"io/ioutil"
+	"os"
+	"os/exec"
 )
 
 type metadata struct {
@@ -90,17 +92,56 @@ func postFileHandler(responseWriter http.ResponseWriter, request *http.Request) 
 		return
 	}
 
-	defer tmpFile.Close()
-
 	_, err = tmpFile.WriteString(content)
 	if err != nil {
+		tmpFile.Close()
 		logWithMetadata("error", "Failed to write to temporary file", map[string]string{"error": err.Error()})
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// We are closing the temp file early so that we can rename it.
+	err = tmpFile.Close()
+	if err != nil {
+		logWithMetadata("error", "Failed to sync temporary file to persistent storage", map[string]string{"error": err.Error()})
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Rename the file to have extension .go - otherwise govet ignores it.
+	tmpGoFileFullPath := tmpFile.Name() + ".go"
+	fmt.Println("Renaming", tmpFile.Name(), "to", tmpGoFileFullPath)
+	err = os.Rename(tmpFile.Name(), tmpGoFileFullPath)
+	if err != nil {
+		logWithMetadata("error", "Failed to rename temporary file", map[string]string{"error": err.Error()})
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Delete the temp file after we have finished with it.
+	defer os.RemoveAll(tmpGoFileFullPath)
+
+	// Run golint and govet
+	err = runGovet(tmpGoFileFullPath)
+	if err != nil {
+		logWithMetadata("error", "Failed to run go vet", map[string]string{"error": err.Error()})
 		responseWriter.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	responseWriter.WriteHeader(http.StatusOK)
 	responseWriter.Write([]byte("{}"))
+}
+
+func runGovet(filename string) error {
+	cmd := exec.Command("go", "tool", "vet", filename)
+	stdoutStderr, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println(string(stdoutStderr))
+		return err
+	}
+	fmt.Println(string(stdoutStderr))
+	return err
 }
 
 func main() {
