@@ -1,5 +1,5 @@
 
-PACKAGE_VERSION=1.0
+PACKAGE_VERSION=$(shell node -pe "require('./package.json').version")
 
 build:
 	docker build \
@@ -17,7 +17,7 @@ run:
 	    -v "/tmp:/lazy" \
 	    -w /app \
 	    go:1.8 \
-	    go govet-engine
+	    /app/app
 
 install:
 

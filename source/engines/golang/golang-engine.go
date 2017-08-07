@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 type metadata struct {
@@ -108,7 +109,7 @@ func postFileHandler(responseWriter http.ResponseWriter, request *http.Request) 
 		return
 	}
 
-	// Rename the file to have extension .go - otherwise govet ignores it.
+	// Rename the file to have extension .go - otherwise gometalinter ignores it.
 	tmpGoFileFullPath := tmpFile.Name() + ".go"
 	fmt.Println("Renaming", tmpFile.Name(), "to", tmpGoFileFullPath)
 	err = os.Rename(tmpFile.Name(), tmpGoFileFullPath)
@@ -121,8 +122,8 @@ func postFileHandler(responseWriter http.ResponseWriter, request *http.Request) 
 	// Delete the temp file after we have finished with it.
 	defer os.RemoveAll(tmpGoFileFullPath)
 
-	// Run golint and govet
-	err = runGovet(tmpGoFileFullPath)
+	// Run gometalinter
+	err = runGometalinter(tmpGoFileFullPath)
 	if err != nil {
 		logWithMetadata("error", "Failed to run go vet", map[string]string{"error": err.Error()})
 		responseWriter.WriteHeader(http.StatusInternalServerError)
@@ -133,14 +134,22 @@ func postFileHandler(responseWriter http.ResponseWriter, request *http.Request) 
 	responseWriter.Write([]byte("{}"))
 }
 
-func runGovet(filename string) error {
-	cmd := exec.Command("go", "tool", "vet", filename)
+func processGometalinterOutput(rawOutput []byte) {
+	output := string(rawOutput)
+	lines := strings.Split(output, "\r")
+	fmt.Println(lines)
+}
+
+func runGometalinter(filename string) error {
+	cmd := exec.Command("gometalinter", filename)
 	stdoutStderr, err := cmd.CombinedOutput()
+	// gometalinter will issue error on incorrect runs (e.g. bad file name) and on runs that return
+	// any kind of warnings or errors. So we have to always process the results.
 	if err != nil {
-		fmt.Println(string(stdoutStderr))
+		processGometalinterOutput(stdoutStderr)
 		return err
 	}
-	fmt.Println(string(stdoutStderr))
+	processGometalinterOutput(stdoutStderr)
 	return err
 }
 

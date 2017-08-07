@@ -1,0 +1,36 @@
+{
+  "name": "golang-engine",
+  "version": "1.0.0",
+  "description": "golang linter engine strategy for lazy",
+  "main": "golang-engine.go",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getlazy/lazy.git"
+  },
+  "keywords": [
+    "lazy",
+    "engine",
+    "golang"
+  ],
+  "authors": [
+    {
+      "name": "Ivan Erceg",
+      "url": "https://github.com/ierceg",
+      "title": "Software Shipper",
+      "username": "ierceg",
+      "twitter": "ierceg"
+    },
+    {
+      "name": "Nebojsa Lazic",
+      "url": "https://github.com/neboysa",
+      "title": "Master of Disaster",
+      "username": "neboysa",
+      "twitter": "2klik"
+    }
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/getlazy/lazy/issues"
+  },
+  "homepage": "https://github.com/getlazy/lazy#readme"
+}
