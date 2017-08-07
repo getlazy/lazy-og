@@ -3,6 +3,17 @@
 
 Hackable Coding Assistant
 
+## Motivation
+
+Most of intermediary results of coding are lost - at best the persisted resolution of our work is in our commits. Sometimes we work for hours, days even, trying out different solutions and finally committing a few lines of code that don't nearly reflect the amount of effort that went into them. But it gets worse: if we don't actually measure what's going on in between commits, how do we improve it? Furthermore, checking the code for validity and quality only on runs or commits makes the feedback loop longer that it need be. Thus our main motivation for lazy is improving the coding experience by providing coders with insightful recommendations while they are coding. Today these recommendations are limited to output by linters but with enough data and machine learning on top of it, maybe we will be able to provide actual quality guidance to coders when it's most useful.
+
+Consider some examples:
+
+* We are our metrics on failed unit tests during development? Irrelevant you may think but how do you know how much time you spent on fixing unit tests vs actually coding the production code?
+* We are our metrics on syntax errors? Maybe you always make the same few mistakes and working on fixing those would help you be more productive.
+* We are our metrics on semantic errors? Maybe I'm awful at writing `for` loops - if so I should really be made aware of it.
+* On team level, where are our hot spots? When would be the best moment to tell somebody "refactor this file - it has been modified 18 times in the past 30 days". Or is anybody else changing this same file right now? Merge is great but what if we could avoid it altogether by working smarter?
+
 ## Features
 
 * Single point to run all your code analysis
