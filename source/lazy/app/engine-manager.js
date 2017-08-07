@@ -119,11 +119,19 @@ class EngineManager {
             .then((image) => {
                 // Create engine's helper containers from the labels the image has and any additional ones
                 // specified in the engine's configuration.
-                const imageMetadata = _.assign(
-                    JSONparse(_.get(image, `Config.Labels.${Label.OrgGetlazyLazyEngineImageMetadataJson}`)),
-                    JSONparse(_.get(engineConfig.labels, Label.OrgGetlazyLazyEngineImageMetadataJson)));
-                if (_.isObject(imageMetadata) && _.isObject(imageMetadata.helper_containers)) {
-                    return this._createHelperContainers(imageMetadata.helper_containers)
+                const imageMetadataJson = _.get(image, `Config.Labels["${Label.OrgGetlazyLazyEngineImageMetadataJson}"]`);
+                const imageMetadata = JSONparse(imageMetadataJson);
+                if (!_.isEmpty(imageMetadataJson) && _.isUndefined(imageMetadata)) {
+                    logger.warn('Bad image metadata', { metadata: imageMetadataJson });
+                }
+                const engineImageMetadataJson = _.get(engineConfig.labels, Label.OrgGetlazyLazyEngineImageMetadataJson);
+                const engineImageMetadata = JSONparse(engineImageMetadataJson);
+                if (!_.isEmpty(engineImageMetadataJson) && _.isUndefined(engineImageMetadata)) {
+                    logger.warn('Bad engine image metadata', { metadata: engineImageMetadataJson });
+                }
+                const compositeImageMetadata = _.assign(imageMetadata, engineImageMetadata);
+                if (_.isObject(compositeImageMetadata) && _.isObject(compositeImageMetadata.helper_containers)) {
+                    return this._createHelperContainers(compositeImageMetadata.helper_containers)
                         .then((helperContainersPairs) => {
                             // Convert the array of pairs into a map.
                             _.forEach(helperContainersPairs, ({ containerId, helperId }) => {
