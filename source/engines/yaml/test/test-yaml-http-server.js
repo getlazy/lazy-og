@@ -1,5 +1,9 @@
 'use strict';
 
+/* global logger, before, after, describe, it */
+
+// lazy ignore func-names global-require prefer-arrow-callback
+
 const _ = require('lodash');
 const assert = require('assert');
 const request = require('request');
@@ -19,9 +23,9 @@ const ANALYZE_FILE_FIXTURE = [{
     then: (results) => {
         const warnings = results.warnings;
         assert.equal(warnings.length, 1);
-        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
+        const warningsPerType = _.groupBy(warnings, warning => warning.type);
 
-        assert.equal(warningsPerType['Error'].length, 1);
+        assert.equal(warningsPerType.Error.length, 1);
         assert(warnings[0].message.endsWith('unexpected end of the stream within a double quoted scalar'));
     },
     catch: ASSERT_FALSE
@@ -46,9 +50,9 @@ rule-sets:
     then: (results) => {
         const warnings = results.warnings;
         assert.equal(warnings.length, 1);
-        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
+        const warningsPerType = _.groupBy(warnings, warning => warning.type);
 
-        assert.equal(warningsPerType['Error'].length, 1);
+        assert.equal(warningsPerType.Error.length, 1);
         assert(warnings[0].message.endsWith('bad indentation of a mapping entry'));
     },
     catch: ASSERT_FALSE
@@ -67,7 +71,7 @@ rule-sets:
     "lazy",
     "linter"
   ],
-  "repository": "https://github.com/getlazy/atom-lazy-linter",
+  "repository": "https://github.com/getlazy/lazy",
   "license": "MIT",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
@@ -123,8 +127,8 @@ rule-sets:
     then: (results) => {
         const warnings = results.warnings;
         assert.equal(warnings.length, 1);
-        const warningsPerType = _.groupBy(warnings, (warning) => warning.type);
-        assert.equal(warningsPerType['Error'].length, 1);
+        const warningsPerType = _.groupBy(warnings, warning => warning.type);
+        assert.equal(warningsPerType.Error.length, 1);
         assert(warnings[0].message.endsWith('missed comma between flow collection entries'));
     },
     catch: ASSERT_FALSE
@@ -142,19 +146,19 @@ describe('YamlEngineHttpServer', function () {
     });
 
     describe('POST /file', function () {
-        let onlyFixtures = _.filter(ANALYZE_FILE_FIXTURE, (fixture) => fixture.only);
+        let onlyFixtures = _.filter(ANALYZE_FILE_FIXTURE, fixture => fixture.only);
         if (_.isEmpty(onlyFixtures)) {
             onlyFixtures = ANALYZE_FILE_FIXTURE;
         }
         _.each(onlyFixtures, (fixture) => {
-            let params = fixture.params;
+            const params = fixture.params;
             it(fixture.name, function () {
                 const requestParams = {
                     method: 'POST',
                     url: 'http://localhost/file',
                     json: true,
                     headers: {
-                        'Accept': 'application/json'
+                        Accept: 'application/json'
                     },
                     body: {
                         hostPath: params.path,
@@ -164,24 +168,23 @@ describe('YamlEngineHttpServer', function () {
                 };
 
                 return new Promise((resolve, reject) => {
-                        request(requestParams, (err, response, body) => {
-                            if (err) {
-                                return reject(err);
+                    request(requestParams, (err, response, body) => {
+                        if (err) {
+                            return reject(err);
+                        }
+
+                        if (response.statusCode !== 200) {
+                            let message = `HTTP engine failed with ${response.statusCode} status code`;
+                            if (body && body.error) {
+                                message += ` (${body.error})`;
                             }
 
-                            if (response.statusCode !== 200) {
-                                let message = 'HTTP engine failed with ' + response.statusCode +
-                                    ' status code';
-                                if (body && body.error) {
-                                    message += ' (' + body.error + ')';
-                                }
+                            return reject(new Error(message));
+                        }
 
-                                return reject(new Error(message));
-                            }
-
-                            resolve(body);
-                        });
-                    })
+                        return resolve(body);
+                    });
+                })
                     .then(fixture.then)
                     .catch(fixture.catch);
             });
