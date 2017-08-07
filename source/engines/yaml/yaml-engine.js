@@ -64,7 +64,7 @@ class YamlEngineHttpServer extends EngineHttpServer {
 
     getMeta() {
         return {
-            languages: ['yaml', 'YAML', 'json', 'JSON']
+            languages: ['yaml', 'json']
         };
     }
 }
