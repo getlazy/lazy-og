@@ -1,0 +1,7 @@
+{
+    "helper_containers": {
+        "gometalinter": {
+            "image": "getlazy/gometalinter:latest"
+        }
+    }
+}
