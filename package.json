@@ -1,0 +1,22 @@
+{
+  "name": "lazy",
+  "version": "1.0.0",
+  "description": "Hackable Coding Assistant",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "atom:package:install": "cd source/clients/atom-linter && npm install && apm install && apm link && echo && echo '***** Now run Window:Reload in Atom ****' && echo"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getlazy/lazy.git"
+  },
+  "author": "The Lazy Authors",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/getlazy/lazy/issues"
+  },
+  "homepage": "https://github.com/getlazy/lazy#readme"
+}

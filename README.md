@@ -43,7 +43,11 @@ To configure your own engines see `lazy.yaml` section.
 
 ### Atom
 
-* [linter-lazy](https://atom.io/packages/linter-lazy) for Atom's [Linter](https://atom.io/packages/linter)
+Installation:
+
+* Install [Linter](https://atom.io/packages/linter)
+* Go to command line and from lazy home directory run `npm run atom:package:install`
+* Now run "Window:Reload" from Command Palette
 
 ## Engines
 
