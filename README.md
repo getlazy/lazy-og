@@ -1,5 +1,6 @@
 
-This is the OG "hackable coding assistant" that [@neboysa](https://github.com/neboysa) and [@ierceg](https://github.com/ierceg) biult back in 2016-2017 frame. We are preserving it here for historical and sentimental purposes. The new project you can find at https://gitlab.com/getlazy/ - see you there!
+**This is the OG "hackable coding assistant" that [@neboysa](https://github.com/neboysa) and [@ierceg](https://github.com/ierceg) built back in 2016-2017 timeframe. We are preserving it here for historical and sentimental purposes. The new project you can find at https://gitlab.com/getlazy/ - see you there!**
+
 # lazy
 
 Hackable Coding Assistant
